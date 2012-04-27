@@ -44,7 +44,7 @@ class server(liblo.Server):
 		self.add_method(str('/debug'), 's', self.debug)
 		self.add_method(str('/quit'), '', self.disconnect)
 		self.add_method("/data/objects", "sfffffffffffff", self.update_object)
-		self.add_method("/data/objects/vertex", "siifff", self.update_mesh)
+		self.add_method("/data/objects/polygon", "siifff", self.update_mesh)
 		self.add_method("/data/camera", "ff", self.not_implemented)        
 		self.add_method("/data/scene", "", self.not_implemented)
 		self.add_method("/texture/state", "ss", self.modules[videotexture].state)
@@ -89,15 +89,38 @@ class server(liblo.Server):
 	def update_mesh(self, path, args):
 		scene = bge.logic.getCurrentScene()
 		ob = scene.objects[args[0]]
-		m_index = args[1]
-		v_index = args[2]
+		polygon_index = args[1]
+		vertex_index = args[2]
 		x = args[3]
 		y = args[4]
 		z = args[5]
 
-		ob.meshes[0].getVertex(m_index, v_index).setXYZ([ args[3], args[4], args[5] ])
+		#	retrieve polygon
+		polygon = ob.meshes[0].getPolygon(polygon_index)
+		
+		#	get verts from polygon
+		verts = [polygon.v1, polygon.v2, polygon.v3, polygon.v4]
+		if verts[3] == 0: verts.pop()
+		print("==verts: ", verts)
 
+		#	get material index (workaround for matid bug, matid is not an attr of KX_PolyProxy)
+		mat_index = ob.meshes[0].materials.index(polygon.material)
+		mesh = ob.meshes[0]
+		try:
+			vertex = mesh.getVertex(mat_index, verts[vertex_index])
+			print("vert: ", vertex.getXYZ())
+			vertex.setXYZ([x,y,z])
+		except IndexError as err:
+			print("%s : mat_idx: %d vert_idx: %d" %(err, mat_index, vertex_index))
 
+#		ob.meshes[mesh_index].getVertex(mat_index, vert_index).setXYZ([ x, y, z ])
+#		print("num meshes: %d" %(len(ob.meshes)))
+#		for mesh in ob.meshes:
+#			for m_index in range(len(mesh.materials)):
+#				for v_index in range(mesh.getVertexArrayLength(m_index)):
+#					vertex = mesh.getVertex(m_index, v_index)
+#					print("m_index: %d, v_index: %d, vert.co: %s" %(m_index,v_index,vertex.getXYZ()))
+								 
 	def not_implemented(self, path, args):
 		print("not implemented: ", path, args)
 

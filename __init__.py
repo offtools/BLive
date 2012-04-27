@@ -147,21 +147,25 @@ class BLive_OT_mesh_apply(bpy.types.Operator):
 	bl_label = "BLive Apply Mesh Changes"
 	
 	def execute(self, context):
+		#	mode toggle hack, to write vertex values into object
 		mode = bpy.context.active_object.mode
-		matsort = dict()
+		bpy.ops.object.mode_set(mode='OBJECT')
+		
+		#	send all vertex data
+		#	iterate over all faces - send each vertex of the polygons
+		#	ob.name: object name
+		#	polygon_index: index of the polygon
+		#	poly_vert_index: index of the vertex in the polygon (0 - 3)
+		#	vertex.co: vertex from ob.data.verices  
 		ob = bpy.context.active_object
-		for faces in ob.data.faces:
-			for vert in faces.vertices:
-				vertex = ob.data.vertices[vert]
+		for polygon_index in range(len(ob.data.faces)):
+			for poly_vert_index in range(len(ob.data.faces[polygon_index].vertices)):
+				vertex_index = ob.data.faces[polygon_index].vertices[poly_vert_index]
+				vertex = ob.data.vertices[vertex_index]
+				print(ob.name, polygon_index, vertex.co[0], vertex.co[1], vertex.co[2])
+				client.client().send("/data/objects/polygon", ob.name, polygon_index, poly_vert_index, vertex.co[0], vertex.co[1], vertex.co[2])
 
-				if not faces.material_index in matsort:
-					matsort[faces.material_index] = list()
-				matsort[faces.material_index].append(vertex.co)
-
-		for i in matsort:
-			for co in sorted(matsort[i]):
-				client.client().send("/data/objects/vertex", ob.name, i, sorted(matsort[i]).index(co), co[0], co[1], co[2])
-
+		#	change back tp previous mode
 		bpy.ops.object.mode_set(mode=mode)
 		return{'FINISHED'}
 
