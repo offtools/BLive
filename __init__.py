@@ -129,7 +129,7 @@ class BLive_OT_open_video(bpy.types.Operator):
 	def execute(self, context):
 		if "PORT" in bpy.context.scene.camera.game.properties:
 			ob = bpy.context.object.name
-			tex = "IM{0}".format(bpy.context.object.active_material.active_texture.image.name)
+			tex = bpy.context.object.active_material.active_texture.image.name
 			client.client().cmd_open_video(ob, tex, self.file)
 			return{'FINISHED'}
 		else:

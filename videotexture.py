@@ -38,8 +38,8 @@ class player:
 
 		# -- Get the material that is using our texture
 		if imgname:
-			print("trying: ", gameobject, imgname)
-			matID = texture.materialID(gameobject, imgname)
+			img = "IM{0}".format(imgname)
+			matID = texture.materialID(gameobject, img)
 			# -- Create the video texture
 			self.video = texture.Texture(gameobject, matID)
         
