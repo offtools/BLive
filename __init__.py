@@ -21,8 +21,12 @@
 
 
 #
-# Blender OSC-BGE addon, this addon allows to send changes from blender 
-# to a running gameengine instance
+#	Blender OSC-BGE addon, this addon allows to send changes from blender 
+#	to a running gameengine instance
+#
+#	1. check client.py, that the search path for liblo is correct on your system
+#	2. enable the blive addon
+#	3. setup BLive in the Properties->Scene->Blive Network Panel
 #
 
 bl_info = {
@@ -53,11 +57,8 @@ else:
 	from . import meshtools
    
 import bpy
-import bmesh
 import sys
 import subprocess
-sys.path.append('/usr/lib/python3.2/site-packages')
-import liblo
 
 #
 #	Scene Network Panel
@@ -72,24 +73,43 @@ class BLive_PT_scene_network(bpy.types.Panel):
 		self.layout.label(text="Setup")
 
 		box = self.layout.box()
-		box.label("add OSC logic to: {}".format(bpy.context.scene.camera.name))
 
-		row = box.row(align=True)
 		if "PORT" in bpy.context.scene.camera.game.properties:
-			row.label("Port: ")
-			row.prop(bpy.context.scene.camera.game.properties["PORT"], "value", text='')
-			row.operator("blive.logic_remove", text="", icon="CANCEL")
+			row = box.row()
+			row.prop(bpy.context.scene.camera.game.properties["PORT"], "value", text="Port: ")
+			row.operator("blive.set_port", text="change port")
+			row.operator("blive.logic_remove", text="", icon="X")
 		else:
+			box.label("add OSC logic to: {}".format(bpy.context.scene.camera.name))
+			row = box.row()
 			row.operator("blive.logic_add", text="create scripts")
+		
+		if "PORT" not in bpy.context.scene.camera.game.properties:
+			return
+			
+		row = self.layout.column()
+		row.label("Next Steps:")
+
 		row = self.layout.row()
-		row.operator_context = 'INVOKE_AREA'
-		row.operator("wm.save_as_mainfile", text="Save As...")
+		split = row.split(percentage=0.1)
+		split.label("1.")
+		split = split.split()
+		split.operator_context = 'INVOKE_AREA'
+		split.operator("wm.save_as_mainfile", text="Save As...")		
+		
 		row = self.layout.row()
-		row.operator("blive.fork_blenderplayer", text="Start")
+		split = row.split(percentage=0.1)
+		split.label("2.")
+		split = split.split()
 		if "PORT" not in bpy.context.scene.camera.game.properties or not bpy.context.blend_data.filepath:
-			row.enabled = False 
+			split.enabled = False		
+		split.operator("blive.fork_blenderplayer", text="Start")
+		
 		row = self.layout.row()
-		row.operator("blive.quit", text="Quit")
+		split = row.split(percentage=0.1)
+		split.label("3.")
+		split = split.split()
+		split.operator("blive.quit", text="Quit")
 
 class BLive_OT_forc_blenderplayer(bpy.types.Operator):
 	bl_idname = "blive.fork_blenderplayer"
@@ -97,6 +117,7 @@ class BLive_OT_forc_blenderplayer(bpy.types.Operator):
 
 	def execute(self, context):
 		if "PORT" in bpy.context.scene.camera.game.properties:
+			client.client().port(bpy.context.scene.camera.game.properties["PORT"].value)
 			app = "blenderplayer"
 			blendfile = bpy.context.blend_data.filepath
 			port = "-p {0}".format(bpy.context.scene.camera.game.properties["PORT"].value)
@@ -104,6 +125,17 @@ class BLive_OT_forc_blenderplayer(bpy.types.Operator):
 			blendprocess = subprocess.Popen(cmd)
 			bpy.app.handlers.frame_change_pre.append(frame_change_pre_handler)
 			bpy.app.handlers.scene_update_post.append(scene_update_post_handler)
+			return{'FINISHED'}
+		else:
+			return{'CANCELLED'}
+
+class BLive_OT_set_port(bpy.types.Operator):
+	bl_idname = "blive.set_port"
+	bl_label = "BLive set OSC port"
+
+	def execute(self, context):
+		if "PORT" in bpy.context.scene.camera.game.properties:
+			client.client().port(bpy.context.scene.camera.game.properties["PORT"].value)
 			return{'FINISHED'}
 		else:
 			return{'CANCELLED'}
@@ -129,7 +161,21 @@ def scene_update_post_handler(scene):
 	if bpy.data.objects.is_updated:
 		for ob in bpy.data.objects:
 			if ob.is_updated:
-				client.client().snd_object(ob)
+				client.client().send("/data/objects", ob.name, \
+                                            ob.location[0], \
+                                            ob.location[1], \
+                                            ob.location[2], \
+                                            ob.scale[0], \
+                                            ob.scale[1], \
+                                            ob.scale[2], \
+                                            ob.rotation_euler[0], \
+                                            ob.rotation_euler[1], \
+                                            ob.rotation_euler[2], \
+                                            ob.color[0], \
+                                            ob.color[1], \
+                                            ob.color[2], \
+                                            ob.color[3] \
+                                            )
 
 def frame_change_pre_handler(scene):
 	# stop animation

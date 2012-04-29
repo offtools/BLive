@@ -19,6 +19,8 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
+import bpy
+import bmesh
 
 class BLive_OT_mesh_apply(bpy.types.Operator):
 	'''
@@ -41,6 +43,7 @@ class BLive_OT_mesh_apply(bpy.types.Operator):
 				for vindex, vertex in enumerate(face.verts):
 					client.client().send("/data/objects/polygon", ob.name, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2])
 		except ValueError:
+			return self.cancel(context)
 
 		return{'FINISHED'}
 
