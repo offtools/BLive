@@ -21,6 +21,7 @@
 
 import bpy
 import bmesh
+from . import client
 
 class BLive_OT_mesh_apply(bpy.types.Operator):
 	'''
@@ -60,7 +61,7 @@ class BLive_OT_modal_mesh_update(bpy.types.Operator):
 
 	def modal(self, context, event):
 
-		if event.type in {'LEFTMOUSE', 'TAB', 'ESC', 'RIGHTMOUSE'}:
+		if event.type in {'TAB', 'ESC', 'RIGHTMOUSE'}:
 			return self.cancel(context)
 
 		if event.type == 'TIMER':

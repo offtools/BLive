@@ -34,7 +34,7 @@ bl_info = {
 	"author": "offtools",
 	"version": (0, 0, 1),
 	"blender": (2, 6, 0),
-	"location": "View3D > Spacebar Key",
+	"location": "various Panels with prefix BLive",
 	"description": "blender to bge osc network addon",
 	"warning": "",
 	"wiki_url": "",
