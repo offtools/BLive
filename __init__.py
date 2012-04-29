@@ -117,7 +117,7 @@ class BLive_OT_forc_blenderplayer(bpy.types.Operator):
 
 	def execute(self, context):
 		if "PORT" in bpy.context.scene.camera.game.properties:
-			client.client().port(bpy.context.scene.camera.game.properties["PORT"].value)
+			client.client().port = bpy.context.scene.camera.game.properties["PORT"].value
 			app = "blenderplayer"
 			blendfile = bpy.context.blend_data.filepath
 			port = "-p {0}".format(bpy.context.scene.camera.game.properties["PORT"].value)
