@@ -134,46 +134,42 @@ class BLive_OT_mesh_apply(bpy.types.Operator):
 	bl_label = "BLive Apply Mesh Changes"
 	
 	def execute(self, context):
-		#   mode toggle hack, to write vertex values into object
-		mode = bpy.context.active_object.mode
-		bpy.ops.object.mode_set(mode='OBJECT')
-		
 		#   send all vertex data
 		#   iterate over all faces - send each vertex of the polygons
 		#   ob.name: object name
-		#   polygon_index: index of the polygon
-		#   poly_vert_index: index of the vertex in the polygon (0 - 3)
-		#   vertex.co: vertex from ob.data.verices  
+		#   vindex: index of the vertex inside the polygon (0 - 3)
+		#   vertex.co: vertex from bmesh vertex (which is updated continuously)  
 		ob = bpy.context.active_object
-		for polygon_index in range(len(ob.data.faces)):
-			for poly_vert_index in range(len(ob.data.faces[polygon_index].vertices)):
-				vertex_index = ob.data.faces[polygon_index].vertices[poly_vert_index]
-				vertex = ob.data.vertices[vertex_index]
-				print(ob.name, polygon_index, vertex.co[0], vertex.co[1], vertex.co[2])
-				client.client().send("/data/objects/polygon", ob.name, polygon_index, poly_vert_index, vertex.co[0], vertex.co[1], vertex.co[2])
-
-		#   change back tp previous mode
-		bpy.ops.object.mode_set(mode=mode)
-		return{'FINISHED'}
-
-class BLive_OT_modal_mesh_update(bpy.types.Operator):
-	'''Operator which runs its self from a timer.'''
-	bl_idname = "wm.blive_modal_vertex_update"
-	bl_label = "Vertex Updater"
-
-	_timer = None
-
-	def modal(self, context, event):
-		print(event.type)
-		if event.type in {'LEFTMOUSE', 'TAB'}:
-			return self.cancel(context)
-
-		if event.type == 'TIMER':
-			ob = bpy.context.active_object
+		try:
 			mesh = bmesh.from_edit_mesh(ob.data)
 			for face in mesh.faces:
 				for vindex, vertex in enumerate(face.verts):
 					client.client().send("/data/objects/polygon", ob.name, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2])
+		except ValueError:
+
+		return{'FINISHED'}
+
+class BLive_OT_modal_mesh_update(bpy.types.Operator):
+	'''Operator which runs its self from a timer.'''
+	bl_idname = "blive.modal_vertex_update"
+	bl_label = "BLive Vertex Updater Operator"
+
+	_timer = None
+
+	def modal(self, context, event):
+
+		if event.type in {'LEFTMOUSE', 'TAB', 'ESC', 'RIGHTMOUSE'}:
+			return self.cancel(context)
+
+		if event.type == 'TIMER':
+			ob = bpy.context.active_object
+			try:
+				mesh = bmesh.from_edit_mesh(ob.data)
+				for face in mesh.faces:
+					for vindex, vertex in enumerate(face.verts):
+						client.client().send("/data/objects/polygon", ob.name, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2])
+			except ValueError:
+				return self.cancel(context)
 
 		return {'PASS_THROUGH'}
 
@@ -184,15 +180,13 @@ class BLive_OT_modal_mesh_update(bpy.types.Operator):
 		return {'RUNNING_MODAL'}
 
 	def cancel(self, context):
-		print("CANCELLED")
 		context.window_manager.event_timer_remove(self._timer)
 		return {'FINISHED'}
 
-class BLive_PT_mesh_apply(bpy.types.Panel):
-	bl_label = "BLive Mesh Update"
-	bl_space_type = 'PROPERTIES'
-	bl_region_type = 'WINDOW'
-	bl_context = "data"
+class BLive_PT_mesh_tools(bpy.types.Panel):
+	bl_label = "BLive Mesh Tools"
+	bl_space_type = "VIEW_3D"
+	bl_region_type = "TOOLS"
 
 	@classmethod
 	def poll(cls, context):
@@ -200,7 +194,9 @@ class BLive_PT_mesh_apply(bpy.types.Panel):
 
 	def draw(self, context):
 		layout = self.layout
-		layout.operator("blive.mesh_apply", text="apply mesh changes")
+		col = layout.column(align=True)
+		col.operator("blive.mesh_apply", text="refresh remote mesh")
+		col.operator("blive.modal_vertex_update", text="send mesh changes")
 
 def frame_change_pre_handler(scene):
 	# stop animation
