@@ -26,38 +26,39 @@
 #
 
 bl_info = {
-    "name": "BLive",
-    "author": "offtools",
-    "version": (0, 0, 1),
-    "blender": (2, 6, 0),
-    "location": "View3D > Spacebar Key",
-    "description": "blender to bge osc network addon",
-    "warning": "",
-    "wiki_url": "",
-    "tracker_url": "",
-    "category": "Game Engine"}
-    
+	"name": "BLive",
+	"author": "offtools",
+	"version": (0, 0, 1),
+	"blender": (2, 6, 0),
+	"location": "View3D > Spacebar Key",
+	"description": "blender to bge osc network addon",
+	"warning": "",
+	"wiki_url": "",
+	"tracker_url": "",
+	"category": "Game Engine"}
+	
 # import modules
 if "bpy" in locals():
-    import imp
-    imp.reload('logic')
-    imp.reload('client')
-    imp.reload('timeline')
-    imp.reload('texture')
+	import imp
+	imp.reload('logic')
+	imp.reload('client')
+	imp.reload('timeline')
+	imp.reload('texture')
 else:
-    from . import logic
-    from . import client
-    from . import timeline
-    from . import texture
-       
+	from . import logic
+	from . import client
+	from . import timeline
+	from . import texture
+	   
 import bpy
+import bmesh
 import sys
 import subprocess
 sys.path.append('/usr/lib/python3.2/site-packages')
 import liblo
 
 #
-#    Scene Network Panel
+#	Scene Network Panel
 #
 class BLive_PT_scene_network(bpy.types.Panel):
 	bl_label = "BLive Network"
@@ -121,20 +122,6 @@ class BLive_OT_quit(bpy.types.Operator):
 		else:
 			return{'CANCELLED'}
 
-class BLive_OT_open_video(bpy.types.Operator):
-	bl_idname = "blive.open_video"
-	bl_label = "BLive open video"
-	file = bpy.props.StringProperty()
-	
-	def execute(self, context):
-		if "PORT" in bpy.context.scene.camera.game.properties:
-			ob = bpy.context.object.name
-			tex = bpy.context.object.active_material.active_texture.image.name
-			client.client().cmd_open_video(ob, tex, self.file)
-			return{'FINISHED'}
-		else:
-			return{'CANCELLED'}
-
 def scene_update_post_handler(scene):
 
 	if bpy.data.objects.is_updated:
@@ -147,16 +134,16 @@ class BLive_OT_mesh_apply(bpy.types.Operator):
 	bl_label = "BLive Apply Mesh Changes"
 	
 	def execute(self, context):
-		#	mode toggle hack, to write vertex values into object
+		#   mode toggle hack, to write vertex values into object
 		mode = bpy.context.active_object.mode
 		bpy.ops.object.mode_set(mode='OBJECT')
 		
-		#	send all vertex data
-		#	iterate over all faces - send each vertex of the polygons
-		#	ob.name: object name
-		#	polygon_index: index of the polygon
-		#	poly_vert_index: index of the vertex in the polygon (0 - 3)
-		#	vertex.co: vertex from ob.data.verices  
+		#   send all vertex data
+		#   iterate over all faces - send each vertex of the polygons
+		#   ob.name: object name
+		#   polygon_index: index of the polygon
+		#   poly_vert_index: index of the vertex in the polygon (0 - 3)
+		#   vertex.co: vertex from ob.data.verices  
 		ob = bpy.context.active_object
 		for polygon_index in range(len(ob.data.faces)):
 			for poly_vert_index in range(len(ob.data.faces[polygon_index].vertices)):
@@ -165,9 +152,41 @@ class BLive_OT_mesh_apply(bpy.types.Operator):
 				print(ob.name, polygon_index, vertex.co[0], vertex.co[1], vertex.co[2])
 				client.client().send("/data/objects/polygon", ob.name, polygon_index, poly_vert_index, vertex.co[0], vertex.co[1], vertex.co[2])
 
-		#	change back tp previous mode
+		#   change back tp previous mode
 		bpy.ops.object.mode_set(mode=mode)
 		return{'FINISHED'}
+
+class BLive_OT_modal_mesh_update(bpy.types.Operator):
+	'''Operator which runs its self from a timer.'''
+	bl_idname = "wm.blive_modal_vertex_update"
+	bl_label = "Vertex Updater"
+
+	_timer = None
+
+	def modal(self, context, event):
+		print(event.type)
+		if event.type in {'LEFTMOUSE', 'TAB'}:
+			return self.cancel(context)
+
+		if event.type == 'TIMER':
+			ob = bpy.context.active_object
+			mesh = bmesh.from_edit_mesh(ob.data)
+			for face in mesh.faces:
+				for vindex, vertex in enumerate(face.verts):
+					client.client().send("/data/objects/polygon", ob.name, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2])
+
+		return {'PASS_THROUGH'}
+
+	def execute(self, context):
+		bpy.ops.object.mode_set(mode='EDIT')
+		context.window_manager.modal_handler_add(self)
+		self._timer = context.window_manager.event_timer_add(0.1, context.window)
+		return {'RUNNING_MODAL'}
+
+	def cancel(self, context):
+		print("CANCELLED")
+		context.window_manager.event_timer_remove(self._timer)
+		return {'FINISHED'}
 
 class BLive_PT_mesh_apply(bpy.types.Panel):
 	bl_label = "BLive Mesh Update"

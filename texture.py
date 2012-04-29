@@ -20,12 +20,12 @@
 
 
 import bpy
-from bpy.props import StringProperty, BoolProperty, IntProperty, CollectionProperty
+from bpy.props import StringProperty, BoolProperty, IntProperty, CollectionProperty, FloatProperty, EnumProperty
 from . import client
 
-class BLive_OT_open_video_filebrowser(bpy.types.Operator):
-	bl_idname = "blive.open_video_filebrowser"
-	bl_label = "BLive Open Video Filebrowser"
+class BLive_OT_videotexture_filebrowser(bpy.types.Operator):
+	bl_idname = "blive.videotexture_filebrowser"
+	bl_label = "BLive Videotexture Filebrowser"
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	filepath = StringProperty(subtype="FILE_PATH")
@@ -38,16 +38,61 @@ class BLive_OT_open_video_filebrowser(bpy.types.Operator):
 	def execute(self, context):
 		print(self.files, self.directory, self.filepath, self.filename)
 		if "PORT" in bpy.context.scene.camera.game.properties:
-			ob = bpy.context.object.name	
-			tex = "IM{0}".format(bpy.context.object.active_material.active_texture.image.name)
-			client.client().cmd_open_video(ob, tex, self.filepath)
+			ob = bpy.context.object
+			image = bpy.context.object.active_material.active_texture.image.name
+			client.client().send("/texture/movie", ob.name, image, self.filepath)
 		return {'FINISHED'}
 
 	def invoke(self, context, event):
 		context.window_manager.fileselect_add(self)
 		return {'RUNNING_MODAL'}
-        
-bpy.utils.register_class(BLive_OT_open_video_filebrowser)
+
+bpy.utils.register_class(BLive_OT_videotexture_filebrowser)
+
+class BLive_OT_videotexture_play(bpy.types.Operator):
+	bl_idname = "blive.videotexture_play"
+	bl_label = "BLive Videotexture Play"
+
+	def execute(self, context):
+		if "PORT" in bpy.context.scene.camera.game.properties:
+			ob = bpy.context.object
+			image = bpy.context.object.active_material.active_texture.image.name
+			client.client().send("/texture/state", ob.name, image, 'PLAY')
+		return {'FINISHED'}
+
+bpy.utils.register_class(BLive_OT_videotexture_play)
+
+class BLive_OT_videotexture_pause(bpy.types.Operator):
+	bl_idname = "blive.videotexture_pause"
+	bl_label = "BLive Videotexture Pause"
+
+	def execute(self, context):
+		if "PORT" in bpy.context.scene.camera.game.properties:
+			ob = bpy.context.object
+			image = bpy.context.object.active_material.active_texture.image.name
+			client.client().send("/texture/state", ob.name, image, 'PAUSE')
+		return {'FINISHED'}
+
+bpy.utils.register_class(BLive_OT_videotexture_pause)
+
+class BLive_OT_videotexture_stop(bpy.types.Operator):
+	bl_idname = "blive.videotexture_stop"
+	bl_label = "BLive Videotexture Stop"
+
+	def execute(self, context):
+		if "PORT" in bpy.context.scene.camera.game.properties:
+			ob = bpy.context.object
+			image = bpy.context.object.active_material.active_texture.image.name
+			client.client().send("/texture/state", ob.name, image, 'STOP')
+		return {'FINISHED'}
+
+bpy.utils.register_class(BLive_OT_videotexture_stop)
+
+def enumerate_images():
+	image_list = list()
+	for index,image in enumerate(bpy.data.images):
+		image_list.append((str(index), image.name, image.name))
+	bpy.context.object['images'] = bpy.props.EnumProperty(items=image_list, default='-1')
 
 class BLive_PT_texture_player(bpy.types.Panel):
 	bl_label = "BLive Videoplayer"
@@ -57,13 +102,9 @@ class BLive_PT_texture_player(bpy.types.Panel):
 
 	def draw(self, context):
 		row = self.layout.row(align=True)
-		try:
-			row.label("Image: {0}".format(bpy.context.object.active_material.active_texture.image.name))
-			row.operator("blive.open_video_filebrowser", text="Open", icon="FILE_MOVIE")
+		row.alignment = 'EXPAND'
+		row.operator("blive.videotexture_filebrowser", text="", icon="FILESEL")
+		row.operator("blive.videotexture_play", text="", icon="PLAY")
+		row.operator("blive.videotexture_pause", text="", icon="PAUSE")
+		row.operator("blive.videotexture_stop", text="", icon="MESH_PLANE")
 
-		except AttributeError:
-			return
-			
-		row = self.layout.row(align=True)
-		tex = bpy.context.object.active_material.active_texture
-		row.template_image(tex, "image", tex.image_user, compact=True)

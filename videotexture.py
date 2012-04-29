@@ -19,6 +19,7 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
+
 # --- import pyliblo
 import sys
 sys.path.append('/usr/lib/python3.2/site-packages')
@@ -74,7 +75,7 @@ class camera(player):
 		self.__file = file
 
 		# -- Load the file
-		self.video.source = bge.texture.VideoFFmpeg("/dev/video1", 1, 0, 64, 48)
+		self.video.source = bge.texture.VideoFFmpeg("/dev/video0", 0, 0, 64, 48)
 
 		# -- scale the video
 		self.video.source.scale = False
@@ -88,7 +89,7 @@ class videotexture(object):
 
 	def __init__(self):
 		self.players = dict()
-		
+
 	def update(self):
 		for i in self.players:
 			self.players[i].refresh(True)

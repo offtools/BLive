@@ -75,7 +75,6 @@ class server(liblo.Server):
 
 		for i in self.modules:
 			self.modules[i].update()
-#		bge.logic.videotexture.update()
 
 	def update_object(self, path, args):
 		scene = bge.logic.getCurrentScene()
@@ -112,14 +111,6 @@ class server(liblo.Server):
 			vertex.setXYZ([x,y,z])
 		except IndexError as err:
 			print("%s : mat_idx: %d vert_idx: %d" %(err, mat_index, vertex_index))
-
-#		ob.meshes[mesh_index].getVertex(mat_index, vert_index).setXYZ([ x, y, z ])
-#		print("num meshes: %d" %(len(ob.meshes)))
-#		for mesh in ob.meshes:
-#			for m_index in range(len(mesh.materials)):
-#				for v_index in range(mesh.getVertexArrayLength(m_index)):
-#					vertex = mesh.getVertex(m_index, v_index)
-#					print("m_index: %d, v_index: %d, vert.co: %s" %(m_index,v_index,vertex.getXYZ()))
 								 
 	def not_implemented(self, path, args):
 		print("not implemented: ", path, args)
