@@ -24,42 +24,42 @@ from . import client
 
 ##################################################################
 #
-#    Type Defs for Timeline Actions
+#    Type Defs for Timeline Trigger
 #
 ##################################################################
 
-ACTION_TYPE_ENUM = [("ActionDummy","Dummy","Dummy Action"), \
-			 		("ActionVideoOpen","Open Video","Open a Video"), \
-			 		("ActionCameraOpen","Connect Camera","Connect a Camera"), \
-			 		("ActionVideoState","Set Video State","Set Play, Pause, Stop")]
+TRIGGER_TYPE_ENUM = [("TriggerDummy","Dummy","Dummy Trigger"), \
+			 		("TriggerVideoOpen","Open Video","Open a Video"), \
+			 		("TriggerCameraOpen","Connect Camera","Connect a Camera"), \
+			 		("TriggerVideoState","Set Video State","Set Play, Pause, Stop")]
 
-def ACTION_TYPE_NAME(self, _type):
-	types = [ i[0] for i in ACTION_TYPE_ENUM ]
-	return ACTION_TYPE_ENUM[types.index(_type)][1]
+def TRIGGER_TYPE_NAME(self, _type):
+	types = [ i[0] for i in TRIGGER_TYPE_ENUM ]
+	return TRIGGER_TYPE_ENUM[types.index(_type)][1]
 
-def ACTION_TYPE_DESCRIPTION(_type):
-	types = [ i[0] for i in ACTION_TYPE_ENUM ]
-	return ACTION_TYPE_ENUM[types.index(_type)][2]
+def TRIGGER_TYPE_DESCRIPTION(_type):
+	types = [ i[0] for i in TRIGGER_TYPE_ENUM ]
+	return TRIGGER_TYPE_ENUM[types.index(_type)][2]
 
-class TimelineActionDummy(bpy.types.PropertyGroup):
+class TimelineTriggerDummy(bpy.types.PropertyGroup):
 	m_marker = bpy.props.StringProperty()	# marker name (back ref to queue / timeline marker)
-	m_type = bpy.props.StringProperty()		# action type definded in ACTION_TYPE_ENUM
-	m_applied = bpy.props.BoolProperty(default=False) # action is applied (used in ui)
-	m_hidden = bpy.props.BoolProperty(default=False) # action is hidden in ui
+	m_type = bpy.props.StringProperty()		# trigger type definded in TRIGGER_TYPE_ENUM
+	m_applied = bpy.props.BoolProperty(default=False) # trigger is applied (used in ui)
+	m_hidden = bpy.props.BoolProperty(default=False) # trigger is hidden in ui
 	m_oscpath = bpy.props.StringProperty(default="/debug")
 
-	m_msg = bpy.props.StringProperty(default="Dummy Action")
+	m_msg = bpy.props.StringProperty(default="Dummy Trigger")
 
 	def send(self):
 		client.client().send(self.m_oscpath, self.m_msg)
 
-bpy.utils.register_class(TimelineActionDummy)
+bpy.utils.register_class(TimelineTriggerDummy)
 
-class TimelineActionVideoOpen(bpy.types.PropertyGroup):
+class TimelineTriggerVideoOpen(bpy.types.PropertyGroup):
 	m_marker = bpy.props.StringProperty()	# marker name (back ref to queue / timeline marker)
-	m_type = bpy.props.StringProperty()		# action type definded in ACTION_TYPE_ENUM
-	m_applied = bpy.props.BoolProperty(default=False) # action is applied (used in ui)
-	m_hidden = bpy.props.BoolProperty(default=False) # action is hidden in ui
+	m_type = bpy.props.StringProperty()		# trigger type definded in TRIGGER_TYPE_ENUM
+	m_applied = bpy.props.BoolProperty(default=False) # trigger is applied (used in ui)
+	m_hidden = bpy.props.BoolProperty(default=False) # trigger is hidden in ui
 	m_oscpath = bpy.props.StringProperty(default="/texture/movie")
 
 	m_object = bpy.props.StringProperty()
@@ -71,13 +71,13 @@ class TimelineActionVideoOpen(bpy.types.PropertyGroup):
 		filepath = bpy.path.abspath(self.m_filepath)
 		client.client().send(self.m_oscpath, self.m_object, self.m_image, filepath)
 
-bpy.utils.register_class(TimelineActionVideoOpen)
+bpy.utils.register_class(TimelineTriggerVideoOpen)
 
-class TimelineActionCameraOpen(bpy.types.PropertyGroup):
+class TimelineTriggerCameraOpen(bpy.types.PropertyGroup):
 	m_marker = bpy.props.StringProperty()	# marker name (back ref to queue / timeline marker)
-	m_type = bpy.props.StringProperty()		# action type definded in ACTION_TYPE_ENUM
-	m_applied = bpy.props.BoolProperty(default=False) # action is applied (used in ui)
-	m_hidden = bpy.props.BoolProperty(default=False) # action is hidden in ui
+	m_type = bpy.props.StringProperty()		# trigger type definded in TRIGGER_TYPE_ENUM
+	m_applied = bpy.props.BoolProperty(default=False) # trigger is applied (used in ui)
+	m_hidden = bpy.props.BoolProperty(default=False) # trigger is hidden in ui
 	m_oscpath = bpy.props.StringProperty(default="/texture/camera")
 
 	m_object = bpy.props.StringProperty()
@@ -89,13 +89,13 @@ class TimelineActionCameraOpen(bpy.types.PropertyGroup):
 		print("connect camera")
 		client.client().send(self.m_oscpath, self.m_object, self.m_image, self.m_filepath)
 
-bpy.utils.register_class(TimelineActionCameraOpen)
+bpy.utils.register_class(TimelineTriggerCameraOpen)
 
-class TimelineActionVideoState(bpy.types.PropertyGroup):
+class TimelineTriggerVideoState(bpy.types.PropertyGroup):
 	m_marker = bpy.props.StringProperty()	# marker name (back ref to queue / timeline marker)
-	m_type = bpy.props.StringProperty()		# action type definded in ACTION_TYPE_ENUM
-	m_applied = bpy.props.BoolProperty(default=False) # action is applied (used in ui)
-	m_hidden = bpy.props.BoolProperty(default=False) # action is hidden in ui
+	m_type = bpy.props.StringProperty()		# trigger type definded in TRIGGER_TYPE_ENUM
+	m_applied = bpy.props.BoolProperty(default=False) # trigger is applied (used in ui)
+	m_hidden = bpy.props.BoolProperty(default=False) # trigger is hidden in ui
 	m_oscpath = bpy.props.StringProperty(default="/texture/state")
 
 	m_image = bpy.props.StringProperty()
@@ -108,21 +108,21 @@ class TimelineActionVideoState(bpy.types.PropertyGroup):
 	def send(self):
 		client.client().send(self.m_oscpath, self.m_image, self.m_state)
 		
-bpy.utils.register_class(TimelineActionVideoState)
+bpy.utils.register_class(TimelineTriggerVideoState)
 
-class TimelineActions(bpy.types.PropertyGroup):
+class TimelineTrigger(bpy.types.PropertyGroup):
 	'''
-		Property Group that holds all Actions, sorted by types
+		Property Group that holds all Trigger, sorted by types
 	'''
 	
-	#TODO: use keys instead of ACTION_TYPE_ENUM
+	#TODO: use keys instead of TRIGGER_TYPE_ENUM
 
-	ActionDummy = bpy.props.CollectionProperty(type=TimelineActionDummy)
-	ActionVideoOpen = bpy.props.CollectionProperty(type=TimelineActionVideoOpen)
-	ActionCameraOpen = bpy.props.CollectionProperty(type=TimelineActionCameraOpen)
-	ActionVideoState = bpy.props.CollectionProperty(type=TimelineActionVideoState)
+	TriggerDummy = bpy.props.CollectionProperty(type=TimelineTriggerDummy)
+	TriggerVideoOpen = bpy.props.CollectionProperty(type=TimelineTriggerVideoOpen)
+	TriggerCameraOpen = bpy.props.CollectionProperty(type=TimelineTriggerCameraOpen)
+	TriggerVideoState = bpy.props.CollectionProperty(type=TimelineTriggerVideoState)
 	
-	m_types = bpy.props.EnumProperty(items = ACTION_TYPE_ENUM, name = "state")
+	m_types = bpy.props.EnumProperty(items = TRIGGER_TYPE_ENUM, name = "state")
 
     
 #    def __get_idx(self):
@@ -133,9 +133,9 @@ class TimelineActions(bpy.types.PropertyGroup):
 
 	def add(self, _type):
 		'''
-			add a new action to the Actioncollections
+			add a new trigger to the Triggercollections
 		'''
-		for info in ACTION_TYPE_ENUM:
+		for info in TRIGGER_TYPE_ENUM:
 			if _type == info[0]:
 				entry = getattr(self, info[0]).add()
 				entry.m_type = info[0]
@@ -156,79 +156,79 @@ class TimelineActions(bpy.types.PropertyGroup):
 
 	def remove(self, name):
 		'''
-			removes an action ()
+			removes an trigger ()
 		'''
-		print("TimelineActions.remove: ", name)
+		print("TimelineTrigger.remove: ", name)
 		def get_type(name):
-			for i in ACTION_TYPE_ENUM:
+			for i in TRIGGER_TYPE_ENUM:
 				if i[0] == name[:-4]:
 					return i[0]
 
 		_type = get_type(name)
 
 		if not _type in self.keys():
-			raise TypeError("requested type not found in timeline actions")
+			raise TypeError("requested type not found in timeline trigger")
 
 		collection = getattr(self, _type)
 
 		if not name in collection:
-			raise IndexError("requested action name not found in timeline actions")
+			raise IndexError("requested trigger name not found in timeline trigger")
 
 		idx = collection.keys().index(name)
 		collection.remove(idx)			
 
 	def lookup(self, _name):
 		def get_type(_name):
-			for i in ACTION_TYPE_ENUM:
+			for i in TRIGGER_TYPE_ENUM:
 				if i[0] == _name[:-4]:
 					return i[0]
 
 		_type = get_type(_name)
 
 		if not _type in self.keys():
-			raise TypeError("requested type not found in timeline actions")
+			raise TypeError("requested type not found in timeline trigger")
 
 		collection = getattr(self, _type)
 
 		if not _name in collection:
-			raise IndexError("requested action name not found in timeline actions")
+			raise IndexError("requested trigger name not found in timeline trigger")
 
 		return collection[_name]
 
-bpy.utils.register_class(TimelineActions)
+bpy.utils.register_class(TimelineTrigger)
 
 class TimelineQueueEntry(bpy.types.PropertyGroup):
 	'''
-		PropertyGroup for Action Queue Entries, references diff type of Actions
+		PropertyGroup for Trigger Queue Entries, references diff type of Trigger
 	'''
 	m_marker = bpy.props.StringProperty()	# name of the queue id
-	m_type = bpy.props.StringProperty()		# action type	
-	m_action = bpy.props.StringProperty() 	# action name
+	m_type = bpy.props.StringProperty()		# trigger type	
+	m_trigger = bpy.props.StringProperty() 	# trigger name
 
-	def add_action(self, actiontype):
+	def add_trigger(self, triggertype):
 		'''
-			add a new action
+			add a new trigger
 		'''
-		action = bpy.context.scene.timeline_actions.add(actiontype)
-		self.m_action = action.name
-		self.m_type = action.m_type
-		return action
+		trigger = bpy.context.scene.timeline_trigger.add(triggertype)
+		self.m_trigger = trigger.name
+		self.m_type = trigger.m_type
+		return trigger
 
-	def del_action(self):
+	def del_trigger(self):
 		'''
-			delete referenced action
+			delete referenced trigger
 		'''
-		print("TimelineQueueEntry.del_action: ", self.m_marker, self.m_type, self.m_action)
-		bpy.context.scene.timeline_actions.remove(self.m_action)
+		print("TimelineQueueEntry.del_trigger: ", self.m_marker, self.m_type, self.m_trigger)
+		bpy.context.scene.timeline_trigger.remove(self.m_trigger)
 
 	def trigger(self):
-		bpy.context.scene.timeline_actions.lookup(self.m_action).send()
+		bpy.context.scene.timeline_trigger.lookup(self.m_trigger).send()
 
 bpy.utils.register_class(TimelineQueueEntry)
 
 class TimelineQueue(bpy.types.PropertyGroup):
 	'''
-		PropertyGroup of Action Queues, stores Entries with Actions
+		PropertyGroup of Trigger Queues, stores Entries with Trigger
 	'''
 	m_items = bpy.props.CollectionProperty(type=TimelineQueueEntry)
 	m_execute_after = bpy.props.BoolProperty(default=False)
@@ -243,7 +243,7 @@ bpy.utils.register_class(TimelineQueue)
 #
 ##################################################################
 
-bpy.types.Scene.timeline_actions = bpy.props.PointerProperty(type=TimelineActions, options={"HIDDEN"})
+bpy.types.Scene.timeline_trigger = bpy.props.PointerProperty(type=TimelineTrigger, options={"HIDDEN"})
 bpy.types.Scene.timeline_queues = bpy.props.CollectionProperty(type=TimelineQueue, options={"HIDDEN"})
 
 bpy.types.Scene.active_marker = bpy.props.IntProperty(options={"HIDDEN"}, subtype='UNSIGNED')
@@ -256,29 +256,29 @@ bpy.types.Scene.active_queues_entry = bpy.props.StringProperty(options={"HIDDEN"
 ##################################################################
 
 #
-#    Operator to add new Timeline Actions 
+#    Operator to add new Timeline Trigger 
 #
-class BLive_OT_action_add(bpy.types.Operator):
+class BLive_OT_trigger_add(bpy.types.Operator):
 	'''
-		adds a new action to action queue and extends TimelineAction
-		with properties based on requested action type
+		adds a new trigger to trigger queue and extends TimelineTrigger
+		with properties based on requested trigger type
 	'''
-	bl_idname = "blive.action_add"
-	bl_label = "BLive add timeline action"
+	bl_idname = "blive.trigger_add"
+	bl_label = "BLive add timeline trigger"
 	
-	type = bpy.props.EnumProperty(items = ACTION_TYPE_ENUM, name = "type")
+	type = bpy.props.EnumProperty(items = TRIGGER_TYPE_ENUM, name = "type")
 
 	def execute(self, context):
 		if len(context.scene.timeline_markers):
 			queue_name = context.scene.timeline_markers[context.scene.active_marker].name
 			
-			# query action type from ACTION_TYPE_ENUM
-			action_prefix = None
-			for i in ACTION_TYPE_ENUM:
+			# query trigger type from TRIGGER_TYPE_ENUM
+			trigger_prefix = None
+			for i in TRIGGER_TYPE_ENUM:
 				if i[0] == self.type:
-					action_prefix = i[0]
-			if not action_prefix:
-				print('blive.action_add - cancelled')
+					trigger_prefix = i[0]
+			if not trigger_prefix:
+				print('blive.trigger_add - cancelled')
 				return{'CANCELLED'}
 			
 			# add new queue
@@ -286,17 +286,17 @@ class BLive_OT_action_add(bpy.types.Operator):
 				queue = bpy.context.scene.timeline_queues.add()
 				queue.name = queue_name
 			
-			# add new action entry to queue
+			# add new trigger entry to queue
 			queue = bpy.context.scene.timeline_queues[queue_name]
 			item = queue.m_items.add()
-			action = item.add_action(action_prefix)
-			item.name = action.name
+			trigger = item.add_trigger(trigger_prefix)
+			item.name = trigger.name
 
 		return{'FINISHED'}
 		
 class BLive_OT_queue_add(bpy.types.Operator):
 	'''
-		adds a action queue
+		adds a trigger queue
 	'''
 	bl_idname = "blive.queue_add"
 	bl_label = "BLive add timeline queue"
@@ -311,18 +311,18 @@ class BLive_OT_queue_add(bpy.types.Operator):
 		else:
 			return{'CANCELLED'}
 			
-class BLive_OT_action_delete(bpy.types.Operator):
+class BLive_OT_trigger_delete(bpy.types.Operator):
 	'''
-		Delete Action
+		Delete Trigger
 	'''
-	bl_idname = "blive.action_delete"
-	bl_label = "BLive delete timeline action"
-	m_action = bpy.props.StringProperty()
+	bl_idname = "blive.trigger_delete"
+	bl_label = "BLive delete timeline trigger"
+	m_trigger = bpy.props.StringProperty()
 	
 	def execute(self, context):
 		marker = context.scene.active_marker
-		idx = context.scene.timeline_queues[marker].m_items.keys().index(self.m_action)
-		context.scene.timeline_queues[marker].m_items[idx].del_action()
+		idx = context.scene.timeline_queues[marker].m_items.keys().index(self.m_trigger)
+		context.scene.timeline_queues[marker].m_items[idx].del_trigger()
 		context.scene.timeline_queues[marker].m_items.remove(idx)
 		return{'FINISHED'}
 
@@ -365,7 +365,7 @@ class BLive_PT_timeline_marker(bpy.types.Panel):
 		row = layout.row()
 		row.operator("blive.queue_add", text="Add Queue")
 
-		#    boxes for actions
+		#    boxes for trigger
 		if marker_id in context.scene.timeline_queues:
 		
 			#	queue attr (pause, send after) 
@@ -374,77 +374,77 @@ class BLive_PT_timeline_marker(bpy.types.Panel):
 			row.prop(context.scene.timeline_queues[marker_id], "m_pause", text="pause")
 			row.prop(context.scene.timeline_queues[marker_id], "m_execute_after", text="send after")
 					
-			#    menu to choose new action
+			#    menu to choose new trigger
 			row = layout.row()
-			row.operator_menu_enum("blive.action_add", "type", text="Add Action")
+			row.operator_menu_enum("blive.trigger_add", "type", text="Add Trigger")
 
 			for item in context.scene.timeline_queues[marker_id].m_items:	
-				#    get action from queue entry
-				action = context.scene.timeline_actions.lookup(item.m_action)
+				#    get trigger from queue entry
+				trigger = context.scene.timeline_trigger.lookup(item.m_trigger)
 
 				main = layout.column(align=True)
 				head = main.box()
 				split = head.split(percentage=0.7)
 				row = split.row()
-				if action.m_hidden:
-					row.prop(action, "m_hidden", text="", icon="TRIA_RIGHT", emboss=False)
+				if trigger.m_hidden:
+					row.prop(trigger, "m_hidden", text="", icon="TRIA_RIGHT", emboss=False)
 				else:
-					row.prop(action, "m_hidden", text="", icon="TRIA_DOWN", emboss=False)
-				row.label( ACTION_TYPE_DESCRIPTION(item.m_type) )
+					row.prop(trigger, "m_hidden", text="", icon="TRIA_DOWN", emboss=False)
+				row.label( TRIGGER_TYPE_DESCRIPTION(item.m_type) )
 				split = split.split(percentage=1)
 				buttons = split.column_flow(columns=2, align=True)
-				if not action.m_applied:
-					buttons.prop(action, "m_applied", text="", icon="UNLOCKED", toggle=True)
+				if not trigger.m_applied:
+					buttons.prop(trigger, "m_applied", text="", icon="UNLOCKED", toggle=True)
 				else:
-					buttons.prop(action, "m_applied", text="", icon="LOCKED", toggle=True)
+					buttons.prop(trigger, "m_applied", text="", icon="LOCKED", toggle=True)
 
-				buttons.operator("blive.action_delete", text="", icon="PANEL_CLOSE").m_action =  item.m_action
+				buttons.operator("blive.trigger_delete", text="", icon="PANEL_CLOSE").m_trigger =  item.m_trigger
 
-				if not action.m_hidden:
+				if not trigger.m_hidden:
 					body = main.box()
 					try:
-						getattr(self, item.m_type)(context, action, body)
+						getattr(self, item.m_type)(context, trigger, body)
 					except:
 						row = body.row()
 						row.label("not implemented")
 
-	def ActionVideoOpen(self, context, action, ui):
-		if action.m_applied:
+	def TriggerVideoOpen(self, context, trigger, ui):
+		if trigger.m_applied:
 			ui.enabled = False
 
 		row = ui.row()
-		row.prop(action, "m_filepath", text="Open File", icon="FILE_MOVIE")
+		row.prop(trigger, "m_filepath", text="Open File", icon="FILE_MOVIE")
 		row = ui.row()
-		row.prop(action, "m_object", text="Choose Object", icon="OBJECT_DATA")
+		row.prop(trigger, "m_object", text="Choose Object", icon="OBJECT_DATA")
 		row = ui.row()
-		row.prop(action, "m_image", text="Choose Image", icon="TEXTURE")
+		row.prop(trigger, "m_image", text="Choose Image", icon="TEXTURE")
 
-	def ActionCameraOpen(self, context, action, ui):
-		if action.m_applied:
+	def TriggerCameraOpen(self, context, trigger, ui):
+		if trigger.m_applied:
 			ui.enabled = False
 
 		row = ui.row()
-		row.prop(action, "m_filepath", text="Open File", icon="FILE_MOVIE")
+		row.prop(trigger, "m_filepath", text="Open File", icon="FILE_MOVIE")
 		row = ui.row()
-		row.prop(action, "m_object", text="Choose Object", icon="OBJECT_DATA")
+		row.prop(trigger, "m_object", text="Choose Object", icon="OBJECT_DATA")
 		row = ui.row()
-		row.prop(action, "m_image", text="Choose Image", icon="TEXTURE")
+		row.prop(trigger, "m_image", text="Choose Image", icon="TEXTURE")
 		
-	def ActionVideoState(self, context, action, ui):
-		if action.m_applied:
+	def TriggerVideoState(self, context, trigger, ui):
+		if trigger.m_applied:
 			ui.enabled = False
 
 		row = ui.row()
-		row.prop(action, "m_state", text="")
+		row.prop(trigger, "m_state", text="")
 		row = ui.row()
-		row.prop(action, "m_image", text="Choose Image", icon="TEXTURE")
+		row.prop(trigger, "m_image", text="Choose Image", icon="TEXTURE")
 
-	def ActionDummy(self, context, action, ui):
-		if action.m_applied:
+	def TriggerDummy(self, context, trigger, ui):
+		if trigger.m_applied:
 			ui.enabled = False
 
 		row = ui.row()
-		row.prop(action, "m_msg", text="send Message")
+		row.prop(trigger, "m_msg", text="send Message")
 		
 def unregister():
 	bpy.utils.unregister_module(__name__)
