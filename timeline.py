@@ -238,12 +238,12 @@ bpy.utils.register_class(TimelineQueue)
 #
 ##################################################################
 
+#	Instanciate on register and remove on unregister
 bpy.types.Scene.timeline_trigger = bpy.props.PointerProperty(type=TimelineTrigger, options={"HIDDEN"})
 bpy.types.Scene.timeline_queues = bpy.props.CollectionProperty(type=TimelineQueue, options={"HIDDEN"})
 
 #	TODO: change to dynamic Property (no need to store in blendfile)
 bpy.types.Scene.active_marker = bpy.props.IntProperty(options={"HIDDEN"}, subtype='UNSIGNED')
-bpy.types.Scene.active_queues_entry = bpy.props.StringProperty(options={"HIDDEN"})
 
 ##################################################################
 #
@@ -411,9 +411,9 @@ class BLive_PT_timeline_marker(bpy.types.Panel):
 		row = ui.row()
 		row.prop(trigger, "m_filepath", text="Open File", icon="FILE_MOVIE")
 		row = ui.row()
-		row.prop(trigger, "m_object", text="Choose Object", icon="OBJECT_DATA")
+		row.prop_search(trigger, "m_object", context.scene, "objects", text="object")
 		row = ui.row()
-		row.prop(trigger, "m_image", text="Choose Image", icon="TEXTURE")
+		row.prop_search(trigger, "m_image", bpy.data, "images", text="image")
 
 	def TriggerCameraOpen(self, context, trigger, ui):
 		if trigger.m_applied:
@@ -422,9 +422,9 @@ class BLive_PT_timeline_marker(bpy.types.Panel):
 		row = ui.row()
 		row.prop(trigger, "m_filepath", text="Open File", icon="FILE_MOVIE")
 		row = ui.row()
-		row.prop(trigger, "m_object", text="Choose Object", icon="OBJECT_DATA")
+		row.prop_search(trigger, "m_object", context.scene, "objects", text="object")
 		row = ui.row()
-		row.prop(trigger, "m_image", text="Choose Image", icon="TEXTURE")
+		row.prop_search(trigger, "m_image", bpy.data, "images", text="image")
 		
 	def TriggerVideoState(self, context, trigger, ui):
 		if trigger.m_applied:
@@ -433,7 +433,7 @@ class BLive_PT_timeline_marker(bpy.types.Panel):
 		row = ui.row()
 		row.prop(trigger, "m_state", text="")
 		row = ui.row()
-		row.prop(trigger, "m_image", text="Choose Image", icon="TEXTURE")
+		row.prop_search(trigger, "m_image", bpy.data, "images", text="image")
 
 	def TriggerDummy(self, context, trigger, ui):
 		if trigger.m_applied:
