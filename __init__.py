@@ -49,12 +49,14 @@ if "bpy" in locals():
 	imp.reload('timeline')
 	imp.reload('texture')
 	imp.reload('meshtools')
+	imp.reload('apphandler')
 else:
 	from . import logic
 	from . import client
 	from . import timeline
 	from . import texture
 	from . import meshtools
+	from . import apphandler
    
 import bpy
 import sys
@@ -123,8 +125,7 @@ class BLive_OT_forc_blenderplayer(bpy.types.Operator):
 			port = "-p {0}".format(bpy.context.scene.camera.game.properties["PORT"].value)
 			cmd = [app,  port, blendfile]
 			blendprocess = subprocess.Popen(cmd)
-			bpy.app.handlers.frame_change_pre.append(frame_change_pre_handler)
-			bpy.app.handlers.scene_update_post.append(scene_update_post_handler)
+
 			return{'FINISHED'}
 		else:
 			return{'CANCELLED'}
@@ -135,7 +136,7 @@ class BLive_OT_set_port(bpy.types.Operator):
 
 	def execute(self, context):
 		if "PORT" in bpy.context.scene.camera.game.properties:
-			client.client().port(bpy.context.scene.camera.game.properties["PORT"].value)
+			client.client().port = bpy.context.scene.camera.game.properties["PORT"].value
 			return{'FINISHED'}
 		else:
 			return{'CANCELLED'}
@@ -156,54 +157,14 @@ class BLive_OT_quit(bpy.types.Operator):
 		else:
 			return{'CANCELLED'}
 
-def scene_update_post_handler(scene):
-
-	if bpy.data.objects.is_updated:
-		for ob in bpy.data.objects:
-			if ob.is_updated:
-				client.client().send("/data/objects", ob.name, \
-                                            ob.location[0], \
-                                            ob.location[1], \
-                                            ob.location[2], \
-                                            ob.scale[0], \
-                                            ob.scale[1], \
-                                            ob.scale[2], \
-                                            ob.rotation_euler[0], \
-                                            ob.rotation_euler[1], \
-                                            ob.rotation_euler[2], \
-                                            ob.color[0], \
-                                            ob.color[1], \
-                                            ob.color[2], \
-                                            ob.color[3] \
-                                            )
-
-def frame_change_pre_handler(scene):
-	# stop animation
-	if not bpy.context.active_object.mode == 'OBJECT':
-		if bpy.context.screen.is_animation_playing:
-			bpy.ops.screen.animation_play()
-
-	cur = scene.frame_current
-	marker = [ (i.frame, i) for i in scene.timeline_markers if i.frame >= cur]
-	if len(marker):
-		nextmarker = min(marker)[1]
-		# animation is passing a marker
-		if nextmarker.frame == cur:
-			# check if we have an event queue with the same name as the current marker
-			if nextmarker.name in bpy.context.scene.timeline_queues:
-				# check pause
-				if scene.timeline_queues[nextmarker.name].m_pause and bpy.context.screen.is_animation_playing:
-					bpy.ops.screen.animation_play()
-				# send events
-				for item in scene.timeline_queues[nextmarker.name].m_items:
-					item.trigger()
-
 def register():
 	bpy.utils.register_module(__name__)
+	apphandler.register()
 
 def unregister():
+	apphandler.unregister()
 	bpy.utils.unregister_module(__name__)
- 
+
 if __name__ == "__main__":
 	print("registering blive modules")
 	register()

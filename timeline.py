@@ -102,7 +102,8 @@ class TimelineTriggerVideoState(bpy.types.PropertyGroup):
 	m_state = bpy.props.EnumProperty(
 		items = [("PLAY","play","play Video"),
 				("PAUSE","pause","pause Video"), 
-				("STOP","stop","stop Video")],
+				("STOP","stop","stop Video"),
+				("REMOVE","remove","remove dynamic Texture")],
 		name = "state")
 
 	def send(self):
@@ -123,12 +124,6 @@ class TimelineTrigger(bpy.types.PropertyGroup):
 	TriggerVideoState = bpy.props.CollectionProperty(type=TimelineTriggerVideoState)
 	
 	m_types = bpy.props.EnumProperty(items = TRIGGER_TYPE_ENUM, name = "state")
-
-    
-#    def __get_idx(self):
-#        return list(bpy.context.scene.yabee_settings.opt_anim_list.anim_collection).index(self)
-#        
-#    index = property(__get_idx)
 
 
 	def add(self, _type):
@@ -246,6 +241,7 @@ bpy.utils.register_class(TimelineQueue)
 bpy.types.Scene.timeline_trigger = bpy.props.PointerProperty(type=TimelineTrigger, options={"HIDDEN"})
 bpy.types.Scene.timeline_queues = bpy.props.CollectionProperty(type=TimelineQueue, options={"HIDDEN"})
 
+#	TODO: change to dynamic Property (no need to store in blendfile)
 bpy.types.Scene.active_marker = bpy.props.IntProperty(options={"HIDDEN"}, subtype='UNSIGNED')
 bpy.types.Scene.active_queues_entry = bpy.props.StringProperty(options={"HIDDEN"})
 
@@ -271,7 +267,7 @@ class BLive_OT_trigger_add(bpy.types.Operator):
 	def execute(self, context):
 		if len(context.scene.timeline_markers):
 			queue_name = context.scene.timeline_markers[context.scene.active_marker].name
-			
+
 			# query trigger type from TRIGGER_TYPE_ENUM
 			trigger_prefix = None
 			for i in TRIGGER_TYPE_ENUM:

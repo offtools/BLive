@@ -35,6 +35,8 @@ class player:
 			raise IndexError
 			
 		self.__file = None
+		self.__state = 'STOPPED'
+
 		gameobject = logic.getCurrentScene().objects[obname]
 
 		# -- Get the material that is using our texture
@@ -47,9 +49,14 @@ class player:
 	def refresh(self, boolean):
 		self.video.refresh(boolean)
 
-	def __setsource(self, file):
+	@property
+	def source(self):
+		return self.__file
+	
+	@source.setter	
+	def source(self, file):
 		self.__file = file
-
+		print("player.source: ", self.__file)
 		# -- Load the file
 		self.video.source = texture.VideoFFmpeg(self.__file)
 
@@ -57,54 +64,66 @@ class player:
 		self.video.source.scale = True
 
 		# -- play the video
-		self.video.source.play()
+		self.state = 'PLAY'
 
+	@property
+	def state(self):
+		return self.__state
+	
+	@state.setter	
+	def state(self, state):
+		if state == 'PLAY':
+			self.video.source.play()
+		elif state == 'PAUSE':
+			self.video.source.pause()
+		elif state == 'STOP':
+			self.video.source.stop()
+		self.__state = state
 
-		src = self.video.source
-
-	def __getsource(self):
-		return self.__file
-
-	source = property(__getsource, __setsource)
 
 class camera(player):
 	def __init__(self, obname, imgname):
-		super(camera, self).__init__(obname, imgname)
+		super().__init__(obname, imgname)
 		
-	def __setsource(self, file):
+	@property
+	def source(self):
+		return self.__file
+	
+	@source.setter	
+	def source(self, file):
 		self.__file = file
-
+		print("camera.source: ", self.__file)
 		# -- Load the file
-		self.video.source = bge.texture.VideoFFmpeg("/dev/video0", 0, 0, 64, 48)
+		self.video.source = bge.texture.VideoFFmpeg(self.__file, 1)
 
 		# -- scale the video
-		self.video.source.scale = False
-		self.video.source.deinterlace = True
-		
-		# -- play the video
-		self.video.source.play()
-		print("camera valid: ", self.video.source.valid)
+		self.video.source.scale = True
+		self.video.deinterlace = True
+
+		# -- play
+		self.state = 'PLAY'
 
 class videotexture(object):
-
+	TEXTURE_STATES = {'PLAY', 'PAUSE', 'STOP', 'REMOVE'}
+		
 	def __init__(self):
-		self.players = dict()
+		self.textures = dict()
 
 	def update(self):
-		for i in self.players:
-			self.players[i].refresh(True)
-		
+		for i in self.textures:
+			self.textures[i].refresh(True)
+
 	def movie(self, path, args):
 		obname = args[0]
 		imgname = args[1]
 		filename = args[2]
 
-		if imgname in self.players:
-			del self.players[imgname]
+		if imgname in self.textures:
+			del self.textures[imgname]
 		try:
 			print("videotexture.movie: ", obname,imgname,filename)
-			self.players[imgname] = player(obname,imgname)
-			self.players[imgname].source = filename
+			self.textures[imgname] = player(obname,imgname)
+			self.textures[imgname].source = filename
 		except TypeError as err:
 			print("err in videotexture.open: ", err)
 
@@ -113,14 +132,21 @@ class videotexture(object):
 		imgname = args[1]
 		filename = args[2]
 
-		if imgname in self.players:
-			del self.players[imgname]
+		if imgname in self.textures:
+			del self.textures[imgname]
 		try:
 			print("videotexture.camera: ", obname,imgname,filename)
-			self.players[imgname] = camera(obname,imgname)
-			self.players[imgname].source = filename
+			self.textures[imgname] = camera(obname,imgname)
+			self.textures[imgname].source = filename
 		except TypeError as err:
 			print("err in videotexture.open: ", err)		
 
 	def state(self, path, args):
 		print("videotexture.state: ", args)
+		imgname = args[0]
+		state = args[1]
+
+		if state in self.TEXTURE_STATES:
+			if state == 'REMOVE':
+				del self.textures[imgname]
+			self.textures[imgname].state = state

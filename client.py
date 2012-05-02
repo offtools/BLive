@@ -32,7 +32,7 @@ class client(object):
 		return cls._instance
 		
 	def __init__(self):
-		self.target = liblo.Address(9000)
+		self.target = liblo.Address(9900)
 
 	def port_getter(self):
 		return self.target.port

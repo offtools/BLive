@@ -28,7 +28,7 @@ import os
 class BLive_OT_logic_add(bpy.types.Operator):
     bl_idname = "blive.logic_add"
     bl_label = "BLive - create logic brick"
-    port = bpy.props.IntProperty(default=9000)
+    port = bpy.props.IntProperty(default=9900)
 
     def execute(self, context):
         if not 'main.py' in bpy.data.texts:
@@ -97,6 +97,8 @@ class BLive_OT_logic_add(bpy.types.Operator):
                         textblock.write(line)
                     file.close()
                     return
+		#	TODO?: error handling
+        print("Error: addon path not found")
 
 #
 #  Operator - removes the logic brick from active camera

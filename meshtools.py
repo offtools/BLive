@@ -71,7 +71,8 @@ class BLive_OT_modal_mesh_update(bpy.types.Operator):
 				for face in mesh.faces:
 					for vindex, vertex in enumerate(face.verts):
 						client.client().send("/data/objects/polygon", ob.name, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2])
-			except ValueError:
+			except ValueError as err:
+				print(err)
 				return self.cancel(context)
 
 		return {'PASS_THROUGH'}
@@ -79,7 +80,7 @@ class BLive_OT_modal_mesh_update(bpy.types.Operator):
 	def execute(self, context):
 		bpy.ops.object.mode_set(mode='EDIT')
 		context.window_manager.modal_handler_add(self)
-		self._timer = context.window_manager.event_timer_add(0.1, context.window)
+		self._timer = context.window_manager.event_timer_add(0.04, context.window)
 		return {'RUNNING_MODAL'}
 
 	def cancel(self, context):

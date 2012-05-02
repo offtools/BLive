@@ -25,6 +25,7 @@ import liblo
 
 import bge
 import main
+
 from videotexture import videotexture
 
 '''
@@ -100,14 +101,12 @@ class server(liblo.Server):
 		#	get verts from polygon
 		verts = [polygon.v1, polygon.v2, polygon.v3, polygon.v4]
 		if verts[3] == 0: verts.pop()
-		print("==verts: ", verts)
 
 		#	get material index (workaround for matid bug, matid is not an attr of KX_PolyProxy)
 		mat_index = ob.meshes[0].materials.index(polygon.material)
 		mesh = ob.meshes[0]
 		try:
 			vertex = mesh.getVertex(mat_index, verts[vertex_index])
-			print("vert: ", vertex.getXYZ())
 			vertex.setXYZ([x,y,z])
 		except IndexError as err:
 			print("%s : mat_idx: %d vert_idx: %d" %(err, mat_index, vertex_index))
