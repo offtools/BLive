@@ -22,9 +22,11 @@
 import bpy
 from . import client
 
+#	TODO: move all methods, which manipulate the properties into operators
+
 ##################################################################
 #
-#    Type Defs for Timeline Trigger
+#    Property Defs for Timeline Trigger
 #
 ##################################################################
 

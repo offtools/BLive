@@ -24,9 +24,10 @@
 #	Blender OSC-BGE addon, this addon allows to send changes from blender 
 #	to a running gameengine instance
 #
-#	1. check client.py, that the search path for liblo is correct on your system
-#	2. enable the blive addon
-#	3. setup BLive in the Properties->Scene->Blive Network Panel
+#	1. install pyliblo
+#	2. check search path for liblo in client.py and server.py
+#	3. enable the blive addon
+#	4. setup BLive in the Properties->Scene->Blive Network Panel
 #
 
 bl_info = {
@@ -63,8 +64,6 @@ else:
 	from . import network
 
 import bpy
-#import sys
-#import subprocess
 
 ##
 ##	Scene Network Panel

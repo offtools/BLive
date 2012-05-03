@@ -20,8 +20,12 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 import sys
-sys.path.append('/usr/lib/python3.2/site-packages')
-import liblo
+
+try:
+	sys.path.append('/usr/lib/python3.2/site-packages')
+	import liblo
+except ImportError as err:
+	print(err, "you need to install pyliblo and set the correct search path in client.py")
 
 import bge
 import main

@@ -19,12 +19,6 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-
-# --- import pyliblo
-import sys
-sys.path.append('/usr/lib/python3.2/site-packages')
-import liblo
-
 # --- import bge modules
 from bge import texture
 from bge import logic

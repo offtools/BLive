@@ -45,6 +45,10 @@ def scene_update_post_handler(scene):
 													ob.color[3] \
 													)
 
+	#	TODO: EDIT MODE											
+	#if bpy.context.object and bpy.context.object.mode == 'EDIT':
+		#	modal operator
+
 @persistent
 def frame_change_pre_handler(scene):
 	'''

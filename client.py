@@ -21,8 +21,12 @@
 
 import bpy
 import sys
-sys.path.append('/usr/lib/python3.2/site-packages')
-import liblo
+
+try:
+	sys.path.append('/usr/lib/python3.2/site-packages')
+	import liblo
+except ImportError as err:
+	print(err, "you need to install pyliblo and set the correct search path in server.py")
 
 class client(object):
 	_instance = None
