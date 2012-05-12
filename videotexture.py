@@ -16,10 +16,13 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
+#	TODO: check patch: http://projects.blender.org/tracker/download.php/9/127/30750/19947/VideoFFmpeg.patch
+
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 # --- import bge modules
+import bge
 from bge import texture
 from bge import logic
 
@@ -76,9 +79,12 @@ class player:
 
 
 class camera(player):
-	def __init__(self, obname, imgname):
+	def __init__(self, obname, imgname, width, height, deinterlace):
 		super().__init__(obname, imgname)
-		
+		self.__width = width
+		self.__height = height
+		self.__deinterlace = deinterlace
+
 	@property
 	def source(self):
 		return self.__file
@@ -87,12 +93,13 @@ class camera(player):
 	def source(self, file):
 		self.__file = file
 		print("camera.source: ", self.__file)
-		# -- Load the file
-		self.video.source = bge.texture.VideoFFmpeg(self.__file, 1)
+		# -- open device
+		# TODO: add parameter for width and size (no hardcoding) 
+		self.video.source = bge.texture.VideoFFmpeg(self.__file, 1, self.__width, self.__height, 0, "video4linux2")
 
 		# -- scale the video
 		self.video.source.scale = True
-		self.video.deinterlace = True
+		self.video.source.deinterlace = self.__deinterlace
 
 		# -- play
 		self.state = 'PLAY'
@@ -122,18 +129,22 @@ class videotexture(object):
 			print("err in videotexture.open: ", err)
 
 	def camera(self, path, args):
+		# TODO: add with and height
 		obname = args[0]
 		imgname = args[1]
 		filename = args[2]
-
+		width = args[3]
+		height = args[4]
+		deinterlace = bool(args[5])
+		
 		if imgname in self.textures:
 			del self.textures[imgname]
 		try:
 			print("videotexture.camera: ", obname,imgname,filename)
-			self.textures[imgname] = camera(obname,imgname)
+			self.textures[imgname] = camera(obname, imgname, width, height, deinterlace)
 			self.textures[imgname].source = filename
 		except TypeError as err:
-			print("err in videotexture.open: ", err)		
+			print("err in videotexture.open: ", err)
 
 	def state(self, path, args):
 		print("videotexture.state: ", args)

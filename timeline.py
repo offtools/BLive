@@ -224,7 +224,12 @@ class BLive_PT_timeline_marker(bpy.types.Panel):
 		row.prop_search(trigger, "m_object", context.scene, "objects", text="object")
 		row = ui.row()
 		row.prop_search(trigger, "m_image", bpy.data, "images", text="image")
-		
+		row = ui.row(align=True)
+		row.prop(trigger, "m_width", text="width")
+		row.prop(trigger, "m_height", text="height")
+		row = ui.row()
+		row.prop(trigger, "m_deinterlace", text="deinterlace")
+
 	def TriggerVideoState(self, context, trigger, ui):
 		if trigger.m_applied:
 			ui.enabled = False

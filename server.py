@@ -54,7 +54,7 @@ class server(liblo.Server):
 		self.add_method("/data/scene", "", self.not_implemented)
 		self.add_method("/texture/state", "ss", self.modules[videotexture].state)
 		self.add_method("/texture/movie", "sss", self.modules[videotexture].movie)
-		self.add_method("/texture/camera", "sss", self.modules[videotexture].camera)
+		self.add_method("/texture/camera", "sssiii", self.modules[videotexture].camera)
 		self.add_method(None, None, self.fallback)
 
 	def register_module(self, cls):
