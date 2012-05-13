@@ -48,7 +48,16 @@ class server(liblo.Server):
 
 		self.add_method(str('/debug'), 's', self.debug)
 		self.add_method(str('/quit'), '', self.disconnect)
-		self.add_method("/data/objects", "sfffffffffffff", self.update_object)
+		
+		#	all objects: recv name, location, rotation_euler
+		self.add_method("/data/objects", "sffffff", self.update_objects)
+
+		#	object: recv name, scale, objectcolor		
+		self.add_method("/data/object", "sfffffff", self.update_object)
+		
+		#	camera: rcv name, lens, ortho_scale, near, far, perspective, shift_x, shift_y
+		self.add_method("/data/camera", "sffffiff", self.update_camera)
+				
 		self.add_method("/data/objects/polygon", "siifff", self.update_mesh)
 		self.add_method("/data/camera", "ff", self.not_implemented)        
 		self.add_method("/data/scene", "", self.not_implemented)
@@ -81,14 +90,53 @@ class server(liblo.Server):
 		for i in self.modules:
 			self.modules[i].update()
 
-	def update_object(self, path, args):
+		#	lens shift
+#		camera = bge.logic.getCurrentScene().active_camera
+#		sx = sy = 0
+#		if hasattr(camera, "shift_x"):
+#			print("shift x", camera.shift_x)
+#			sx = camera[shift_x]
+#		if hasattr(camera, "shift_y"):
+#			print("shift y", camera.shift_y)
+#			sy = camera[shift_y]
+
+#		pmatrix = camera.projection_matrix
+
+#		pmatrix[2][0] = 0
+#		pmatrix[2][1] = 0
+#		camera.projection_matrix = pmatrix
+
+	def update_objects(self, path, args):
 		scene = bge.logic.getCurrentScene()
 		_id = args[0]
 		ob = scene.objects[_id]
 		ob.position = (args[1],args[2],args[3])
-		ob.scaling = (args[4],args[5],args[6])
-		ob.orientation = (args[7],args[8],args[9])
-		ob.color = (args[10],args[11],args[12],args[13])
+		ob.orientation = (args[4],args[5],args[6])
+
+	def update_object(self, path, args):
+		scene = bge.logic.getCurrentScene()
+		_id = args[0]
+		ob = scene.objects[_id]
+		ob.scaling = (args[1],args[2],args[3])
+		ob.color = (args[4],args[5],args[6],args[7])
+		
+	def update_camera(self, path, args):
+		# name, lens, ortho_scale, near, far, perspective, shift_x, shift_y
+		scene = bge.logic.getCurrentScene()
+		camera =  scene.cameras[args[0]]
+
+		camera.lens = float(args[1])
+		camera.ortho_scale = float(args[2])
+		camera.near = float(args[3])
+		camera.far = float(args[4])
+		camera.perspective = float(args[5])
+		camera["shift_x"] = float(args[6])
+		camera["shift_y"] = float(args[7])
+#		pmatrix = camera.projection_matrix
+
+#		pmatrix[2][0] = 2*shift_x
+#		pmatrix[2][1] = 2*shift_y
+#		camera.projection_matrix = pmatrix
 
 	def update_mesh(self, path, args):
 		scene = bge.logic.getCurrentScene()

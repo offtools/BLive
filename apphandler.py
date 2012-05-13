@@ -29,21 +29,39 @@ def scene_update_post_handler(scene):
 	if bpy.data.objects.is_updated:
 		for ob in bpy.data.objects:
 			if ob.is_updated:
-				client.client().send("/data/objects", ob.name, \
-													ob.location[0], \
-													ob.location[1], \
-													ob.location[2], \
-													ob.scale[0], \
-													ob.scale[1], \
-													ob.scale[2], \
-													ob.rotation_euler[0], \
-													ob.rotation_euler[1], \
-													ob.rotation_euler[2], \
-													ob.color[0], \
-													ob.color[1], \
-													ob.color[2], \
-													ob.color[3] \
-													)
+				client.client().send("/data/objects", ob.name, ob.location[0], ob.location[1], ob.location[2], ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2])
+
+				if ob.type == 'MESH':
+					client.client().send("/data/object", ob.name, ob.scale[0], ob.scale[1], ob.scale[2], ob.color[0], ob.color[1], ob.color[2], ob.color[3])
+
+			if ob.type == 'CAMERA':
+				camera = bpy.data.cameras[ob.name]
+				if not camera.is_updated:
+					continue
+
+				perspective = 1
+				if camera.type == 'ORTHO':
+					perspective = 0
+				client.client().send("/data/camera", ob.name, camera.lens, camera.ortho_scale, camera.clip_start, camera.clip_end, perspective, camera.shift_x, camera.shift_y)
+
+			elif ob.type == 'LAMP':
+				'''
+					types in BGE SUN, SPOT, NORMAL
+				'''
+				lamp = bpy.data.lamps[ob.name]
+				if not lamp.is_updated:
+					continue
+
+				print("LAMP: ", lamp, lamp.type, lamp.color, lamp.distance, lamp.energy)
+				
+				if lamp.type == 'POINT':
+					pass
+				elif lamp.type == 'SPOT':
+					pass
+				elif lamp.type == 'SUN':
+					pass
+				pass
+
 
 	#	TODO: EDIT MODE											
 	#if bpy.context.object and bpy.context.object.mode == 'EDIT':
