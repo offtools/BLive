@@ -57,7 +57,7 @@ class server(liblo.Server):
 		self.add_method("/data/object", "sfffffff", self.update_object)
 		
 		#	camera: rcv name, lens, ortho_scale, near, far, perspective, shift_x, shift_y
-		self.add_method("/data/camera", "sffffiff", self.update_camera)
+		self.add_method("/data/camera", "sfffffiff", self.update_camera)
 		
 		#	light: rcv energy, color
 		self.add_method("/data/light", "sffff", self.update_light)
@@ -120,23 +120,24 @@ class server(liblo.Server):
 
 		scene = bge.logic.getCurrentScene()
 		camera =  scene.cameras[args[0]]
-		
+
 		angle = args[1]
+		aspect = args[2]
 #		camera.lens = lens
-#		camera.ortho_scale = args[2]
-#		camera.near = args[3]
-#		camera.far = args[4]
-#		camera.perspective = args[5]
+#		camera.ortho_scale = args[3]
+#		camera.near = args[4]
+#		camera.far = args[5]
+#		camera.perspective = args[6]
 
 		projection_matrix = camera.projection_matrix
 
 		e = 1.0/math.tan(angle/2.0)
 
-		shift_x = args[6]
-		shift_y = args[7]
+		shift_x = args[7]
+		shift_y = args[8]
 
 		projection_matrix[0][0] = e
-		projection_matrix[1][1] = e/0.75
+		projection_matrix[1][1] = e/aspect
 		
 		projection_matrix[0][2] = 2*shift_x
 		projection_matrix[1][2] = 2*shift_y

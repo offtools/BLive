@@ -42,7 +42,8 @@ def scene_update_post_handler(scene):
 				perspective = 1
 				if camera.type == 'ORTHO':
 					perspective = 0
-				client.client().send("/data/camera", ob.name, camera.angle, camera.ortho_scale, camera.clip_start, camera.clip_end, perspective, camera.shift_x, camera.shift_y)
+				aspect = scene.game_settings.resolution_y/scene.game_settings.resolution_x
+				client.client().send("/data/camera", ob.name, camera.angle, aspect, camera.ortho_scale, camera.clip_start, camera.clip_end, perspective, camera.shift_x, camera.shift_y)
 
 			
 			#	lamp data except color and energy not working at the moment 
