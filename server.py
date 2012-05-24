@@ -28,6 +28,7 @@ except ImportError as err:
 	print(err, "you need to install pyliblo and set the correct search path in client.py")
 
 import bge
+import math
 import main
 
 from videotexture import videotexture
@@ -57,9 +58,20 @@ class server(liblo.Server):
 		
 		#	camera: rcv name, lens, ortho_scale, near, far, perspective, shift_x, shift_y
 		self.add_method("/data/camera", "sffffiff", self.update_camera)
-				
+		
+		#	light: rcv energy, color
+		self.add_method("/data/light", "sffff", self.update_light)
+
+		#	normal light: rcv distance, linear_attenuation, quadric_attenuation
+		self.add_method("/data/light/normal", "sfff", self.update_light_normal)
+
+		#	spot light: rcv distance, linear_attenuation, quadric_attenuation, spot_size, spot_blend
+		self.add_method("/data/light/spot", "sfffff", self.update_light_spot)
+		
+		#	sun light: rcv name
+		self.add_method("/data/light/sun", "s", self.update_light_sun)
+		
 		self.add_method("/data/objects/polygon", "siifff", self.update_mesh)
-		self.add_method("/data/camera", "ff", self.not_implemented)        
 		self.add_method("/data/scene", "", self.not_implemented)
 		self.add_method("/texture/state", "ss", self.modules[videotexture].state)
 		self.add_method("/texture/movie", "sss", self.modules[videotexture].movie)
@@ -90,22 +102,6 @@ class server(liblo.Server):
 		for i in self.modules:
 			self.modules[i].update()
 
-		#	lens shift
-#		camera = bge.logic.getCurrentScene().active_camera
-#		sx = sy = 0
-#		if hasattr(camera, "shift_x"):
-#			print("shift x", camera.shift_x)
-#			sx = camera[shift_x]
-#		if hasattr(camera, "shift_y"):
-#			print("shift y", camera.shift_y)
-#			sy = camera[shift_y]
-
-#		pmatrix = camera.projection_matrix
-
-#		pmatrix[2][0] = 0
-#		pmatrix[2][1] = 0
-#		camera.projection_matrix = pmatrix
-
 	def update_objects(self, path, args):
 		scene = bge.logic.getCurrentScene()
 		_id = args[0]
@@ -121,23 +117,63 @@ class server(liblo.Server):
 		ob.color = (args[4],args[5],args[6],args[7])
 		
 	def update_camera(self, path, args):
-		# name, lens, ortho_scale, near, far, perspective, shift_x, shift_y
+
 		scene = bge.logic.getCurrentScene()
 		camera =  scene.cameras[args[0]]
+		
+		angle = args[1]
+#		camera.lens = lens
+#		camera.ortho_scale = args[2]
+#		camera.near = args[3]
+#		camera.far = args[4]
+#		camera.perspective = args[5]
 
-		camera.lens = float(args[1])
-		camera.ortho_scale = float(args[2])
-		camera.near = float(args[3])
-		camera.far = float(args[4])
-		camera.perspective = float(args[5])
-		camera["shift_x"] = float(args[6])
-		camera["shift_y"] = float(args[7])
-#		pmatrix = camera.projection_matrix
+		projection_matrix = camera.projection_matrix
 
-#		pmatrix[2][0] = 2*shift_x
-#		pmatrix[2][1] = 2*shift_y
-#		camera.projection_matrix = pmatrix
+		e = 1.0/math.tan(angle/2.0)
 
+		shift_x = args[6]
+		shift_y = args[7]
+
+		projection_matrix[0][0] = e
+		projection_matrix[1][1] = e/0.75
+		
+		projection_matrix[0][2] = 2*shift_x
+		projection_matrix[1][2] = 2*shift_y
+		
+		camera.projection_matrix = projection_matrix
+
+	def update_light(self, path, args):
+		scene = bge.logic.getCurrentScene()
+		light = scene.objects[args[0]]
+		light.energy = args[1]
+		light.color = (args[2], args[3], args[4])
+		light.spotblend = float(0)
+
+	def update_light_normal(self, path, args):
+		scene = bge.logic.getCurrentScene()
+		light = scene.objects[args[0]]
+		light.type = 2
+		light.distance = args[1]
+		light.lin_attenuation = args[2]
+		light.quad_attenuation = args[3]
+		
+	def update_light_spot(self, path, args):
+		print(path, args)
+		scene = bge.logic.getCurrentScene()
+		light = scene.objects[args[0]]
+		light.type = 0
+		light.distance = args[1]
+		light.lin_attenuation = args[2]
+		light.quad_attenuation = args[3]
+		light.spotsize = args[4]
+		light.spotblend = args[5]
+		
+	def update_light_sun(self, path, args):
+		scene = bge.logic.getCurrentScene()
+		light = scene.objects[args[0]]
+		light.type = 1
+		
 	def update_mesh(self, path, args):
 		scene = bge.logic.getCurrentScene()
 		ob = scene.objects[args[0]]

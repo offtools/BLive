@@ -42,8 +42,10 @@ def scene_update_post_handler(scene):
 				perspective = 1
 				if camera.type == 'ORTHO':
 					perspective = 0
-				client.client().send("/data/camera", ob.name, camera.lens, camera.ortho_scale, camera.clip_start, camera.clip_end, perspective, camera.shift_x, camera.shift_y)
+				client.client().send("/data/camera", ob.name, camera.angle, camera.ortho_scale, camera.clip_start, camera.clip_end, perspective, camera.shift_x, camera.shift_y)
 
+			
+			#	lamp data except color and energy not working at the moment 
 			elif ob.type == 'LAMP':
 				'''
 					types in BGE SUN, SPOT, NORMAL
@@ -51,17 +53,15 @@ def scene_update_post_handler(scene):
 				lamp = bpy.data.lamps[ob.name]
 				if not lamp.is_updated:
 					continue
-
-				print("LAMP: ", lamp, lamp.type, lamp.color, lamp.distance, lamp.energy)
 				
+				#	common data for all lamps types including sun 
+				client.client().send("/data/light", lamp.name, lamp.energy, lamp.color[0], lamp.color[1], lamp.color[2])
 				if lamp.type == 'POINT':
-					pass
+					client.client().send("/data/light/normal", lamp.name, lamp.distance,  lamp.linear_attenuation, lamp.quadratic_attenuation)
 				elif lamp.type == 'SPOT':
-					pass
+					client.client().send("/data/light/spot",  lamp.name, lamp.distance,  lamp.linear_attenuation, lamp.quadratic_attenuation, lamp.spot_size, lamp.spot_blend)
 				elif lamp.type == 'SUN':
-					pass
-				pass
-
+					client.client().send("/data/light/sun", lamp.name)
 
 	#	TODO: EDIT MODE											
 	#if bpy.context.object and bpy.context.object.mode == 'EDIT':

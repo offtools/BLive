@@ -192,7 +192,7 @@ class TimelineQueueEntry(bpy.types.PropertyGroup):
 		PropertyGroup for Trigger Queue Entries, references diff type of Trigger
 	'''
 	m_marker = bpy.props.StringProperty()	# name of the queue id
-	m_type = bpy.props.StringProperty()		# trigger type	
+	m_type = bpy.props.StringProperty()		# trigger type
 	m_trigger = bpy.props.StringProperty() 	# trigger name
 
 	def add_trigger(self, triggertype):
@@ -208,7 +208,6 @@ class TimelineQueueEntry(bpy.types.PropertyGroup):
 		'''
 			delete referenced trigger
 		'''
-		print("TimelineQueueEntry.del_trigger: ", self.m_marker, self.m_type, self.m_trigger)
 		bpy.context.scene.timeline_trigger.remove(self.m_trigger)
 
 	def trigger(self):
@@ -221,7 +220,6 @@ class TimelineQueue(bpy.types.PropertyGroup):
 	m_items = bpy.props.CollectionProperty(type=TimelineQueueEntry)
 	m_execute_after = bpy.props.BoolProperty(default=False)
 	m_pause = bpy.props.BoolProperty(default=True)
-
 
 def register():
 
