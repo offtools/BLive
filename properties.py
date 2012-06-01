@@ -221,6 +221,29 @@ class TimelineQueue(bpy.types.PropertyGroup):
 	m_execute_after = bpy.props.BoolProperty(default=False)
 	m_pause = bpy.props.BoolProperty(default=True)
 
+class CameraExtProperties():
+	#	Menu Projektor
+	#row.menu("RENDER_MT_presets", text=bpy.types.RENDER_MT_presets.bl_label)
+	def register():
+		#	extra Camera Properties
+		bpy.types.Camera.lens_max = bpy.props.FloatProperty(update=CameraExtProperties.callback)
+		bpy.types.Camera.lens_min = bpy.props.FloatProperty(update=CameraExtProperties.callback)
+		bpy.types.Camera.hlens_min = bpy.props.FloatProperty(update=CameraExtProperties.callback)
+		bpy.types.Camera.hlens_max = bpy.props.FloatProperty(update=CameraExtProperties.callback)
+		bpy.types.Camera.vlens_min = bpy.props.FloatProperty(update=CameraExtProperties.callback)
+		bpy.types.Camera.vlens_max = bpy.props.FloatProperty(update=CameraExtProperties.callback)	
+
+	def unregister():
+		del bpy.types.Camera.lens_max
+		del bpy.types.Camera.lens_min
+		del bpy.types.Camera.hlens_min
+		del bpy.types.Camera.hlens_max
+		del bpy.types.Camera.vlens_min
+		del bpy.types.Camera.vlens_max
+		
+	def callback():
+		pass
+	
 def register():
 
 	##################################################################
@@ -250,6 +273,8 @@ def register():
 	#	TODO: change to dynamic Property (no need to store in blendfile)
 	bpy.types.Scene.active_marker = bpy.props.IntProperty(options={"HIDDEN"}, subtype='UNSIGNED')
 	
+
+	
 def unregister():
 
 	##################################################################
@@ -275,3 +300,4 @@ def unregister():
 	del bpy.types.Scene.timeline_trigger
 	del bpy.types.Scene.timeline_queues
 	del bpy.types.Scene.active_marker
+
