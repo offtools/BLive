@@ -95,7 +95,7 @@ class camera(player):
 		print("camera.source: ", self.__file)
 		# -- open device
 		# TODO: add parameter for width and size (no hardcoding) 
-		self.video.source = bge.texture.VideoFFmpeg(self.__file, 1, self.__width, self.__height, 0, "video4linux2")
+		self.video.source = bge.texture.VideoFFmpeg(self.__file, 0, self.__width, self.__height, 0)
 
 		# -- scale the video
 		self.video.source.scale = True
