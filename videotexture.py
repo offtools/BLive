@@ -39,6 +39,7 @@ class player:
 		# -- Get the material that is using our texture
 		if imgname:
 			img = "IM{0}".format(imgname)
+			print("image: ", gameobject, img)
 			matID = texture.materialID(gameobject, img)
 			# -- Create the video texture
 			self.video = texture.Texture(gameobject, matID)
@@ -92,10 +93,9 @@ class camera(player):
 	@source.setter	
 	def source(self, file):
 		self.__file = file
-		print("camera.source: ", self.__file)
 		# -- open device
 		# TODO: add parameter for width and size (no hardcoding) 
-		self.video.source = bge.texture.VideoFFmpeg(self.__file, 0, self.__width, self.__height, 0)
+		self.video.source = bge.texture.VideoFFmpeg(self.__file, 0, 25, 720, 576)
 
 		# -- scale the video
 		self.video.source.scale = True
