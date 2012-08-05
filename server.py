@@ -53,8 +53,11 @@ class server(liblo.Server):
 		#	all objects: recv name, location, rotation_euler
 		self.add_method("/data/objects", "sffffff", self.update_objects)
 
+		#	object: recv name, scaling		
+		self.add_method("/data/object/scaling", "sfff", self.update_object_scaling)
+
 		#	object: recv name, scale, objectcolor		
-		self.add_method("/data/object", "sfffffff", self.update_object)
+		self.add_method("/data/object/color", "sffff", self.update_object_color)
 		
 		#	camera: rcv name, lens, ortho_scale, near, far, perspective, shift_x, shift_y
 		self.add_method("/data/camera", "sfffffiff", self.update_camera)
@@ -109,12 +112,17 @@ class server(liblo.Server):
 		ob.position = (args[1],args[2],args[3])
 		ob.orientation = (args[4],args[5],args[6])
 
-	def update_object(self, path, args):
+	def update_object_scaling(self, path, args):
 		scene = bge.logic.getCurrentScene()
 		_id = args[0]
 		ob = scene.objects[_id]
 		ob.scaling = (args[1],args[2],args[3])
-		ob.color = (args[4],args[5],args[6],args[7])
+
+	def update_object_color(self, path, args):
+		scene = bge.logic.getCurrentScene()
+		_id = args[0]
+		ob = scene.objects[_id]
+		ob.color = (args[1],args[2],args[3],args[4])
 		
 	def update_camera(self, path, args):
 

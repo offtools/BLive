@@ -26,13 +26,38 @@ from . import client
 @persistent
 def scene_update_post_handler(scene):
 
+# tests
+	for ob in bpy.data.objects:
+		if ob.is_updated:
+			print("object %s updated" %ob)
+		if ob.is_updated_data:
+			print("object updated data %s updated" %ob)
+
+	for ob in bpy.data.materials:
+		if ob.is_updated:
+			print("material %s updated" %ob)
+		if ob.is_updated_data:
+			print("material updated data %s updated" %ob)
+
+#TODO: move all mesh handler here
+	for ob in bpy.data.meshes:
+		if ob.is_updated:
+			print("mesh %s updated" %ob)
+		if ob.is_updated_data:
+			print("mesh updated data %s updated" %ob)
+
+#ob color workaround (can't check update of this value')
+	for ob in bpy.data.objects:
+		if ob.type == 'MESH':
+			client.client().send("/data/object/color", ob.name, ob.color[0], ob.color[1], ob.color[2], ob.color[3])					
+
 	if bpy.data.objects.is_updated:
 		for ob in bpy.data.objects:
 			if ob.is_updated:
 				client.client().send("/data/objects", ob.name, ob.location[0], ob.location[1], ob.location[2], ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2])
 
 				if ob.type == 'MESH':
-					client.client().send("/data/object", ob.name, ob.scale[0], ob.scale[1], ob.scale[2], ob.color[0], ob.color[1], ob.color[2], ob.color[3])
+					client.client().send("/data/object/scaling", ob.name, ob.scale[0], ob.scale[1], ob.scale[2])					
 
 			if ob.type == 'CAMERA':
 				camera = bpy.data.cameras[ob.name]
