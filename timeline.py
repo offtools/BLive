@@ -213,6 +213,8 @@ class BLive_PT_timeline_marker(bpy.types.Panel):
 		row.prop_search(trigger, "m_object", context.scene, "objects", text="object")
 		row = ui.row()
 		row.prop_search(trigger, "m_image", bpy.data, "images", text="image")
+		row = ui.row()
+		row.prop(trigger, "m_loop", text="loop video")
 
 	def TriggerCameraOpen(self, context, trigger, ui):
 		if trigger.m_applied:

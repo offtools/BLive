@@ -33,6 +33,7 @@ class player:
 			
 		self.__file = None
 		self.__state = 'STOPPED'
+		self.__loop = False
 
 		gameobject = logic.getCurrentScene().objects[obname]
 
@@ -62,7 +63,10 @@ class player:
 		self.video.source.scale = True
 
 		# --- loop video
-		self.video.source.repeat=-1
+		if self.__loop:
+			self.video.source.repeat=-1
+		else:
+			self.video.source.repeat = 0
 
 		# -- play the video
 		self.state = 'PLAY'
@@ -81,6 +85,19 @@ class player:
 			self.video.source.stop()
 		self.__state = state
 
+	@property
+	def loop(self):
+		return self.__state
+	
+	@loop.setter	
+	def loop(self, state):
+		if state == 'PLAY':
+			self.video.source.play()
+		elif state == 'PAUSE':
+			self.video.source.pause()
+		elif state == 'STOP':
+			self.video.source.stop()
+		self.__state = state
 
 class camera(player):
 	def __init__(self, obname, imgname, width, height, deinterlace):
@@ -121,13 +138,15 @@ class videotexture(object):
 		obname = args[0]
 		imgname = args[1]
 		filename = args[2]
-
+		loop = args[3]
+		
 		if imgname in self.textures:
 			del self.textures[imgname]
 		try:
 			print("videotexture.movie: ", obname,imgname,filename)
 			self.textures[imgname] = player(obname,imgname)
 			self.textures[imgname].source = filename
+			self.textures[imgname].loop = loop
 		except TypeError as err:
 			print("err in videotexture.open: ", err)
 

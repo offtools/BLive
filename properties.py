@@ -65,11 +65,12 @@ class TimelineTriggerVideoOpen(bpy.types.PropertyGroup):
 	m_object = bpy.props.StringProperty()
 	m_filepath = bpy.props.StringProperty(subtype="FILE_PATH")
 	m_image = bpy.props.StringProperty()
+	m_loop = bpy.props.BoolProperty(default=False)
 
 	def send(self):
 		print("play movie")
 		filepath = bpy.path.abspath(self.m_filepath)
-		client.client().send(self.m_oscpath, self.m_object, self.m_image, filepath)
+		client.client().send(self.m_oscpath, self.m_object, self.m_image, filepath, int(self.m_loop))
 
 class TimelineTriggerCameraOpen(bpy.types.PropertyGroup):
 	m_marker = bpy.props.StringProperty()	# marker name (back ref to queue / timeline marker)
