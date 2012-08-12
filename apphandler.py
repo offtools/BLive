@@ -142,11 +142,12 @@ def frame_change_pre_handler(scene):
 						item.trigger()
 
 	# send events - execute_after
-	prevmarker = cur - 1
-	if prevmarker in (i.frame for i in bpy.data.scenes['Scene'].timeline_markers) and scene.timeline_queues[nextmarker.name].m_execute_after:
-		for item in scene.timeline_queues[nextmarker.name].m_items:
-			item.trigger()
-
+	prevframe = cur - 1
+	for marker in bpy.data.scenes['Scene'].timeline_markers:
+		if marker.frame == prevframe and scene.timeline_queues[marker.name].m_execute_after:
+			for item in scene.timeline_queues[marker.name].m_items:
+				item.trigger()
+			break;
 
 @persistent
 def load_pre_handler(dummy):
