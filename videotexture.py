@@ -61,6 +61,9 @@ class player:
 		# -- scale the video
 		self.video.source.scale = True
 
+		# --- loop video
+		self.video.source.repeat=-1
+
 		# -- play the video
 		self.state = 'PLAY'
 
