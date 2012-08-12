@@ -93,6 +93,21 @@ def scene_update_post_handler(scene):
 	#if bpy.context.object and bpy.context.object.mode == 'EDIT':
 		#	modal operator
 
+
+	# --- check mesh updates
+	if bpy.data.meshes.is_updated:
+		for mesh in bpy.data.meshes:
+			if mesh.is_updated:
+						ob = bpy.context.active_object
+			try:
+				mesh = bmesh.from_edit_mesh(ob.data)
+				for face in mesh.faces:
+					for vindex, vertex in enumerate(face.verts):
+						client.client().send("/data/objects/polygon", ob.name, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2])
+			except ValueError as err:
+				print(err)
+
+
 @persistent
 def frame_change_pre_handler(scene):
 	'''
@@ -115,13 +130,23 @@ def frame_change_pre_handler(scene):
 		# animation is passing a marker
 		if nextmarker.frame == cur:
 			# check if we have an event queue with the same name as the current marker
+			# TODO dont check name, check frame number 
 			if nextmarker.name in bpy.context.scene.timeline_queues:
-				# check pause
+				# check pause - stop playing
 				if scene.timeline_queues[nextmarker.name].m_pause and bpy.context.screen.is_animation_playing:
 					bpy.ops.screen.animation_play()
-				# send events
-				for item in scene.timeline_queues[nextmarker.name].m_items:
-					item.trigger()
+
+				# send events - not execute_after
+				if not scene.timeline_queues[nextmarker.name].m_execute_after:
+					for item in scene.timeline_queues[nextmarker.name].m_items:
+						item.trigger()
+
+	# send events - execute_after
+	prevmarker = cur - 1
+	if prevmarker in (i.frame for i in bpy.data.scenes['Scene'].timeline_markers) and scene.timeline_queues[nextmarker.name].m_execute_after:
+		for item in scene.timeline_queues[nextmarker.name].m_items:
+			item.trigger()
+
 
 @persistent
 def load_pre_handler(dummy):
