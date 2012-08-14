@@ -33,7 +33,8 @@ from . import client
 TRIGGER_TYPE_ENUM = [("TriggerDummy","Dummy","Dummy Trigger"), \
 			 		("TriggerVideoOpen","Open Video","Open a Video"), \
 			 		("TriggerCameraOpen","Connect Camera","Connect a Camera"), \
-			 		("TriggerVideoState","Set Video State","Set Play, Pause, Stop")]
+			 		("TriggerVideoState","Set Video State","Set Play, Pause, Stop"), \
+			 		("TriggerChangeScene","Change active Scene","Change active Scene")]
 
 def TRIGGER_TYPE_NAME(self, _type):
 	types = [ i[0] for i in TRIGGER_TYPE_ENUM ]
@@ -109,6 +110,18 @@ class TimelineTriggerVideoState(bpy.types.PropertyGroup):
 	def send(self):
 		client.client().send(self.m_oscpath, self.m_image, self.m_state)
 
+class TimelineTriggerChangeScene(bpy.types.PropertyGroup):
+	m_marker = bpy.props.StringProperty()	# marker name (back ref to queue / timeline marker)
+	m_type = bpy.props.StringProperty()		# trigger type definded in TRIGGER_TYPE_ENUM
+	m_applied = bpy.props.BoolProperty(default=False) # trigger is applied (used in ui)
+	m_hidden = bpy.props.BoolProperty(default=False) # trigger is hidden in ui
+	m_oscpath = bpy.props.StringProperty(default="/scene")
+
+	m_scene = bpy.props.StringProperty()
+
+	def send(self):
+		client.client().send(self.m_oscpath, self.m_scene)
+
 class TimelineTrigger(bpy.types.PropertyGroup):
 	'''
 		Property Group that holds all Trigger, sorted by types
@@ -120,7 +133,8 @@ class TimelineTrigger(bpy.types.PropertyGroup):
 	TriggerVideoOpen = bpy.props.CollectionProperty(type=TimelineTriggerVideoOpen)
 	TriggerCameraOpen = bpy.props.CollectionProperty(type=TimelineTriggerCameraOpen)
 	TriggerVideoState = bpy.props.CollectionProperty(type=TimelineTriggerVideoState)
-	
+	TriggerChangeScene = bpy.props.CollectionProperty(type=TimelineTriggerChangeScene)
+		
 	m_types = bpy.props.EnumProperty(items = TRIGGER_TYPE_ENUM, name = "state")
 
 
@@ -257,6 +271,7 @@ def register():
 	bpy.utils.register_class(TimelineTriggerVideoOpen)
 	bpy.utils.register_class(TimelineTriggerCameraOpen)	
 	bpy.utils.register_class(TimelineTriggerVideoState)
+	bpy.utils.register_class(TimelineTriggerChangeScene)
 	bpy.utils.register_class(TimelineTrigger)
 	bpy.utils.register_class(TimelineQueueEntry)
 	bpy.utils.register_class(TimelineQueue)
@@ -288,6 +303,7 @@ def unregister():
 	bpy.utils.unregister_class(TimelineTriggerVideoOpen)
 	bpy.utils.unregister_class(TimelineTriggerCameraOpen)	
 	bpy.utils.unregister_class(TimelineTriggerVideoState)
+	bpy.utils.unregister_class(TimelineTriggerChangeScene)
 	bpy.utils.unregister_class(TimelineTrigger)
 	bpy.utils.unregister_class(TimelineQueueEntry)
 	bpy.utils.unregister_class(TimelineQueue)

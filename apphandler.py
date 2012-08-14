@@ -20,6 +20,7 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 import bpy
+import bmesh
 from bpy.app.handlers import persistent
 from . import client
 
@@ -27,31 +28,37 @@ from . import client
 def scene_update_post_handler(scene):
 
 # tests
-	for ob in bpy.data.objects:
+	for ob in scene.objects:
 		if ob.is_updated:
-			print("object %s updated" %ob)
+			#print("object %s updated" %ob)
+			pass
 		if ob.is_updated_data:
-			print("object updated data %s updated" %ob)
-
+			#print("object updated data %s updated" %ob)
+			pass
+			
 	for ob in bpy.data.materials:
 		if ob.is_updated:
-			print("material %s updated" %ob)
+			#print("material %s updated" %ob)
+			pass
 		if ob.is_updated_data:
-			print("material updated data %s updated" %ob)
-
+			#print("material updated data %s updated" %ob)
+			pass
+			
 #TODO: move all mesh handler here
-	for ob in bpy.data.meshes:
-		if ob.is_updated:
-			print("mesh %s updated" %ob)
-		if ob.is_updated_data:
-			print("mesh updated data %s updated" %ob)
-
+	for mesh in bpy.data.meshes:
+		if mesh.is_updated:
+			#print("mesh %s updated" %mesh)
+			pass
+		if mesh.is_updated_data:
+			#print("mesh updated data %s updated" %mesh)
+			pass
+			
 #ob color workaround (can't check update of this value')
-	for ob in bpy.data.objects:
+	for ob in scene.objects:
 		if ob.type == 'MESH':
 			client.client().send("/data/object/color", ob.name, ob.color[0], ob.color[1], ob.color[2], ob.color[3])					
 
-	if bpy.data.objects.is_updated:
+	if bpy.data.scenes[scene.name].is_updated:
 		for ob in bpy.data.objects:
 			if ob.is_updated:
 				client.client().send("/data/objects", ob.name, ob.location[0], ob.location[1], ob.location[2], ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2])
@@ -114,7 +121,6 @@ def frame_change_pre_handler(scene):
 		app handler used on playback animation
 	'''
 	#   ignored if animation is not playing
-	#   TODO: add BoolProperty in window_manager
 	if not bpy.context.screen.is_animation_playing:    
 		return
 
@@ -143,12 +149,16 @@ def frame_change_pre_handler(scene):
 
 	# send events - execute_after
 	prevframe = cur - 1
-	for marker in bpy.data.scenes['Scene'].timeline_markers:
+	for marker in scene.timeline_markers:
 		if marker.frame == prevframe and scene.timeline_queues[marker.name].m_execute_after:
 			for item in scene.timeline_queues[marker.name].m_items:
 				item.trigger()
 			break;
 
+@persistent
+def frame_change_post_handler(scene):
+	pass
+	
 @persistent
 def load_pre_handler(dummy):
 	print("load_post_handler")
@@ -162,6 +172,7 @@ def save_pre_handler(dummy):
 #
 def register():
 	bpy.app.handlers.frame_change_pre.append(frame_change_pre_handler)
+	bpy.app.handlers.frame_change_pre.append(frame_change_post_handler)
 	bpy.app.handlers.scene_update_post.append(scene_update_post_handler)
 	bpy.app.handlers.load_pre.append(load_pre_handler)
 	bpy.app.handlers.save_pre.append(save_pre_handler)

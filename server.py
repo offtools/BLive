@@ -79,6 +79,10 @@ class server(liblo.Server):
 		self.add_method("/texture/state", "ss", self.modules[videotexture].state)
 		self.add_method("/texture/movie", "sssi", self.modules[videotexture].movie)
 		self.add_method("/texture/camera", "sssiii", self.modules[videotexture].camera)
+		
+		#	change scene: rcv name
+		self.add_method("/scene", "s", self.change_scene)
+		
 		self.add_method(None, None, self.fallback)
 
 	def register_module(self, cls):
@@ -207,7 +211,12 @@ class server(liblo.Server):
 			vertex.setXYZ([x,y,z])
 		except IndexError as err:
 			print("%s : mat_idx: %d vert_idx: %d" %(err, mat_index, vertex_index))
-								 
+
+	def change_scene(self, path, args):
+		name = args[0]
+		scene = bge.logic.getCurrentScene()
+		scene.replace(name)
+				 
 	def not_implemented(self, path, args):
 		print("not implemented: ", path, args)
 

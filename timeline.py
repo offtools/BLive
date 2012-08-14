@@ -248,6 +248,13 @@ class BLive_PT_timeline_marker(bpy.types.Panel):
 		row = ui.row()
 		row.prop(trigger, "m_msg", text="send Message")
 
+	def TriggerChangeScene(self, context, trigger, ui):
+		if trigger.m_applied:
+			ui.enabled = False
+	
+		row = ui.row()
+		row.prop_search(trigger, "m_scene", bpy.data, "scenes", text="scene")
+		
 def register():
 	bpy.utils.register_module(__name__)	
 
