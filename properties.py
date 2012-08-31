@@ -120,6 +120,8 @@ class TimelineTriggerChangeScene(bpy.types.PropertyGroup):
 	m_scene = bpy.props.StringProperty()
 
 	def send(self):
+		#	change scene in blender too
+		bpy.context.screen.scene = bpy.data.scenes[self.m_scene]
 		client.client().send(self.m_oscpath, self.m_scene)
 
 class TimelineTrigger(bpy.types.PropertyGroup):
@@ -201,6 +203,39 @@ class TimelineTrigger(bpy.types.PropertyGroup):
 			raise IndexError("requested trigger name not found in timeline trigger")
 
 		return collection[_name]
+
+#class Trigger(bpy.types.PropertyGroup):
+#	'''
+#		Property Group that holds all Trigger, sorted by types
+#	'''
+#	
+#	#TODO: use keys instead of TRIGGER_TYPE_ENUM
+
+#	TriggerDummy = bpy.props.CollectionProperty(type=TimelineTriggerDummy)
+#	TriggerVideoOpen = bpy.props.CollectionProperty(type=TimelineTriggerVideoOpen)
+#	TriggerCameraOpen = bpy.props.CollectionProperty(type=TimelineTriggerCameraOpen)
+#	TriggerVideoState = bpy.props.CollectionProperty(type=TimelineTriggerVideoState)
+#	TriggerChangeScene = bpy.props.CollectionProperty(type=TimelineTriggerChangeScene)
+
+#	def trigger(self, _type, _name):
+#		pass
+#		
+#	def add(self, _type, _name):
+#		pass
+#		
+#	def removetrigger(self, _type, _name):
+#		pass
+
+#class QueueEntry(bpy.types.PropertyGroup):
+#	m_type = bpy.props.EnumProperty(items = TRIGGER_TYPE_ENUM, name = "state")
+
+#class Queue(bpy.types.PropertyGroup):
+#	m_active = bpy.props.BoolProperty(default=True)
+#	m_execute_after = bpy.props.BoolProperty(default=False)
+#	m_pause = bpy.props.BoolProperty(default=True)
+
+#	m_trigger = bpy.props.CollectionProperty(type=Trigger)
+#	m_queue = bpy.props.CollectionProperty(type=QueueEntry)
 
 class TimelineQueueEntry(bpy.types.PropertyGroup):
 	'''

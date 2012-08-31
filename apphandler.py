@@ -28,9 +28,10 @@ from . import client
 def scene_update_post_handler(scene):
 
 # tests
+
 	for ob in scene.objects:
 		if ob.is_updated:
-			#print("object %s updated" %ob)
+#			print("object %s updated" %ob)
 			pass
 		if ob.is_updated_data:
 			#print("object updated data %s updated" %ob)
@@ -44,7 +45,7 @@ def scene_update_post_handler(scene):
 			#print("material updated data %s updated" %ob)
 			pass
 			
-#TODO: move all mesh handler here
+	#TODO: move all mesh handler here
 	for mesh in bpy.data.meshes:
 		if mesh.is_updated:
 			#print("mesh %s updated" %mesh)
@@ -53,72 +54,68 @@ def scene_update_post_handler(scene):
 			#print("mesh updated data %s updated" %mesh)
 			pass
 			
-#ob color workaround (can't check update of this value')
+	#	ob color workaround (can't check update of this value')
 	for ob in scene.objects:
 		if ob.type == 'MESH':
 			client.client().send("/data/object/color", ob.name, ob.color[0], ob.color[1], ob.color[2], ob.color[3])					
 
-	if bpy.data.scenes[scene.name].is_updated:
-		for ob in bpy.data.objects:
-			if ob.is_updated:
-				client.client().send("/data/objects", ob.name, ob.location[0], ob.location[1], ob.location[2], ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2])
+	for ob in scene.objects:
+		if ob.is_updated:
+			client.client().send("/data/objects", ob.name, ob.location[0], ob.location[1], ob.location[2], ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2])
 
-				if ob.type == 'MESH':
-					client.client().send("/data/object/scaling", ob.name, ob.scale[0], ob.scale[1], ob.scale[2])					
+			if ob.type == 'MESH':
+				client.client().send("/data/object/scaling", ob.name, ob.scale[0], ob.scale[1], ob.scale[2])					
 
-			if ob.type == 'CAMERA':
-				camera = bpy.data.cameras[ob.name]
-				if not camera.is_updated:
-					continue
+		if ob.type == 'CAMERA':
+			camera = bpy.data.cameras[ob.name]
+			if not camera.is_updated:
+				continue
 
-				perspective = 1
-				if camera.type == 'ORTHO':
-					perspective = 0
-				aspect = scene.game_settings.resolution_y/scene.game_settings.resolution_x
-				client.client().send("/data/camera", ob.name, camera.angle, aspect, camera.ortho_scale, camera.clip_start, camera.clip_end, perspective, camera.shift_x, camera.shift_y)
+			perspective = 1
+			if camera.type == 'ORTHO':
+				perspective = 0
+			aspect = scene.game_settings.resolution_y/scene.game_settings.resolution_x
+			client.client().send("/data/camera", ob.name, camera.angle, aspect, camera.ortho_scale, camera.clip_start, camera.clip_end, perspective, camera.shift_x, camera.shift_y)
 
+		
+		#	lamp data except color and energy not working at the moment 
+		elif ob.type == 'LAMP':
+			'''
+				types in BGE SUN, SPOT, NORMAL
+			'''
+			lamp = bpy.data.lamps[ob.name]
+			if not lamp.is_updated:
+				continue
 			
-			#	lamp data except color and energy not working at the moment 
-			elif ob.type == 'LAMP':
-				'''
-					types in BGE SUN, SPOT, NORMAL
-				'''
-				lamp = bpy.data.lamps[ob.name]
-				if not lamp.is_updated:
-					continue
-				
-				#	common data for all lamps types including sun 
-				client.client().send("/data/light", lamp.name, lamp.energy, lamp.color[0], lamp.color[1], lamp.color[2])
-				if lamp.type == 'POINT':
-					client.client().send("/data/light/normal", lamp.name, lamp.distance,  lamp.linear_attenuation, lamp.quadratic_attenuation)
-				elif lamp.type == 'SPOT':
-					client.client().send("/data/light/spot",  lamp.name, lamp.distance,  lamp.linear_attenuation, lamp.quadratic_attenuation, lamp.spot_size, lamp.spot_blend)
-				elif lamp.type == 'SUN':
-					client.client().send("/data/light/sun", lamp.name)
+			#	common data for all lamps types including sun 
+			client.client().send("/data/light", lamp.name, lamp.energy, lamp.color[0], lamp.color[1], lamp.color[2])
+			if lamp.type == 'POINT':
+				client.client().send("/data/light/normal", lamp.name, lamp.distance,  lamp.linear_attenuation, lamp.quadratic_attenuation)
+			elif lamp.type == 'SPOT':
+				client.client().send("/data/light/spot",  lamp.name, lamp.distance,  lamp.linear_attenuation, lamp.quadratic_attenuation, lamp.spot_size, lamp.spot_blend)
+			elif lamp.type == 'SUN':
+				client.client().send("/data/light/sun", lamp.name)
 
-	#	TODO: EDIT MODE											
-	#if bpy.context.object and bpy.context.object.mode == 'EDIT':
-		#	modal operator
+#	TODO: EDIT MODE											
+#if bpy.context.object and bpy.context.object.mode == 'EDIT':
+	#	modal operator
 
 
 	# --- check mesh updates
-	if bpy.data.meshes.is_updated:
-		for mesh in bpy.data.meshes:
-			if mesh.is_updated:
-						ob = bpy.context.active_object
+	for ob in scene.objects:
+		if ob.is_updated_data:
 			try:
 				mesh = bmesh.from_edit_mesh(ob.data)
 				for face in mesh.faces:
 					for vindex, vertex in enumerate(face.verts):
 						client.client().send("/data/objects/polygon", ob.name, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2])
 			except ValueError as err:
-				print(err)
-
+				print('apphandler.py - mesh update: ', err)
 
 @persistent
 def frame_change_pre_handler(scene):
 	'''
-		app handler used on playback animation
+		app handler mainly used to trigger timelinemarkers
 	'''
 	#   ignored if animation is not playing
 	if not bpy.context.screen.is_animation_playing:    
@@ -129,31 +126,36 @@ def frame_change_pre_handler(scene):
 		if bpy.context.screen.is_animation_playing:
 			bpy.ops.screen.animation_play()
 
+	markframes = dict((i.frame, i) for i in scene.timeline_markers)
 	cur = scene.frame_current
-	marker = [ (i.frame, i) for i in scene.timeline_markers if i.frame >= cur]
-	if len(marker):
-		nextmarker = min(marker)[1]
-		# animation is passing a marker
-		if nextmarker.frame == cur:
-			# check if we have an event queue with the same name as the current marker
-			# TODO dont check name, check frame number 
-			if nextmarker.name in bpy.context.scene.timeline_queues:
-				# check pause - stop playing
-				if scene.timeline_queues[nextmarker.name].m_pause and bpy.context.screen.is_animation_playing:
-					bpy.ops.screen.animation_play()
-
-				# send events - not execute_after
-				if not scene.timeline_queues[nextmarker.name].m_execute_after:
-					for item in scene.timeline_queues[nextmarker.name].m_items:
-						item.trigger()
-
-	# send events - execute_after
-	prevframe = cur - 1
-	for marker in scene.timeline_markers:
-		if marker.frame == prevframe and scene.timeline_queues[marker.name].m_execute_after:
-			for item in scene.timeline_queues[marker.name].m_items:
-				item.trigger()
-			break;
+	prev = cur - 1
+	
+	#	check for marker in current frame
+	if cur in markframes and markframes[cur].name in scene.timeline_queues:
+		markerid = markframes[cur].name
+		
+		if markerid in scene.timeline_queues:
+			
+			#	check pause - stop animation 
+			if scene.timeline_queues[markerid].m_pause and	bpy.context.screen.is_animation_playing:
+				bpy.ops.screen.animation_play()
+			
+			# send events - if not execute_after
+			if not scene.timeline_queues[markerid].m_execute_after:
+				for item in scene.timeline_queues[markerid].m_items:
+					item.trigger()
+				
+	#	check for marker in prev frame (execute after flag)
+	if prev in markframes and markframes[prev].name:
+		markerid =  markframes[prev].name
+		
+		#	check for timelinequeue
+		if markerid in scene.timeline_queues:
+			
+			# send events - execute_after
+			if scene.timeline_queues[markerid].m_execute_after:
+				for item in scene.timeline_queues[markerid].m_items:
+					item.trigger()
 
 @persistent
 def frame_change_post_handler(scene):
