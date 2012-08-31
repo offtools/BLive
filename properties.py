@@ -293,7 +293,16 @@ class CameraExtProperties():
 		
 	def callback():
 		pass
-	
+
+class ImageExtProperties():
+	def register():
+		bpy.types.Image.loop = bpy.props.BoolProperty(default=True)
+		bpy.types.Image.has_playlist = bpy.props.BoolProperty(default=False)
+
+	def unregister():
+		bpy.types.Image.loop
+		bpy.types.Image.has_playlist
+
 def register():
 
 	##################################################################
@@ -310,6 +319,8 @@ def register():
 	bpy.utils.register_class(TimelineTrigger)
 	bpy.utils.register_class(TimelineQueueEntry)
 	bpy.utils.register_class(TimelineQueue)
+
+	ImageExtProperties.register()
 
 	##################################################################
 	#
@@ -342,6 +353,8 @@ def unregister():
 	bpy.utils.unregister_class(TimelineTrigger)
 	bpy.utils.unregister_class(TimelineQueueEntry)
 	bpy.utils.unregister_class(TimelineQueue)
+	
+	ImageExtProperties.unregister()
 	
 	##################################################################
 	#

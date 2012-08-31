@@ -39,8 +39,8 @@ class BLive_OT_videotexture_filebrowser(bpy.types.Operator):
 		print(self.files, self.directory, self.filepath, self.filename)
 		if "PORT" in bpy.context.scene.camera.game.properties:
 			ob = bpy.context.object
-			image = bpy.context.object.active_material.active_texture.image.name
-			client.client().send("/texture/movie", ob.name, image, self.filepath)
+			image = bpy.context.object.active_material.active_texture.image
+			client.client().send("/texture/movie", ob.name, image.name, self.filepath, int(image.loop))
 		return {'FINISHED'}
 
 	def invoke(self, context, event):
@@ -99,7 +99,7 @@ class BLive_PT_texture_player(bpy.types.Panel):
 	bl_space_type = 'PROPERTIES'
 	bl_region_type = 'WINDOW'
 	bl_context = "texture"
-
+	
 	def draw(self, context):
 		row = self.layout.row(align=True)
 		row.alignment = 'EXPAND'
@@ -107,4 +107,6 @@ class BLive_PT_texture_player(bpy.types.Panel):
 		row.operator("blive.videotexture_play", text="", icon="PLAY")
 		row.operator("blive.videotexture_pause", text="", icon="PAUSE")
 		row.operator("blive.videotexture_stop", text="", icon="MESH_PLANE")
-
+		row = self.layout.row(align=True)
+		image = bpy.context.object.active_material.active_texture.image
+		row.prop(image, "loop", text="loop video")
