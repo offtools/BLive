@@ -66,11 +66,13 @@ else:
 import bpy
 
 def register():
+	print("__init__.register")
 	properties.register()
 	bpy.utils.register_module(__name__)
 	apphandler.register()
 
 def unregister():
+	print("__init__.unregister")
 	apphandler.unregister()
 	properties.unregister()
 	bpy.utils.unregister_module(__name__)

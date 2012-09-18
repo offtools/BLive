@@ -294,15 +294,33 @@ class CameraExtProperties():
 	def callback():
 		pass
 
+
+##################################################################
+#
+#    Property Defs for Image Playlist (Texture Panel)
+#
+##################################################################
+
+class ImagePlaylist(bpy.types.PropertyGroup):
+	m_filepath = bpy.props.StringProperty()
+
 class ImageExtProperties():
 	def register():
+		bpy.utils.register_class(ImagePlaylist)
+		
 		bpy.types.Image.loop = bpy.props.BoolProperty(default=True)
 		bpy.types.Image.has_playlist = bpy.props.BoolProperty(default=False)
+		bpy.types.Image.playlist = bpy.props.CollectionProperty(type=ImagePlaylist)
+		bpy.types.Image.active_playlist_entry = bpy.props.IntProperty()
 
 	def unregister():
-		bpy.types.Image.loop
-		bpy.types.Image.has_playlist
-
+		del bpy.types.Image.loop
+		del bpy.types.Image.has_playlist
+		del bpy.types.Image.playlist
+		del bpy.types.Image.active_playlist_entry
+		
+		bpy.utils.register_class(ImagePlaylist)
+		
 def register():
 
 	##################################################################
@@ -311,6 +329,7 @@ def register():
 	#
 	##################################################################
 
+	print("properties.register")
 	bpy.utils.register_class(TimelineTriggerDummy)
 	bpy.utils.register_class(TimelineTriggerVideoOpen)
 	bpy.utils.register_class(TimelineTriggerCameraOpen)	
@@ -345,6 +364,7 @@ def unregister():
 	#
 	##################################################################
 
+	print("properties.unregister")
 	bpy.utils.unregister_class(TimelineTriggerDummy)
 	bpy.utils.unregister_class(TimelineTriggerVideoOpen)
 	bpy.utils.unregister_class(TimelineTriggerCameraOpen)	

@@ -23,6 +23,7 @@ import bpy
 import sys
 import subprocess
 from . import client
+from . import apphandler
 
 ###############################################
 #
@@ -114,10 +115,10 @@ class BLive_OT_quit(bpy.types.Operator):
 		if "PORT" in bpy.context.scene.camera.game.properties:
 			client.client().quit()
 			# TODO unregister app handlers
-			for i in bpy.app.handlers.frame_change_post:
-				bpy.app.handlers.frame_change_post.remove(i)
-			for i in bpy.app.handlers.scene_update_post:
-				bpy.app.handlers.scene_update_post.remove(i)
+#			for i in bpy.app.handlers.frame_change_post:
+#				bpy.app.handlers.frame_change_post.remove(i)
+#			for i in bpy.app.handlers.scene_update_post:
+#				bpy.app.handlers.scene_update_post.remove(i)
 			return{'FINISHED'}
 		else:
 			return{'CANCELLED'}

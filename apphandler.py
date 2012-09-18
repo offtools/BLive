@@ -173,6 +173,7 @@ def save_pre_handler(dummy):
 #	register / unregister functions
 #
 def register():
+	print("apphandler.register")
 	bpy.app.handlers.frame_change_pre.append(frame_change_pre_handler)
 	bpy.app.handlers.frame_change_pre.append(frame_change_post_handler)
 	bpy.app.handlers.scene_update_post.append(scene_update_post_handler)
@@ -180,6 +181,7 @@ def register():
 	bpy.app.handlers.save_pre.append(save_pre_handler)
 
 def unregister():
+	print("apphandler.unregister")
 	idx = bpy.app.handlers.frame_change_pre.index(frame_change_pre_handler)
 	bpy.app.handlers.frame_change_pre.remove(bpy.app.handlers.frame_change_pre[idx])
 

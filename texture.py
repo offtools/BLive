@@ -18,7 +18,7 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-
+import os
 import bpy
 from bpy.props import StringProperty, BoolProperty, IntProperty, CollectionProperty, FloatProperty, EnumProperty
 from . import client
@@ -40,7 +40,14 @@ class BLive_OT_videotexture_filebrowser(bpy.types.Operator):
 		if "PORT" in bpy.context.scene.camera.game.properties:
 			ob = bpy.context.object
 			image = bpy.context.object.active_material.active_texture.image
-			client.client().send("/texture/movie", ob.name, image.name, self.filepath, int(image.loop))
+			
+			if not image.has_playlist:
+				client.client().send("/texture/movie", ob.name, image.name, self.filepath, int(image.loop))
+			else:
+				entry = image.playlist.add()
+				entry.name = os.path.basename(self.filepath)
+				entry.m_filepath = self.filepath
+				
 		return {'FINISHED'}
 
 	def invoke(self, context, event):
@@ -56,8 +63,12 @@ class BLive_OT_videotexture_play(bpy.types.Operator):
 	def execute(self, context):
 		if "PORT" in bpy.context.scene.camera.game.properties:
 			ob = bpy.context.object
-			image = bpy.context.object.active_material.active_texture.image.name
-			client.client().send("/texture/state", ob.name, image, 'PLAY')
+			image = bpy.context.object.active_material.active_texture.image
+			
+			if image.has_playlist:
+				client.client().send("/texture/movie", ob.name, image.name, image.playlist[image.active_playlist_entry].m_filepath, int(image.loop))
+
+			client.client().send("/texture/state", ob.name, image.name, 'PLAY')
 		return {'FINISHED'}
 
 bpy.utils.register_class(BLive_OT_videotexture_play)
@@ -107,6 +118,13 @@ class BLive_PT_texture_player(bpy.types.Panel):
 		row.operator("blive.videotexture_play", text="", icon="PLAY")
 		row.operator("blive.videotexture_pause", text="", icon="PAUSE")
 		row.operator("blive.videotexture_stop", text="", icon="MESH_PLANE")
+
 		row = self.layout.row(align=True)
 		image = bpy.context.object.active_material.active_texture.image
 		row.prop(image, "loop", text="loop video")
+		row.prop(image, "has_playlist", text="use playlist")
+
+		if image.has_playlist:
+			row = self.layout.row(align=True)		
+			row.template_list(image, "playlist", image, "active_playlist_entry", rows=2, maxrows=8)
+
