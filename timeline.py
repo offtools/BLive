@@ -153,7 +153,7 @@ class BLive_PT_timeline_marker(bpy.types.Panel):
 		#    list of timeline markers 
 		scene = context.scene
 		row = layout.row()
-		row.template_list(scene, "timeline_markers", scene, "active_marker", rows=2, maxrows=2)
+		row.template_list(scene, "timeline_markers", scene, "active_marker", rows=2, maxrows=8)
 
 		#    add queue
 		row = layout.row()
