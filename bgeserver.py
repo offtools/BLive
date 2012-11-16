@@ -71,7 +71,6 @@ class BgeOSCServer(OSCServer):
 			self.handle_request()
 
 		for mod in self.__module:
-			print(mod.update)
 			mod.update()
 
 # ##### PyLiblo implementation #####
