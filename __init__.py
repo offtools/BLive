@@ -34,7 +34,7 @@ bl_info = {
 	"name": "BLive",
 	"author": "offtools",
 	"version": (0, 0, 1),
-	"blender": (2, 6, 3),
+	"blender": (2, 6, 4),
 	"location": "various Panels with prefix BLive",
 	"description": "blender to bge osc network addon",
 	"warning": "",
@@ -57,6 +57,7 @@ else:
 	from . import logic
 	from . import client
 	from . import timeline
+	from . import marker
 	from . import texture
 #	from . import meshtools
 	from . import apphandler

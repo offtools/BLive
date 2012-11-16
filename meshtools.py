@@ -42,7 +42,7 @@ class BLive_OT_mesh_apply(bpy.types.Operator):
 			mesh = bmesh.from_edit_mesh(ob.data)
 			for face in mesh.faces:
 				for vindex, vertex in enumerate(face.verts):
-					client.client().send("/data/objects/polygon", ob.name, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2])
+					client.client().send("/data/objects/polygon", [ob.name, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2]])
 		except ValueError:
 			return self.cancel(context)
 
@@ -70,7 +70,7 @@ class BLive_OT_modal_mesh_update(bpy.types.Operator):
 				mesh = bmesh.from_edit_mesh(ob.data)
 				for face in mesh.faces:
 					for vindex, vertex in enumerate(face.verts):
-						client.client().send("/data/objects/polygon", ob.name, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2])
+						client.client().send("/data/objects/polygon", [ob.name, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2]])
 			except ValueError as err:
 				print(err)
 				return self.cancel(context)

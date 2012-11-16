@@ -42,7 +42,7 @@ class BLive_OT_videotexture_filebrowser(bpy.types.Operator):
 			image = bpy.context.object.active_material.active_texture.image
 			
 			if not image.has_playlist:
-				client.client().send("/texture/movie", ob.name, image.name, self.filepath, int(image.loop))
+				client.client().send("/texture/movie", [ob.name, image.name, self.filepath, int(image.loop)])
 			else:
 				entry = image.playlist.add()
 				entry.name = os.path.basename(self.filepath)
@@ -66,9 +66,9 @@ class BLive_OT_videotexture_play(bpy.types.Operator):
 			image = bpy.context.object.active_material.active_texture.image
 			
 			if image.has_playlist:
-				client.client().send("/texture/movie", ob.name, image.name, image.playlist[image.active_playlist_entry].m_filepath, int(image.loop))
+				client.client().send("/texture/movie", [ob.name, image.name, image.playlist[image.active_playlist_entry].m_filepath, int(image.loop)])
 
-			client.client().send("/texture/state", ob.name, image.name, 'PLAY')
+			client.client().send("/texture/state", [ob.name, image.name, 'PLAY'])
 		return {'FINISHED'}
 
 bpy.utils.register_class(BLive_OT_videotexture_play)
@@ -81,7 +81,7 @@ class BLive_OT_videotexture_pause(bpy.types.Operator):
 		if "PORT" in bpy.context.scene.camera.game.properties:
 			ob = bpy.context.object
 			image = bpy.context.object.active_material.active_texture.image.name
-			client.client().send("/texture/state", ob.name, image, 'PAUSE')
+			client.client().send("/texture/state", [ob.name, image, 'PAUSE'])
 		return {'FINISHED'}
 
 bpy.utils.register_class(BLive_OT_videotexture_pause)
@@ -94,7 +94,7 @@ class BLive_OT_videotexture_stop(bpy.types.Operator):
 		if "PORT" in bpy.context.scene.camera.game.properties:
 			ob = bpy.context.object
 			image = bpy.context.object.active_material.active_texture.image.name
-			client.client().send("/texture/state", ob.name, image, 'STOP')
+			client.client().send("/texture/state", [ob.name, image, 'STOP'])
 		return {'FINISHED'}
 
 bpy.utils.register_class(BLive_OT_videotexture_stop)

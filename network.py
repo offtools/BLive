@@ -72,10 +72,16 @@ class BLive_PT_scene_network(bpy.types.Panel):
 		if "PORT" not in bpy.context.scene.camera.game.properties or not bpy.context.blend_data.filepath:
 			split.enabled = False		
 		split.operator("blive.fork_blenderplayer", text="Start")
-		
+
 		row = self.layout.row()
 		split = row.split(percentage=0.1)
 		split.label("3.")
+		split = split.split()
+		split.operator("blive.osc_connect", text="Connect")
+		
+		row = self.layout.row()
+		split = row.split(percentage=0.1)
+		split.label("4.")
 		split = split.split()
 		split.operator("blive.quit", text="Quit")
 
@@ -85,16 +91,25 @@ class BLive_OT_forc_blenderplayer(bpy.types.Operator):
 
 	def execute(self, context):
 		if "PORT" in bpy.context.scene.camera.game.properties:
-			client.client().port = bpy.context.scene.camera.game.properties["PORT"].value
 			app = "blenderplayer"
 			blendfile = bpy.context.blend_data.filepath
 			port = "-p {0}".format(bpy.context.scene.camera.game.properties["PORT"].value)
 			cmd = [app,  port, blendfile]
 			blendprocess = subprocess.Popen(cmd)
-
 			return{'FINISHED'}
 		else:
 			return{'CANCELLED'}
+
+
+class BLive_OT_osc_connect(bpy.types.Operator):
+	bl_idname = "blive.osc_connect"
+	bl_label = "connect to bge"
+
+	def execute(self, context):
+		cli = client.client()
+		cli.connect(("127.0.0.1", bpy.context.scene.camera.game.properties["PORT"].value))
+		print('connected: ', cli.address())
+		return{'FINISHED'}
 
 class BLive_OT_set_port(bpy.types.Operator):
 	bl_idname = "blive.set_port"
@@ -102,7 +117,9 @@ class BLive_OT_set_port(bpy.types.Operator):
 
 	def execute(self, context):
 		if "PORT" in bpy.context.scene.camera.game.properties:
-			client.client().port = bpy.context.scene.camera.game.properties["PORT"].value
+			cli = client.client()
+			cli.close()
+			cli.connect(("127.0.0.1", bpy.context.scene.camera.game.properties["PORT"].value))
 			return{'FINISHED'}
 		else:
 			return{'CANCELLED'}

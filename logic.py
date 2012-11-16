@@ -74,6 +74,7 @@ class BLive_OT_logic_add(bpy.types.Operator):
         '''
             add server script for bge, appends import path dynamicly
         '''
+        print(dir())
         print("add bge init script")
         filename = "main.py"
         tpl = "bge_template.tpl"

@@ -54,7 +54,7 @@ class TimelineTriggerDummy(bpy.types.PropertyGroup):
 	m_msg = bpy.props.StringProperty(default="Dummy Trigger")
 
 	def send(self):
-		client.client().send(self.m_oscpath, self.m_msg)
+		client.client().send(self.m_oscpath, [self.m_msg])
 
 class TimelineTriggerVideoOpen(bpy.types.PropertyGroup):
 	m_marker = bpy.props.StringProperty()	# marker name (back ref to queue / timeline marker)
@@ -71,7 +71,7 @@ class TimelineTriggerVideoOpen(bpy.types.PropertyGroup):
 	def send(self):
 		print("play movie")
 		filepath = bpy.path.abspath(self.m_filepath)
-		client.client().send(self.m_oscpath, self.m_object, self.m_image, filepath, int(self.m_loop))
+		client.client().send(self.m_oscpath, [self.m_object, self.m_image, filepath, int(self.m_loop)])
 
 class TimelineTriggerCameraOpen(bpy.types.PropertyGroup):
 	m_marker = bpy.props.StringProperty()	# marker name (back ref to queue / timeline marker)
@@ -90,7 +90,7 @@ class TimelineTriggerCameraOpen(bpy.types.PropertyGroup):
 	
 	def send(self):
 		print("connect camera")
-		client.client().send(self.m_oscpath, self.m_object, self.m_image, self.m_filepath, self.m_width, self.m_height, int(self.m_deinterlace))
+		client.client().send(self.m_oscpath, [self.m_object, self.m_image, self.m_filepath, self.m_width, self.m_height, int(self.m_deinterlace)])
 
 class TimelineTriggerVideoState(bpy.types.PropertyGroup):
 	m_marker = bpy.props.StringProperty()	# marker name (back ref to queue / timeline marker)
@@ -108,7 +108,7 @@ class TimelineTriggerVideoState(bpy.types.PropertyGroup):
 		name = "state")
 
 	def send(self):
-		client.client().send(self.m_oscpath, self.m_image, self.m_state)
+		client.client().send(self.m_oscpath, [self.m_image, self.m_state])
 
 class TimelineTriggerChangeScene(bpy.types.PropertyGroup):
 	m_marker = bpy.props.StringProperty()	# marker name (back ref to queue / timeline marker)
@@ -122,7 +122,7 @@ class TimelineTriggerChangeScene(bpy.types.PropertyGroup):
 	def send(self):
 		#	change scene in blender too
 		bpy.context.screen.scene = bpy.data.scenes[self.m_scene]
-		client.client().send(self.m_oscpath, self.m_scene)
+		client.client().send(self.m_oscpath, [self.m_scene])
 
 class TimelineTrigger(bpy.types.PropertyGroup):
 	'''

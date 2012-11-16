@@ -22,32 +22,23 @@
 import bpy
 import sys
 
-try:
-	sys.path.append('/usr/lib/python3.2/site-packages')
-	import liblo
-except ImportError as err:
-	print(err, "you need to install pyliblo and set the correct search path in server.py")
+from . import OSC
+from .OSC import OSCClient, OSCMessage
 
-class client(object):
-	_instance = None
-	def __new__(cls, *args, **kwargs):
-		if not cls._instance:
-			cls._instance = super(client, cls).__new__(cls, *args, **kwargs)
-		return cls._instance
-		
-	def __init__(self):
-		self.target = liblo.Address(9900)
+class client(OSCClient):
+	def __new__(type, *args):
+		if not '_instance' in type.__dict__:
+			type._instance = object.__new__(type)
+		return type._instance
 
-	def port_getter(self):
-		return self.target.port
-        
-	def port_setter(self, port):
-		self.target = liblo.Address(port)
-
-	port = property(port_getter, port_setter)
-		
+	def __init__(self, server=None):
+		if not '_init' in dir(self):
+			super().__init__(server)
+			self._init = True
+			
 	def quit(self):
-		liblo.send(self.target, "/quit")
+		self.send("/quit", None)
 
-	def send(self, path, *args):
-		liblo.send(self.target, path, *args)
+	def send(self, path, data):
+		if self.address():
+			super().send(OSCMessage(path, data))

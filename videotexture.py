@@ -132,6 +132,7 @@ class videotexture(object):
 
 	def update(self):
 		for i in self.textures:
+#			if self.textures[i].state == 'PLAY':
 			self.textures[i].refresh(True)
 
 	def movie(self, path, args):
@@ -170,8 +171,9 @@ class videotexture(object):
 
 	def state(self, path, args):
 		print("videotexture.state: ", args)
-		imgname = args[0]
-		state = args[1]
+		obname = args[0]
+		imgname = args[1]
+		state = args[2]
 
 		if state in self.TEXTURE_STATES:
 			if state == 'REMOVE':
