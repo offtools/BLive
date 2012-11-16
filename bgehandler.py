@@ -22,10 +22,13 @@
 import bge
 
 def debug(path, tags, args, source):
-	print(path, tags, args, source)
+	print("Debug: ", path, tags, args, source)
 	
 def quit(path, tags, args, source):
-	print(path, tags, args, source)
+	if hasattr(bge.logic, 'server'):
+		print('received quit, freeing OSC server')
+		bge.logic.server.close()
+	bge.logic.endGame()
 
 def update_objects(path, tags, args, source):
 	scene = bge.logic.getCurrentScene()

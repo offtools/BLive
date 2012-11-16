@@ -29,7 +29,7 @@ class BLive_OT_logic_add(bpy.types.Operator):
     bl_idname = "blive.logic_add"
     bl_label = "BLive - create logic brick"
     port = bpy.props.IntProperty(default=9900)
-
+    
     def execute(self, context):
         if not 'main.py' in bpy.data.texts:
             self.add_script()
@@ -77,7 +77,7 @@ class BLive_OT_logic_add(bpy.types.Operator):
         print(dir())
         print("add bge init script")
         filename = "main.py"
-        tpl = "bge_template.tpl"
+        tpl = "bgetemplate.tpl"
         paths = bpy.utils.script_paths()
         for i in paths:
             path = os.path.join(i, "addons")

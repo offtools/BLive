@@ -37,7 +37,8 @@ class client(OSCClient):
 			self._init = True
 			
 	def quit(self):
-		self.send("/quit", None)
+		if self.address():
+			super().send(OSCMessage("/quit"))
 
 	def send(self, path, data):
 		if self.address():

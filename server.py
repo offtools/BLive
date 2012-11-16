@@ -19,11 +19,10 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-
-import sys
-
-import OSC
+import bge
+import types
 import bgehandler
+import videotexture
 from OSC import OSCServer
 
 class BgeOSCServer(OSCServer):
@@ -35,7 +34,8 @@ class BgeOSCServer(OSCServer):
 	def __init__(self, ip="127.0.0.1", port=9900):
 		super().__init__((ip,port))
 		self.timeout = 0
-		self.__update = list()
+		self.__module = list()
+		
 		self.addMsgHandler('/debug', bgehandler.debug)
 		self.addMsgHandler('/quit', bgehandler.quit)
 		self.addMsgHandler('/debug', bgehandler.update_objects)
@@ -49,20 +49,30 @@ class BgeOSCServer(OSCServer):
 		self.addMsgHandler("/data/light/sun", bgehandler.update_light_sun)			
 		self.addMsgHandler("/data/objects/polygon", bgehandler.update_mesh)
 		self.addMsgHandler("/scene", bgehandler.change_scene)
+
+		vtex = videotexture.videotexture()
+		self._addUpdateModule(vtex)
+		self.addMsgHandler("/texture/state", vtex.state)
+		self.addMsgHandler("/texture/movie", vtex.movie)
+		self.addMsgHandler("/texture/camera", vtex.camera)
 			
 	def handle_timeout(self):
 		self.timed_out = True
 		
-	def addUpdateFunc(self, func):
-		self.__update.append(func)
+	def _addUpdateModule(self, instance):
+		if hasattr(instance, 'update'):
+			if type(instance.update) in (types.FunctionType, types.MethodType):
+				print("%s update added"%str(instance))
+				self.__module.append(instance)
 		
 	def update(self):
 		self.timed_out = False
 		while not self.timed_out:
 			self.handle_request()
 
-		for func in self.__update:
-			func()
+		for mod in self.__module:
+			print(mod.update)
+			mod.update()
 
 # ##### PyLiblo implementation #####
 

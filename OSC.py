@@ -1702,9 +1702,7 @@ class OSCAddressSpace:
 			if chk in address:
 				raise OSCServerError("OSC-address string may not contain any characters in '*?,[]{}# '")
 		
-		# __offtools__ callable function also works with decorators
-		if not callable(callback):
-		#if type(callback) not in (types.FunctionType, types.MethodType):
+		if type(callback) not in (types.FunctionType, types.MethodType):
 			raise OSCServerError("Message callback '%s' is not callable" % repr(callback))
 		
 		if address != 'default':

@@ -135,7 +135,7 @@ class videotexture(object):
 #			if self.textures[i].state == 'PLAY':
 			self.textures[i].refresh(True)
 
-	def movie(self, path, args):
+	def movie(self, path, tags, args, source):
 		obname = args[0]
 		imgname = args[1]
 		filename = args[2]
@@ -151,7 +151,7 @@ class videotexture(object):
 		except TypeError as err:
 			print("err in videotexture.open: ", err)
 
-	def camera(self, path, args):
+	def camera(self, path, tags, args, source):
 		# TODO: add with and height
 		obname = args[0]
 		imgname = args[1]
@@ -169,7 +169,7 @@ class videotexture(object):
 		except TypeError as err:
 			print("err in videotexture.open: ", err)
 
-	def state(self, path, args):
+	def state(self, path, tags, args, source):
 		print("videotexture.state: ", args)
 		obname = args[0]
 		imgname = args[1]
