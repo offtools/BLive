@@ -126,8 +126,6 @@ v0.3.6 - 19 April 2010
 		inspection keeps the code backward compatible
 	Moved testing code into separate testbench (testbench.py)
 
-13. Nov. 2012 (__offtools__)
-	changed 1706: using callable function to test Handlers, works with decorators also 
 
 -----------------
 Original Comments
