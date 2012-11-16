@@ -62,7 +62,6 @@ class BgeOSCServer(OSCServer):
 	def _addUpdateModule(self, instance):
 		if hasattr(instance, 'update'):
 			if type(instance.update) in (types.FunctionType, types.MethodType):
-				print("%s update added"%str(instance))
 				self.__module.append(instance)
 		
 	def update(self):

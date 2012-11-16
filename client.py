@@ -35,11 +35,19 @@ class client(OSCClient):
 		if not '_init' in dir(self):
 			super().__init__(server)
 			self._init = True
-			
+
 	def quit(self):
 		if self.address():
 			super().send(OSCMessage("/quit"))
+			self.close()
 
 	def send(self, path, data):
 		if self.address():
-			super().send(OSCMessage(path, data))
+			try:
+				super().send(OSCMessage(path, data))
+			except ConnectionRefusedError as err:
+				print('[BLive] - connection to server lost')
+				self.close()
+			except TypeError:
+				print('[BLive] - connection to server lost')
+				self.close()
