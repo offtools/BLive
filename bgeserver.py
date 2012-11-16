@@ -22,7 +22,7 @@
 import bge
 import types
 import bgehandler
-import videotexture
+import bgevideotexture
 from OSC import OSCServer
 
 class BgeOSCServer(OSCServer):
@@ -50,7 +50,7 @@ class BgeOSCServer(OSCServer):
 		self.addMsgHandler("/data/objects/polygon", bgehandler.update_mesh)
 		self.addMsgHandler("/scene", bgehandler.change_scene)
 
-		vtex = videotexture.videotexture()
+		vtex = bgevideotexture.videotexture()
 		self._addUpdateModule(vtex)
 		self.addMsgHandler("/texture/state", vtex.state)
 		self.addMsgHandler("/texture/movie", vtex.movie)
