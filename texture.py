@@ -23,6 +23,26 @@ import bpy
 from bpy.props import StringProperty, BoolProperty, IntProperty, CollectionProperty, FloatProperty, EnumProperty
 from . import client
 
+class ImagePlaylist(bpy.types.PropertyGroup):
+	m_filepath = bpy.props.StringProperty()
+
+class ImageExtProperties():
+	def register():
+		bpy.utils.register_class(ImagePlaylist)
+		
+		bpy.types.Image.loop = bpy.props.BoolProperty(default=True)
+		bpy.types.Image.has_playlist = bpy.props.BoolProperty(default=False)
+		bpy.types.Image.playlist = bpy.props.CollectionProperty(type=ImagePlaylist)
+		bpy.types.Image.active_playlist_entry = bpy.props.IntProperty()
+
+	def unregister():
+		del bpy.types.Image.loop
+		del bpy.types.Image.has_playlist
+		del bpy.types.Image.playlist
+		del bpy.types.Image.active_playlist_entry
+		
+		bpy.utils.register_class(ImagePlaylist)
+
 class BLive_OT_videotexture_filebrowser(bpy.types.Operator):
 	bl_idname = "blive.videotexture_filebrowser"
 	bl_label = "BLive Videotexture Filebrowser"
@@ -136,6 +156,7 @@ def register():
 	bpy.utils.register_class(BLive_OT_videotexture_play)
 	bpy.utils.register_class(BLive_OT_videotexture_stop)
 	bpy.utils.register_class(BLive_PT_texture_player)	
+	ImageExtProperties.register()
 	
 def unregister():
 	print("texture.unregister")
@@ -144,3 +165,4 @@ def unregister():
 	bpy.utils.unregister_class(BLive_OT_videotexture_play)
 	bpy.utils.unregister_class(BLive_OT_videotexture_stop)
 	bpy.utils.unregister_class(BLive_PT_texture_player)	
+	ImageExtProperties.unregister()

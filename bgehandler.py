@@ -19,6 +19,8 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
+#	TODO: fix debug message bug
+
 import bge
 
 def debug(path, tags, args, source):
