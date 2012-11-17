@@ -45,38 +45,39 @@ bl_info = {
 # import modules
 if "bpy" in locals():
 	import imp
-	imp.reload('logic')
-	imp.reload('client')
-	imp.reload('timeline')
-	imp.reload('texture')
-#	imp.reload('meshtools')
-	imp.reload('apphandler')
-	imp.reload('properties')
-	imp.reload('network')
+	imp.reload(logic)
+	imp.reload(client)
+	imp.reload(texture)
+	imp.reload(apphandler)
+	imp.reload(network)
+	imp.reload(marker)
 else:
 	from . import logic
 	from . import client
-	from . import timeline
-	from . import marker
 	from . import texture
-#	from . import meshtools
 	from . import apphandler
-	from . import properties
 	from . import network
+	from . import marker
 
 import bpy
 
 def register():
 	print("__init__.register")
-	properties.register()
-	bpy.utils.register_module(__name__)
+	network.register()
+	logic.register()
+	client.register()
+	texture.register()
 	apphandler.register()
+	marker.register()
 
 def unregister():
 	print("__init__.unregister")
+	marker.unregister()
 	apphandler.unregister()
-	properties.unregister()
-	bpy.utils.unregister_module(__name__)
-
+	texture.unregister()
+	client.unregister()
+	logic.unregister()
+	network.unregister()
+	
 if __name__ == "__main__":
 	pass

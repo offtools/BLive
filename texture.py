@@ -54,7 +54,7 @@ class BLive_OT_videotexture_filebrowser(bpy.types.Operator):
 		context.window_manager.fileselect_add(self)
 		return {'RUNNING_MODAL'}
 
-bpy.utils.register_class(BLive_OT_videotexture_filebrowser)
+#~ bpy.utils.register_class(BLive_OT_videotexture_filebrowser)
 
 class BLive_OT_videotexture_play(bpy.types.Operator):
 	bl_idname = "blive.videotexture_play"
@@ -71,7 +71,7 @@ class BLive_OT_videotexture_play(bpy.types.Operator):
 			client.client().send("/texture/state", [ob.name, image.name, 'PLAY'])
 		return {'FINISHED'}
 
-bpy.utils.register_class(BLive_OT_videotexture_play)
+#~ bpy.utils.register_class(BLive_OT_videotexture_play)
 
 class BLive_OT_videotexture_pause(bpy.types.Operator):
 	bl_idname = "blive.videotexture_pause"
@@ -84,7 +84,7 @@ class BLive_OT_videotexture_pause(bpy.types.Operator):
 			client.client().send("/texture/state", [ob.name, image, 'PAUSE'])
 		return {'FINISHED'}
 
-bpy.utils.register_class(BLive_OT_videotexture_pause)
+#~ bpy.utils.register_class(BLive_OT_videotexture_pause)
 
 class BLive_OT_videotexture_stop(bpy.types.Operator):
 	bl_idname = "blive.videotexture_stop"
@@ -97,7 +97,7 @@ class BLive_OT_videotexture_stop(bpy.types.Operator):
 			client.client().send("/texture/state", [ob.name, image, 'STOP'])
 		return {'FINISHED'}
 
-bpy.utils.register_class(BLive_OT_videotexture_stop)
+#~ bpy.utils.register_class(BLive_OT_videotexture_stop)
 
 def enumerate_images():
 	image_list = list()
@@ -128,3 +128,19 @@ class BLive_PT_texture_player(bpy.types.Panel):
 			row = self.layout.row(align=True)		
 			row.template_list(image, "playlist", image, "active_playlist_entry", rows=2, maxrows=8)
 
+
+def register():
+	print("texture.register")
+	bpy.utils.register_class(BLive_OT_videotexture_filebrowser)
+	bpy.utils.register_class(BLive_OT_videotexture_pause)
+	bpy.utils.register_class(BLive_OT_videotexture_play)
+	bpy.utils.register_class(BLive_OT_videotexture_stop)
+	bpy.utils.register_class(BLive_PT_texture_player)	
+	
+def unregister():
+	print("texture.unregister")
+	bpy.utils.unregister_class(BLive_OT_videotexture_filebrowser)
+	bpy.utils.unregister_class(BLive_OT_videotexture_pause)
+	bpy.utils.unregister_class(BLive_OT_videotexture_play)
+	bpy.utils.unregister_class(BLive_OT_videotexture_stop)
+	bpy.utils.unregister_class(BLive_PT_texture_player)	

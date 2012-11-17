@@ -41,13 +41,25 @@ class client(OSCClient):
 			super().send(OSCMessage("/quit"))
 			self.close()
 
-	def send(self, path, data):
+	def connect(self, ip, port):
+		super().connect((ip,port))
+		self.send('/connect')
+
+	def send(self, path, *args):
 		if self.address():
 			try:
-				super().send(OSCMessage(path, data))
+				super().send(OSCMessage(path, args))
 			except ConnectionRefusedError as err:
 				print('[BLive] - connection to server lost')
 				self.close()
 			except TypeError:
 				print('[BLive] - connection to server lost')
 				self.close()
+
+def register():
+	print("client.register")
+	pass
+
+def unregister():
+	print("client.unregister")
+	pass

@@ -28,7 +28,7 @@ from . import client
 def scene_update_post_handler(scene):
 	for ob in scene.objects:
 		if ob.is_updated:
-#			print("object %s updated" %ob)
+			#~ print("object %s updated" %ob)
 			pass
 		if ob.is_updated_data:
 			#print("object updated data %s updated" %ob)
@@ -36,10 +36,10 @@ def scene_update_post_handler(scene):
 			
 	for ob in bpy.data.materials:
 		if ob.is_updated:
-			#print("material %s updated" %ob)
+			#~ print("material %s updated" %ob)
 			pass
 		if ob.is_updated_data:
-			#print("material updated data %s updated" %ob)
+			#~ print("material updated data %s updated" %ob)
 			pass
 			
 	#TODO: move all mesh handler here
@@ -154,8 +154,6 @@ def frame_change_pre_handler(scene):
 				for item in scene.timeline_queues[markerid].m_items:
 					item.trigger()
 
-	#oscport.update()
-
 @persistent
 def frame_change_post_handler(scene):
 	pass
@@ -168,14 +166,9 @@ def load_pre_handler(dummy):
 def save_pre_handler(dummy):
 	print("save_pre_handler")
 
-#class oscport()
-
-#
-#	register / unregister functions
-#
 def register():
 	print("apphandler.register")
-	bpy.app.handlers.frame_change_pre.append(frame_change_pre_handler)
+	#~ bpy.app.handlers.frame_change_pre.append(frame_change_pre_handler)
 	bpy.app.handlers.frame_change_pre.append(frame_change_post_handler)
 	bpy.app.handlers.scene_update_post.append(scene_update_post_handler)
 	bpy.app.handlers.load_pre.append(load_pre_handler)
@@ -183,8 +176,8 @@ def register():
 
 def unregister():
 	print("apphandler.unregister")
-	idx = bpy.app.handlers.frame_change_pre.index(frame_change_pre_handler)
-	bpy.app.handlers.frame_change_pre.remove(bpy.app.handlers.frame_change_pre[idx])
+	#~ idx = bpy.app.handlers.frame_change_pre.index(frame_change_pre_handler)
+	#~ bpy.app.handlers.frame_change_pre.remove(bpy.app.handlers.frame_change_pre[idx])
 
 	idx = bpy.app.handlers.scene_update_post.index(scene_update_post_handler)
 	bpy.app.handlers.scene_update_post.remove(bpy.app.handlers.scene_update_post[idx])

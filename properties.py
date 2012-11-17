@@ -321,68 +321,68 @@ class ImageExtProperties():
 		
 		bpy.utils.register_class(ImagePlaylist)
 		
-def register():
-
-	##################################################################
-	#
-	#    register
-	#
-	##################################################################
-
-	print("properties.register")
-	bpy.utils.register_class(TimelineTriggerDummy)
-	bpy.utils.register_class(TimelineTriggerVideoOpen)
-	bpy.utils.register_class(TimelineTriggerCameraOpen)	
-	bpy.utils.register_class(TimelineTriggerVideoState)
-	bpy.utils.register_class(TimelineTriggerChangeScene)
-	bpy.utils.register_class(TimelineTrigger)
-	bpy.utils.register_class(TimelineQueueEntry)
-	bpy.utils.register_class(TimelineQueue)
-
-	ImageExtProperties.register()
-
-	##################################################################
-	#
-	#    init Instances
-	#
-	##################################################################
-
-	#	Instanciate on register and remove on unregister
-	bpy.types.Scene.timeline_trigger = bpy.props.PointerProperty(type=TimelineTrigger, options={"HIDDEN"})
-	bpy.types.Scene.timeline_queues = bpy.props.CollectionProperty(type=TimelineQueue, options={"HIDDEN"})
-
-	#	TODO: change to dynamic Property (no need to store in blendfile)
-	bpy.types.Scene.active_marker = bpy.props.IntProperty(options={"HIDDEN"}, subtype='UNSIGNED')
-	
-
-	
-def unregister():
-
-	##################################################################
-	#
-	#    unregister
-	#
-	##################################################################
-
-	print("properties.unregister")
-	bpy.utils.unregister_class(TimelineTriggerDummy)
-	bpy.utils.unregister_class(TimelineTriggerVideoOpen)
-	bpy.utils.unregister_class(TimelineTriggerCameraOpen)	
-	bpy.utils.unregister_class(TimelineTriggerVideoState)
-	bpy.utils.unregister_class(TimelineTriggerChangeScene)
-	bpy.utils.unregister_class(TimelineTrigger)
-	bpy.utils.unregister_class(TimelineQueueEntry)
-	bpy.utils.unregister_class(TimelineQueue)
-	
-	ImageExtProperties.unregister()
-	
-	##################################################################
-	#
-	#    cleanup
-	#
-	##################################################################
-
-	del bpy.types.Scene.timeline_trigger
-	del bpy.types.Scene.timeline_queues
-	del bpy.types.Scene.active_marker
-
+#~ def register():
+#~ 
+	#~ ##################################################################
+	#~ #
+	#~ #    register
+	#~ #
+	#~ ##################################################################
+#~ 
+	#~ print("properties.register")
+	#~ bpy.utils.register_class(TimelineTriggerDummy)
+	#~ bpy.utils.register_class(TimelineTriggerVideoOpen)
+	#~ bpy.utils.register_class(TimelineTriggerCameraOpen)	
+	#~ bpy.utils.register_class(TimelineTriggerVideoState)
+	#~ bpy.utils.register_class(TimelineTriggerChangeScene)
+	#~ bpy.utils.register_class(TimelineTrigger)
+	#~ bpy.utils.register_class(TimelineQueueEntry)
+	#~ bpy.utils.register_class(TimelineQueue)
+#~ 
+	#~ ImageExtProperties.register()
+#~ 
+	#~ ##################################################################
+	#~ #
+	#~ #    init Instances
+	#~ #
+	#~ ##################################################################
+#~ 
+	#~ #	Instanciate on register and remove on unregister
+	#~ bpy.types.Scene.timeline_trigger = bpy.props.PointerProperty(type=TimelineTrigger, options={"HIDDEN"})
+	#~ bpy.types.Scene.timeline_queues = bpy.props.CollectionProperty(type=TimelineQueue, options={"HIDDEN"})
+#~ 
+	#~ #	TODO: change to dynamic Property (no need to store in blendfile)
+	#~ bpy.types.Scene.active_marker = bpy.props.IntProperty(options={"HIDDEN"}, subtype='UNSIGNED')
+	#~ 
+#~ 
+	#~ 
+#~ def unregister():
+#~ 
+	#~ ##################################################################
+	#~ #
+	#~ #    unregister
+	#~ #
+	#~ ##################################################################
+#~ 
+	#~ print("properties.unregister")
+	#~ bpy.utils.unregister_class(TimelineTriggerDummy)
+	#~ bpy.utils.unregister_class(TimelineTriggerVideoOpen)
+	#~ bpy.utils.unregister_class(TimelineTriggerCameraOpen)	
+	#~ bpy.utils.unregister_class(TimelineTriggerVideoState)
+	#~ bpy.utils.unregister_class(TimelineTriggerChangeScene)
+	#~ bpy.utils.unregister_class(TimelineTrigger)
+	#~ bpy.utils.unregister_class(TimelineQueueEntry)
+	#~ bpy.utils.unregister_class(TimelineQueue)
+	#~ 
+	#~ ImageExtProperties.unregister()
+	#~ 
+	#~ ##################################################################
+	#~ #
+	#~ #    cleanup
+	#~ #
+	#~ ##################################################################
+#~ 
+	#~ del bpy.types.Scene.timeline_trigger
+	#~ del bpy.types.Scene.timeline_queues
+	#~ del bpy.types.Scene.active_marker
+#~ 

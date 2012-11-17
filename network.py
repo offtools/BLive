@@ -45,7 +45,7 @@ class BLive_PT_scene_network(bpy.types.Panel):
 		if "PORT" in bpy.context.scene.camera.game.properties:
 			row = box.row()
 			row.prop(bpy.context.scene.camera.game.properties["PORT"], "value", text="Port: ")
-			row.operator("blive.set_port", text="change port")
+			row.operator("blive.osc_port", text="change port")
 			row.operator("blive.logic_remove", text="", icon="X")
 		else:
 			box.label("add OSC logic to: {}".format(bpy.context.scene.camera.name))
@@ -83,9 +83,9 @@ class BLive_PT_scene_network(bpy.types.Panel):
 		split = row.split(percentage=0.1)
 		split.label("4.")
 		split = split.split()
-		split.operator("blive.quit", text="Quit")
+		split.operator("blive.osc_quit", text="Quit")
 
-class BLive_OT_forc_blenderplayer(bpy.types.Operator):
+class BLive_OT_fork_blenderplayer(bpy.types.Operator):
 	bl_idname = "blive.fork_blenderplayer"
 	bl_label = "BLive fork blenderplayer"
 
@@ -107,12 +107,11 @@ class BLive_OT_osc_connect(bpy.types.Operator):
 
 	def execute(self, context):
 		cli = client.client()
-		cli.connect(("127.0.0.1", bpy.context.scene.camera.game.properties["PORT"].value))
-		print('connected: ', cli.address())
+		cli.connect("127.0.0.1", bpy.context.scene.camera.game.properties["PORT"].value)
 		return{'FINISHED'}
 
-class BLive_OT_set_port(bpy.types.Operator):
-	bl_idname = "blive.set_port"
+class BLive_OT_osc_set_port(bpy.types.Operator):
+	bl_idname = "blive.osc_port"
 	bl_label = "BLive set OSC port"
 
 	def execute(self, context):
@@ -124,19 +123,29 @@ class BLive_OT_set_port(bpy.types.Operator):
 		else:
 			return{'CANCELLED'}
 
-class BLive_OT_quit(bpy.types.Operator):
-	bl_idname = "blive.quit"
+class BLive_OT_osc_quit(bpy.types.Operator):
+	bl_idname = "blive.osc_quit"
 	bl_label = "BLive quit blenderplayer"
 
 	def execute(self, context):
 		if "PORT" in bpy.context.scene.camera.game.properties:
 			client.client().quit()
-			# TODO unregister app handlers
-#			for i in bpy.app.handlers.frame_change_post:
-#				bpy.app.handlers.frame_change_post.remove(i)
-#			for i in bpy.app.handlers.scene_update_post:
-#				bpy.app.handlers.scene_update_post.remove(i)
 			return{'FINISHED'}
 		else:
 			return{'CANCELLED'}
 
+def register():
+	print("network.register")
+	bpy.utils.register_class(BLive_OT_fork_blenderplayer)
+	bpy.utils.register_class(BLive_OT_osc_connect)
+	bpy.utils.register_class(BLive_OT_osc_set_port)
+	bpy.utils.register_class(BLive_OT_osc_quit)
+	bpy.utils.register_class(BLive_PT_scene_network)
+
+def unregister():
+	print("network.unregister")
+	bpy.utils.unregister_class(BLive_OT_fork_blenderplayer)
+	bpy.utils.unregister_class(BLive_OT_osc_connect)
+	bpy.utils.unregister_class(BLive_OT_osc_set_port)
+	bpy.utils.unregister_class(BLive_OT_osc_quit)
+	bpy.utils.unregister_class(BLive_PT_scene_network)
