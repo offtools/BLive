@@ -23,27 +23,32 @@ import bpy
 from bpy.props import StringProperty, BoolProperty, IntProperty, CollectionProperty, FloatProperty, EnumProperty
 from . import client
 
-#	FIXME: Pause doesnt work with playlist (line 90)
 
-class ImagePlaylist(bpy.types.PropertyGroup):
+def update_playlist(self, context):
+	image = bpy.context.object.active_material.active_texture.image
+	image.playlist_entry_changed = True
+
+class ImagePlaylistEntry(bpy.types.PropertyGroup):
 	m_filepath = bpy.props.StringProperty()
 
 class ImageExtProperties():
 	def register():
-		bpy.utils.register_class(ImagePlaylist)
+		bpy.utils.register_class(ImagePlaylistEntry)
 		
 		bpy.types.Image.loop = bpy.props.BoolProperty(default=True)
 		bpy.types.Image.has_playlist = bpy.props.BoolProperty(default=False)
-		bpy.types.Image.playlist = bpy.props.CollectionProperty(type=ImagePlaylist)
-		bpy.types.Image.active_playlist_entry = bpy.props.IntProperty()
+		bpy.types.Image.playlist = bpy.props.CollectionProperty(type=ImagePlaylistEntry)
+		bpy.types.Image.active_playlist_entry = bpy.props.IntProperty(update=update_playlist)
+		bpy.types.Image.playlist_entry_changed = bpy.props.BoolProperty(default=False)
 
 	def unregister():
 		del bpy.types.Image.loop
 		del bpy.types.Image.has_playlist
 		del bpy.types.Image.playlist
 		del bpy.types.Image.active_playlist_entry
+		del bpy.types.Image.playlist_entry_changed
 		
-		bpy.utils.register_class(ImagePlaylist)
+		bpy.utils.register_class(ImagePlaylistEntry)
 
 class BLive_OT_videotexture_filebrowser(bpy.types.Operator):
 	bl_idname = "blive.videotexture_filebrowser"
@@ -76,7 +81,6 @@ class BLive_OT_videotexture_filebrowser(bpy.types.Operator):
 		context.window_manager.fileselect_add(self)
 		return {'RUNNING_MODAL'}
 
-#~ bpy.utils.register_class(BLive_OT_videotexture_filebrowser)
 
 class BLive_OT_videotexture_play(bpy.types.Operator):
 	bl_idname = "blive.videotexture_play"
@@ -87,13 +91,13 @@ class BLive_OT_videotexture_play(bpy.types.Operator):
 			ob = bpy.context.object
 			image = bpy.context.object.active_material.active_texture.image
 			
-			if image.has_playlist:
+			if image.has_playlist and image.playlist_entry_changed:
 				client.client().send("/texture/movie", [ob.name, image.name, image.playlist[image.active_playlist_entry].m_filepath, int(image.loop)])
+				image.playlist_entry_changed=False
 
 			client.client().send("/texture/state", [ob.name, image.name, 'PLAY'])
 		return {'FINISHED'}
 
-#~ bpy.utils.register_class(BLive_OT_videotexture_play)
 
 class BLive_OT_videotexture_pause(bpy.types.Operator):
 	bl_idname = "blive.videotexture_pause"
@@ -106,7 +110,6 @@ class BLive_OT_videotexture_pause(bpy.types.Operator):
 			client.client().send("/texture/state", [ob.name, image, 'PAUSE'])
 		return {'FINISHED'}
 
-#~ bpy.utils.register_class(BLive_OT_videotexture_pause)
 
 class BLive_OT_videotexture_stop(bpy.types.Operator):
 	bl_idname = "blive.videotexture_stop"
@@ -117,9 +120,9 @@ class BLive_OT_videotexture_stop(bpy.types.Operator):
 			ob = bpy.context.object
 			image = bpy.context.object.active_material.active_texture.image.name
 			client.client().send("/texture/state", [ob.name, image, 'STOP'])
+			image.playlist_entry_changed = True
 		return {'FINISHED'}
 
-#~ bpy.utils.register_class(BLive_OT_videotexture_stop)
 
 def enumerate_images():
 	image_list = list()
@@ -149,7 +152,6 @@ class BLive_PT_texture_player(bpy.types.Panel):
 		if image.has_playlist:
 			row = self.layout.row(align=True)		
 			row.template_list(image, "playlist", image, "active_playlist_entry", rows=2, maxrows=8)
-
 
 def register():
 	print("texture.register")
