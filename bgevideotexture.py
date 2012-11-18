@@ -46,7 +46,7 @@ class player:
 			matID = texture.materialID(gameobject, img)
 			# -- Create the video texture
 			self.video = texture.Texture(gameobject, matID)
-        
+
 	def refresh(self, boolean):
 		if hasattr(self, "video"):
 			self.video.refresh(boolean)

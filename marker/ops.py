@@ -42,7 +42,7 @@ def unique_name(collection, name):
 
 class BLive_OT_trigger_new(bpy.types.Operator):
 	'''
-	    add timeline trigger
+		add timeline trigger
 	'''
 	bl_idname = "blive.trigger_new"
 	bl_label = "BLive add a timeline trigger"
@@ -60,7 +60,7 @@ class BLive_OT_trigger_new(bpy.types.Operator):
 
 class BLive_OT_trigger_delete(bpy.types.Operator):
 	'''
-	    delete timeline trigger
+		delete timeline trigger
 	'''
 	bl_idname = "blive.trigger_delete"
 	bl_label = "BLive delete a timeline trigger"
@@ -85,7 +85,7 @@ class BLive_OT_trigger_delete(bpy.types.Operator):
 
 #~ class BLive_OT_trigger_assign(bpy.types.Operator):
 	#~ '''
-	    #~ assign trigger to timeline marker
+		#~ assign trigger to timeline marker
 	#~ '''
 	#~ bl_idname = "blive.trigger_assign"
 	#~ bl_label = "BLive assign a trigger to a timeline marker"
@@ -104,7 +104,7 @@ class BLive_OT_trigger_delete(bpy.types.Operator):
 	
 class BLive_OT_trigger_revoke(bpy.types.Operator):
 	'''
-	    revoke trigger from timeline marker
+		revoke trigger from timeline marker
 	'''
 	bl_idname = "blive.trigger_revoke"
 	bl_label = "BLive revoke a trigger from a timeline marker"
@@ -178,7 +178,7 @@ def register():
 	bpy.utils.register_class(BLive_OT_trigger_revoke)
 	bpy.utils.register_class(BLive_OT_trigger_append)
 	bpy.utils.register_class(BLive_OT_trigger_remove)
-			
+
 def unregister():
 	print("marker.ops.unregister")
 	bpy.utils.unregister_class(BLive_OT_trigger_new)

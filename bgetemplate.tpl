@@ -3,7 +3,7 @@ import bge
 from bgeserver import BgeOSCServer
 
 def handle_timeout(self):
-    self.timed_out = True
+	self.timed_out = True
 
 def start():
 	'''
@@ -17,7 +17,7 @@ def start():
 		print('OSC Server:', port)
 		try:
 			bge.logic.server = BgeOSCServer( "127.0.0.1", port )
-			print("OSC Server Started", bge.logic.server.address())			
+			print("OSC Server Started", bge.logic.server.address())
 		except TypeError as err:
 			print('main.py: ', err)
 			stop()

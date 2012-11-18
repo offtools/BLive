@@ -28,11 +28,11 @@ def marker_frame_change_pre_handler(scene):
 	'''
 		app handler mainly used to trigger timelinemarkers
 	'''
-	#   ignored if animation is not playing
+	#	ignored if animation is not playing
 	if not bpy.context.screen.is_animation_playing:    
 		return
 
-	#   stop animation in editmode
+	#	stop animation in editmode
 	if not bpy.context.active_object.mode == 'OBJECT':
 		if bpy.context.screen.is_animation_playing:
 			bpy.ops.screen.animation_play()
