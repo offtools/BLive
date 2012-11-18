@@ -23,6 +23,8 @@ import bpy
 from bpy.props import StringProperty, BoolProperty, IntProperty, CollectionProperty, FloatProperty, EnumProperty
 from . import client
 
+#	FIXME: Pause doesnt work with playlist (line 90)
+
 class ImagePlaylist(bpy.types.PropertyGroup):
 	m_filepath = bpy.props.StringProperty()
 

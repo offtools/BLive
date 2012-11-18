@@ -21,6 +21,8 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
+#   TODO: fix pause bug
+
 # --- import bge modules
 import bge
 from bge import texture
@@ -32,7 +34,7 @@ class player:
 			raise IndexError
 			
 		self.__file = None
-		self.__state = 'STOPPED'
+		self.__state = 'STOP'
 		self.__loop = False
 
 		gameobject = logic.getCurrentScene().objects[obname]
@@ -46,7 +48,8 @@ class player:
 			self.video = texture.Texture(gameobject, matID)
         
 	def refresh(self, boolean):
-		self.video.refresh(boolean)
+		if hasattr(self, "video"):
+			self.video.refresh(boolean)
 
 	@property
 	def source(self):
@@ -61,12 +64,6 @@ class player:
 
 		# -- scale the video
 		self.video.source.scale = True
-
-		# --- loop video
-		if self.__loop:
-			self.video.source.repeat=-1
-		else:
-			self.video.source.repeat = 0
 
 		# -- play the video
 		self.state = 'PLAY'
@@ -83,21 +80,21 @@ class player:
 			self.video.source.pause()
 		elif state == 'STOP':
 			self.video.source.stop()
+			del self.video
+		else:
+			return
 		self.__state = state
 
 	@property
 	def loop(self):
-		return self.__state
+		return self.video.source.repeat
 	
 	@loop.setter	
-	def loop(self, state):
-		if state == 'PLAY':
-			self.video.source.play()
-		elif state == 'PAUSE':
-			self.video.source.pause()
-		elif state == 'STOP':
-			self.video.source.stop()
-		self.__state = state
+	def loop(self, loop):
+		if loop:
+			self.video.source.repeat = -1
+		else:
+			self.video.source.repeat = 0
 
 class camera(player):
 	def __init__(self, obname, imgname, width, height, deinterlace):
@@ -125,7 +122,7 @@ class camera(player):
 		self.state = 'PLAY'
 
 class videotexture(object):
-	TEXTURE_STATES = {'PLAY', 'PAUSE', 'STOP', 'REMOVE'}
+	TEXTURE_STATES = {'PLAY', 'PAUSE', 'STOP'}
 		
 	def __init__(self):
 		self.textures = dict()
@@ -136,6 +133,7 @@ class videotexture(object):
 			self.textures[i].refresh(True)
 
 	def movie(self, path, tags, args, source):
+		print(path, tags, args, source)
 		obname = args[0]
 		imgname = args[1]
 		filename = args[2]
@@ -176,6 +174,4 @@ class videotexture(object):
 		state = args[2]
 
 		if state in self.TEXTURE_STATES:
-			if state == 'REMOVE':
-				del self.textures[imgname]
 			self.textures[imgname].state = state
