@@ -48,7 +48,7 @@ class ImageExtProperties():
 		del bpy.types.Image.active_playlist_entry
 		del bpy.types.Image.playlist_entry_changed
 		
-		bpy.utils.register_class(ImagePlaylistEntry)
+		bpy.utils.unregister_class(ImagePlaylistEntry)
 
 class BLive_OT_videotexture_filebrowser(bpy.types.Operator):
 	bl_idname = "blive.videotexture_filebrowser"
@@ -135,7 +135,14 @@ class BLive_PT_texture_player(bpy.types.Panel):
 	bl_space_type = 'PROPERTIES'
 	bl_region_type = 'WINDOW'
 	bl_context = "texture"
-	
+
+	@classmethod
+	def poll(self, context):
+		try:
+			return bool(bpy.context.object.active_material.active_texture.image)
+		except AttributeError:
+			return False
+
 	def draw(self, context):
 		row = self.layout.row(align=True)
 		row.alignment = 'EXPAND'
@@ -150,7 +157,7 @@ class BLive_PT_texture_player(bpy.types.Panel):
 		row.prop(image, "has_playlist", text="use playlist")
 
 		if image.has_playlist:
-			row = self.layout.row(align=True)		
+			row = self.layout.row(align=True)
 			row.template_list(image, "playlist", image, "active_playlist_entry", rows=2, maxrows=8)
 
 def register():
