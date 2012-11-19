@@ -92,7 +92,7 @@ class BLive_OT_logic_add(bpy.types.Operator):
 					# add import path
 					textblock = bpy.data.texts[filename] 
 					textblock.write("import sys\n")
-					textblock.write("sys.path.append('{0}')\n".format(directory))
+					textblock.write("sys.path.append(r'{0}')\n".format(directory))
 
 					for line in file:
 						textblock.write(line)
