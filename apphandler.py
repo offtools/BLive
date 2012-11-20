@@ -93,11 +93,6 @@ def scene_update_post_handler(scene):
 			elif lamp.type == 'SUN':
 				client.client().send("/data/light/sun", [lamp.name])
 
-#	TODO: EDIT MODE											
-#if bpy.context.object and bpy.context.object.mode == 'EDIT':
-	#	modal operator
-
-
 	# --- check mesh updates
 	for ob in scene.objects:
 		if ob.is_updated_data:

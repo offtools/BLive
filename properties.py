@@ -21,6 +21,12 @@
 
 import bpy
 
+#	TODO: map diffuse color of material slot[0] to Object Color
+#	TODO: map Z-Transparency | Ray | ... of material slot[0] to Object Color[4]
+#	(reuse Keyframe when rendering your Project instead of using gameengine)
+
+#	FIXME: change Scene Trigger
+
 class CameraExtProperties():
 	#	Menu Projektor
 	#row.menu("RENDER_MT_presets", text=bpy.types.RENDER_MT_presets.bl_label)

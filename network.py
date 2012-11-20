@@ -35,7 +35,7 @@ class BLive_PT_scene_network(bpy.types.Panel):
 	bl_label = "BLive Network"
 	bl_space_type = 'PROPERTIES'
 	bl_region_type = 'WINDOW'
-	bl_context = "scene"
+	bl_context = "render"
 
 	def draw(self, context):
 		self.layout.label(text="Setup")

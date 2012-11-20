@@ -45,6 +45,7 @@ bl_info = {
 # import modules
 if "bpy" in locals():
 	import imp
+	imp.reload(settings)
 	imp.reload(logic)
 	imp.reload(client)
 	imp.reload(texture)
@@ -52,6 +53,7 @@ if "bpy" in locals():
 	imp.reload(network)
 	imp.reload(marker)
 else:
+	from . import settings
 	from . import logic
 	from . import client
 	from . import texture
@@ -63,6 +65,7 @@ import bpy
 
 def register():
 	print("__init__.register")
+	settings.register()
 	network.register()
 	logic.register()
 	client.register()
@@ -78,6 +81,7 @@ def unregister():
 	client.unregister()
 	logic.unregister()
 	network.unregister()
+	settings.unregister()
 	
 if __name__ == "__main__":
 	pass
