@@ -19,21 +19,22 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-import bpy
+# Settings holds all common data for the addon. 
+# They are added to bpy.data.windowmanger[...], because its
+# a unique stucture in the BlendData
 
-class BLive_PT_settings(bpy.types.Panel):
-	bl_label = "BLive Settings"
-	bl_space_type = 'PROPERTIES'
-	bl_region_type = 'WINDOW'
-	bl_context = "render"
-
-	def draw(self, context):
-		pass
+from . import props
+from . import ops
+from . import ui
 
 def register():
-	print("settings.ui.register")
-	bpy.utils.register_class(BLive_PT_settings)
+	print("common.register")
+	props.register()
+	ops.register()
+	ui.register()
 
 def unregister():
-	print("settings.ui.unregister")
-	bpy.utils.unregister_class(BLive_PT_settings)
+	print("common.unregister")
+	ui.unregister()
+	ops.unregister()
+	props.unregister()

@@ -133,10 +133,10 @@ class BLive_OT_logic_remove(bpy.types.Operator):
 
 def register():
 	print("logic.register")
-	bpy.utils.register_class(BLive_OT_logic_add)
-	bpy.utils.register_class(BLive_OT_logic_remove)
+	#~ bpy.utils.register_class(BLive_OT_logic_add)
+	#~ bpy.utils.register_class(BLive_OT_logic_remove)
 
 def unregister():
 	print("logic.unregister")
-	bpy.utils.unregister_class(BLive_OT_logic_add)
-	bpy.utils.unregister_class(BLive_OT_logic_remove)
+	#~ bpy.utils.unregister_class(BLive_OT_logic_add)
+	#~ bpy.utils.unregister_class(BLive_OT_logic_remove)

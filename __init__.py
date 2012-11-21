@@ -45,16 +45,14 @@ bl_info = {
 # import modules
 if "bpy" in locals():
 	import imp
-	imp.reload(settings)
-	imp.reload(logic)
+	imp.reload(common)
 	imp.reload(client)
 	imp.reload(texture)
 	imp.reload(apphandler)
 	imp.reload(network)
 	imp.reload(marker)
 else:
-	from . import settings
-	from . import logic
+	from . import common
 	from . import client
 	from . import texture
 	from . import apphandler
@@ -65,9 +63,8 @@ import bpy
 
 def register():
 	print("__init__.register")
-	settings.register()
+	common.register()
 	network.register()
-	logic.register()
 	client.register()
 	texture.register()
 	apphandler.register()
@@ -79,9 +76,8 @@ def unregister():
 	apphandler.unregister()
 	texture.unregister()
 	client.unregister()
-	logic.unregister()
 	network.unregister()
-	settings.unregister()
+	common.unregister()
 	
 if __name__ == "__main__":
 	pass
