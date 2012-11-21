@@ -56,7 +56,6 @@ else:
 	from . import client
 	from . import texture
 	from . import apphandler
-	from . import network
 	from . import marker
 
 import bpy
@@ -64,7 +63,6 @@ import bpy
 def register():
 	print("__init__.register")
 	common.register()
-	network.register()
 	client.register()
 	texture.register()
 	apphandler.register()
@@ -76,7 +74,6 @@ def unregister():
 	apphandler.unregister()
 	texture.unregister()
 	client.unregister()
-	network.unregister()
 	common.unregister()
 	
 if __name__ == "__main__":
