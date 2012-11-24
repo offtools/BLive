@@ -19,6 +19,8 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
+# TODO: clean this apphandler mess and merge it into common folder
+
 import bpy
 import bmesh
 from bpy.app.handlers import persistent
@@ -41,7 +43,7 @@ def scene_update_post_handler(scene):
 		if ob.is_updated_data:
 			#~ print("material updated data %s updated" %ob)
 			pass
-			
+
 	#TODO: move all mesh handler here
 	for mesh in bpy.data.meshes:
 		if mesh.is_updated:

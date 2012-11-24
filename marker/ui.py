@@ -23,6 +23,8 @@
 #	Panel located in NLA Editor
 #
 
+# TODO: Error Handling for TriggerGameProperty
+
 import bpy
 
 class BLive_PT_timeline_trigger(bpy.types.Panel):
@@ -138,13 +140,20 @@ class BLive_PT_timeline_trigger(bpy.types.Panel):
 		row = ui.row()
 		row.prop_search(trigger, "m_scene", bpy.data, "scenes", text="scene")
 
+	def TriggerGameProperty(self, context, trigger, ui):
+		row = ui.row()
+		row.prop_search(trigger, "m_object", context.scene, "objects", text="object")
+		if not context.scene.objects[trigger.m_object].game.properties:
+			return
+		row = ui.row()
+		row.prop_search(trigger, "m_property", context.scene.objects[trigger.m_object].game, "properties", text="prop")
+		row = ui.row()
+		row.prop(context.scene.objects[trigger.m_object].game.properties[trigger.m_property], "value", text="set")
+
 def register():
 	print("marker.ui.register")
-
 	bpy.utils.register_class(BLive_PT_timeline_trigger)
 
-		
 def unregister():
 	print("marker.ui.unregister")
-
 	bpy.utils.unregister_class(BLive_PT_timeline_trigger)

@@ -36,18 +36,19 @@ class BgeOSCServer(OSCServer):
 		self.timeout = 0
 		self.__module = list()
 
-		self.addMsgHandler('/connect', self.callback_connect)		
+		self.addMsgHandler('/connect', self.callback_connect)
 		self.addMsgHandler('/debug', bgehandler.debug)
 		self.addMsgHandler('/quit', bgehandler.quit)
 		self.addMsgHandler('/debug', bgehandler.update_objects)
 		self.addMsgHandler("/data/objects", bgehandler.update_objects)
 		self.addMsgHandler("/data/object/scaling", bgehandler.update_object_scaling)
 		self.addMsgHandler("/data/object/color", bgehandler.update_object_color)
+		self.addMsgHandler("/data/object/gameproperty", bgehandler.update_object_property)
 		self.addMsgHandler("/data/camera", bgehandler.update_camera)
 		self.addMsgHandler("/data/light", bgehandler.update_light)
 		self.addMsgHandler("/data/light/normal", bgehandler.update_light_normal)
 		self.addMsgHandler("/data/light/spot", bgehandler.update_light_spot)
-		self.addMsgHandler("/data/light/sun", bgehandler.update_light_sun)			
+		self.addMsgHandler("/data/light/sun", bgehandler.update_light_sun)
 		self.addMsgHandler("/data/objects/polygon", bgehandler.update_mesh)
 		self.addMsgHandler("/scene", bgehandler.change_scene)
 

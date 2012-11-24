@@ -51,6 +51,13 @@ def update_object_color(path, tags, args, source):
 	ob = scene.objects[_id]
 	ob.color = (args[1],args[2],args[3],args[4])
 	
+def update_object_property(path, tags, args, source):
+	scene = bge.logic.getCurrentScene()
+	_id = args[0]
+	_prop = args[1]
+	_value = args[2]
+	scene.objects[_id][_prop] = _value
+
 def update_camera(path, tags, args, source):
 
 	scene = bge.logic.getCurrentScene()

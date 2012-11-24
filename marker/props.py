@@ -27,7 +27,8 @@ TRIGGER_TYPE_ENUM = [("TriggerDummy","Dummy","Dummy Trigger"), \
 			 		("TriggerVideoOpen","Open Video","Open a Video"), \
 			 		("TriggerCameraOpen","Connect Camera","Connect a Camera"), \
 			 		("TriggerVideoState","Set Video State","Set Play, Pause, Stop"), \
-			 		("TriggerChangeScene","Change active Scene","Change active Scene")]
+			 		("TriggerChangeScene","Change active Scene","Change active Scene"), \
+			 		("TriggerGameProperty","Set a Game Property","Set a Game Property")]
 	
 def TRIGGER_TYPE_NAME(self, _type):
 	types = [ i[0] for i in TRIGGER_TYPE_ENUM ]
@@ -102,6 +103,17 @@ class TriggerChangeScene(bpy.types.PropertyGroup):
 		bpy.context.screen.scene = bpy.data.scenes[self.m_scene]
 		client.client().send(self.m_oscpath, [self.m_scene])
 
+class TriggerGameProperty(bpy.types.PropertyGroup):
+	m_hidden = bpy.props.BoolProperty(default=True)
+	m_oscpath = bpy.props.StringProperty(default="/data/object/gameproperty")
+
+	m_object = bpy.props.StringProperty()
+	m_property = bpy.props.StringProperty()
+
+	def send(self):
+		value = bpy.context.scene.objects[self.m_object].game.properties[self.m_property].value
+		client.client().send(self.m_oscpath, [self.m_object, self.m_property, value])
+
 class TriggerWrapper(bpy.types.PropertyGroup):
 	'''
 		Property Group for OscTrigger
@@ -111,6 +123,7 @@ class TriggerWrapper(bpy.types.PropertyGroup):
 	TriggerCameraOpen = bpy.props.CollectionProperty(type=TriggerCameraOpen)
 	TriggerVideoState = bpy.props.CollectionProperty(type=TriggerVideoState)
 	TriggerChangeScene = bpy.props.CollectionProperty(type=TriggerChangeScene)
+	TriggerGameProperty = bpy.props.CollectionProperty(type=TriggerGameProperty)
 
 class TriggerSlot(bpy.types.PropertyGroup):
 	m_type = bpy.props.StringProperty()
@@ -139,6 +152,7 @@ def register():
 	bpy.utils.register_class(TriggerCameraOpen) 
 	bpy.utils.register_class(TriggerVideoState)
 	bpy.utils.register_class(TriggerChangeScene)
+	bpy.utils.register_class(TriggerGameProperty)
 	bpy.utils.register_class(TriggerWrapper)
 	bpy.utils.register_class(TriggerSlot)
 	bpy.utils.register_class(TriggerQueue)
@@ -157,6 +171,7 @@ def unregister():
 	bpy.utils.unregister_class(TriggerCameraOpen) 
 	bpy.utils.unregister_class(TriggerVideoState)
 	bpy.utils.unregister_class(TriggerChangeScene)
+	bpy.utils.unregister_class(TriggerGameProperty)
 	bpy.utils.unregister_class(TriggerQueue)
 	bpy.utils.unregister_class(TriggerSlot)
 	bpy.utils.unregister_class(TriggerWrapper)
