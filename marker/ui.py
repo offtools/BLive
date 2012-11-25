@@ -112,6 +112,12 @@ class BLive_PT_timeline_trigger(bpy.types.Panel):
 		row.prop_search(trigger, "m_image", bpy.data, "images", text="image")
 		row = ui.row()
 		row.prop(trigger, "m_loop", text="loop video")
+		row = ui.row()
+		row.prop(trigger, "m_preseek", text="preseek")
+		row = ui.row()
+		row.prop(trigger, "m_inp", text="inpoint")
+		row.prop(trigger, "m_outp", text="outpoint")
+
 
 	def TriggerCameraOpen(self, context, trigger, ui):
 		row = ui.row()

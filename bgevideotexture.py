@@ -96,6 +96,22 @@ class player:
 		else:
 			self.video.source.repeat = 0
 
+	@property
+	def preseek(self):
+		return self.video.source.preseek
+	
+	@preseek.setter	
+	def preseek(self, preseek):
+		self.video.source.preseek = preseek
+
+	@property
+	def range(self):
+		return self.video.source.range
+	
+	@range.setter	
+	def range(self, frames):
+		self.video.source.range = frames
+
 class camera(player):
 	def __init__(self, obname, imgname, width, height, deinterlace):
 		super().__init__(obname, imgname)
@@ -138,7 +154,10 @@ class videotexture(object):
 		imgname = args[1]
 		filename = args[2]
 		loop = args[3]
-		
+		preseek = args[4]
+		inp = float(args[5])
+		outp = float(args[6])
+
 		if imgname in self.textures:
 			del self.textures[imgname]
 		try:
@@ -146,6 +165,9 @@ class videotexture(object):
 			self.textures[imgname] = player(obname,imgname)
 			self.textures[imgname].source = filename
 			self.textures[imgname].loop = loop
+			self.textures[imgname].preseek = preseek
+			self.textures[imgname].range = (inp, outp)
+
 		except TypeError as err:
 			print("err in videotexture.open: ", err)
 

@@ -55,11 +55,14 @@ class TriggerVideoOpen(bpy.types.PropertyGroup):
 	m_filepath = bpy.props.StringProperty(subtype="FILE_PATH")
 	m_image = bpy.props.StringProperty()
 	m_loop = bpy.props.BoolProperty(default=False)
+	m_preseek = bpy.props.IntProperty(default=0)
+	m_inp = bpy.props.FloatProperty(default=0.0)
+	m_outp = bpy.props.FloatProperty(default=0.0)
 
 	def send(self):
 		print("play movie")
 		filepath = bpy.path.abspath(self.m_filepath)
-		client.client().send(self.m_oscpath, [self.m_object, self.m_image, filepath, int(self.m_loop)])
+		client.client().send(self.m_oscpath, [self.m_object, self.m_image, filepath, int(self.m_loop)], self.m_preseek, self.m_inp, self.m_outp)
 
 class TriggerCameraOpen(bpy.types.PropertyGroup):
 	m_hidden = bpy.props.BoolProperty(default=True)
