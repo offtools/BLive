@@ -25,6 +25,7 @@
 
 # --- import bge modules
 import bge
+import aud
 from bge import texture
 from bge import logic
 
@@ -36,6 +37,9 @@ class player:
 		self.__file = None
 		self.__state = 'STOP'
 		self.__loop = False
+		self.__hassound = False
+		self.__sound = None
+		self.__handle = None
 
 		gameobject = logic.getCurrentScene().objects[obname]
 
@@ -47,9 +51,12 @@ class player:
 			# -- Create the video texture
 			self.video = texture.Texture(gameobject, matID)
 
-	def refresh(self, boolean):
+	def refresh(self, doplay):
 		if hasattr(self, "video"):
-			self.video.refresh(boolean)
+			if self.__hassound == True:
+				self.video.refresh(doplay, self.__handle.position)
+			else:
+				self.video.refresh(doplay)
 
 	@property
 	def source(self):
@@ -61,6 +68,18 @@ class player:
 		print("player.source: ", self.__file)
 		# -- Load the file
 		self.video.source = texture.VideoFFmpeg(self.__file)
+
+		try:
+			self.__sound = aud.Factory(self.__file)
+			self.__sound.loop(-1)
+			device = aud.device()
+			self.__handle = device.play(self.__sound)
+			self.__handle.loop_count = -1
+			self.__hassound = True
+		except aud.error as err:
+			print('Error: MoviePlayer.load - no sound available')
+			self.__hassound = None
+			self.__sound = None
 
 		# -- scale the video
 		self.video.source.scale = True
@@ -80,6 +99,11 @@ class player:
 			self.video.source.pause()
 		elif state == 'STOP':
 			self.video.source.stop()
+			if self.__hassound:
+				self.__handle.stop()
+				self.__hassound = False
+				self.__sound = None
+				self.__handle = None
 			del self.video
 		else:
 			return
@@ -89,12 +113,14 @@ class player:
 	def loop(self):
 		return self.video.source.repeat
 
-	@loop.setter	
+	@loop.setter
 	def loop(self, loop):
 		if loop:
 			self.video.source.repeat = -1
 		else:
 			self.video.source.repeat = 0
+		if self.__hassound:
+			self.__sound.loop(self.video.source.repeat)
 
 	@property
 	def preseek(self):
@@ -111,6 +137,8 @@ class player:
 	@range.setter	
 	def range(self, seq):
 		if seq[0] < seq[1]:
+			if self.__hassound:
+				self.__sound.limit(seq[0], seq[1])
 			self.video.source.range = seq
 
 class camera(player):
