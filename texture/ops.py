@@ -21,7 +21,7 @@
 
 import os
 import bpy
-from .. import client
+from ..client import BLiveClient
 
 class BLive_OT_videotexture_filebrowser(bpy.types.Operator):
 	bl_idname = "blive.videotexture_filebrowser"
@@ -46,9 +46,10 @@ class BLive_OT_videotexture_filebrowser(bpy.types.Operator):
 		ob = context.active_object
 		image = ob.active_material.active_texture.image
 		player = image.player
+		_id = player.active_playlist_entry
 
 		if not player.has_playlist:
-			client.client().send("/texture/movie", [ob.name, image.name, self.filepath, int(player.loop)])
+			BLiveClient().send("/texture/movie", [ob.name, image.name, self.filepath, int(player.loop)], player.playlist[_id].m_preseek, player.playlist[_id].m_inpoint, player.playlist[_id].m_outpoint)
 		else:
 			entry = player.playlist.add()
 			entry.name = os.path.basename(self.filepath)
@@ -76,12 +77,13 @@ class BLive_OT_videotexture_play(bpy.types.Operator):
 		ob = context.active_object
 		image = ob.active_material.active_texture.image
 		player = image.player
-		
+		_id = player.active_playlist_entry
+				
 		if player.has_playlist and player.playlist_entry_changed:
-			client.client().send("/texture/movie", [ob.name, image.name, player.playlist[player.active_playlist_entry].m_filepath, int(player.loop)])
+			BLiveClient().send("/texture/movie", [ob.name, image.name, player.playlist[player.active_playlist_entry].m_filepath, int(player.loop)], player.playlist[_id].m_preseek, player.playlist[_id].m_inpoint, player.playlist[_id].m_outpoint)
 			player.playlist_entry_changed=False
 
-		client.client().send("/texture/state", [ob.name, image.name, 'PLAY'])
+		BLiveClient().send("/texture/state", [ob.name, image.name, 'PLAY'])
 		return {'FINISHED'}
 
 
@@ -99,7 +101,7 @@ class BLive_OT_videotexture_pause(bpy.types.Operator):
 	def execute(self, context):
 		ob = context.active_object
 		image = ob.active_material.active_texture.image
-		client.client().send("/texture/state", [ob.name, image.name, 'PAUSE'])
+		BLiveClient().send("/texture/state", [ob.name, image.name, 'PAUSE'])
 		return {'FINISHED'}
 
 class BLive_OT_videotexture_stop(bpy.types.Operator):
@@ -117,7 +119,7 @@ class BLive_OT_videotexture_stop(bpy.types.Operator):
 		ob = bpy.context.object
 		image = ob.active_material.active_texture.image
 		player = image.player
-		client.client().send("/texture/state", [ob.name, image.name, 'STOP'])
+		BLiveClient().send("/texture/state", [ob.name, image.name, 'STOP'])
 		player.playlist_entry_changed = True
 		return {'FINISHED'}
 

@@ -59,6 +59,13 @@ class BLive_PT_texture_player(bpy.types.Panel):
 		if player.has_playlist:
 			row = self.layout.row(align=True)
 			row.template_list(player, "playlist", player, "active_playlist_entry", rows=2, maxrows=8)
+			_id = player.active_playlist_entry
+			if len(player.playlist):
+				row = self.layout.row(align=True)
+				row.prop(player.playlist[_id], "m_inpoint", text="in")
+				row.prop(player.playlist[_id], "m_outpoint", text="out")
+				row = self.layout.row()
+				row.prop(player.playlist[_id], "m_preseek", text="preseek")
 
 def register():
 	print("texture.ui.register")

@@ -88,7 +88,7 @@ class player:
 	@property
 	def loop(self):
 		return self.video.source.repeat
-	
+
 	@loop.setter	
 	def loop(self, loop):
 		if loop:
@@ -109,8 +109,9 @@ class player:
 		return self.video.source.range
 	
 	@range.setter	
-	def range(self, frames):
-		self.video.source.range = frames
+	def range(self, seq):
+		if seq[0] < seq[1]:
+			self.video.source.range = seq
 
 class camera(player):
 	def __init__(self, obname, imgname, width, height, deinterlace):

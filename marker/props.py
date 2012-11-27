@@ -21,7 +21,7 @@
 
 
 import bpy
-from .. import client
+from ..client import BLiveClient
 
 TRIGGER_TYPE_ENUM = [("TriggerDummy","Dummy","Dummy Trigger"), \
 			 		("TriggerVideoOpen","Open Video","Open a Video"), \
@@ -45,7 +45,7 @@ class TriggerDummy(bpy.types.PropertyGroup):
 	m_msg = bpy.props.StringProperty(default="Dummy Trigger")
 
 	def send(self):
-		client.client().send(self.m_oscpath, [self.m_msg])
+		BLiveClient().send(self.m_oscpath, [self.m_msg])
 
 class TriggerVideoOpen(bpy.types.PropertyGroup):
 	m_hidden = bpy.props.BoolProperty(default=True)
@@ -62,7 +62,7 @@ class TriggerVideoOpen(bpy.types.PropertyGroup):
 	def send(self):
 		print("play movie")
 		filepath = bpy.path.abspath(self.m_filepath)
-		client.client().send(self.m_oscpath, [self.m_object, self.m_image, filepath, int(self.m_loop)], self.m_preseek, self.m_inp, self.m_outp)
+		BLiveClient().send(self.m_oscpath, [self.m_object, self.m_image, filepath, int(self.m_loop)], self.m_preseek, self.m_inp, self.m_outp)
 
 class TriggerCameraOpen(bpy.types.PropertyGroup):
 	m_hidden = bpy.props.BoolProperty(default=True)
@@ -78,7 +78,7 @@ class TriggerCameraOpen(bpy.types.PropertyGroup):
 	
 	def send(self):
 		print("connect camera")
-		client.client().send(self.m_oscpath, [self.m_object, self.m_image, self.m_filepath, self.m_width, self.m_height, int(self.m_deinterlace)])
+		BLiveClient().send(self.m_oscpath, [self.m_object, self.m_image, self.m_filepath, self.m_width, self.m_height, int(self.m_deinterlace)])
 
 class TriggerVideoState(bpy.types.PropertyGroup):
 	m_hidden = bpy.props.BoolProperty(default=True)
@@ -93,7 +93,7 @@ class TriggerVideoState(bpy.types.PropertyGroup):
 		name = "state")
 
 	def send(self):
-		client.client().send(self.m_oscpath, [self.m_image, self.m_state])
+		BLiveClient().send(self.m_oscpath, [self.m_image, self.m_state])
 
 class TriggerChangeScene(bpy.types.PropertyGroup):
 	m_hidden = bpy.props.BoolProperty(default=True)
@@ -104,7 +104,7 @@ class TriggerChangeScene(bpy.types.PropertyGroup):
 	def send(self):
 		#	change scene in blender too
 		bpy.context.screen.scene = bpy.data.scenes[self.m_scene]
-		client.client().send(self.m_oscpath, [self.m_scene])
+		BLiveClient().send(self.m_oscpath, [self.m_scene])
 
 class TriggerGameProperty(bpy.types.PropertyGroup):
 	m_hidden = bpy.props.BoolProperty(default=True)
@@ -115,7 +115,7 @@ class TriggerGameProperty(bpy.types.PropertyGroup):
 
 	def send(self):
 		value = bpy.context.scene.objects[self.m_object].game.properties[self.m_property].value
-		client.client().send(self.m_oscpath, [self.m_object, self.m_property, value])
+		BLiveClient().send(self.m_oscpath, [self.m_object, self.m_property, value])
 
 class TriggerWrapper(bpy.types.PropertyGroup):
 	'''

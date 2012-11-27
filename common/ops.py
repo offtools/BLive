@@ -23,7 +23,7 @@ import bpy
 import os
 import sys
 import subprocess
-from .. import client
+from ..client import BLiveClient
 
 # TODO: test blenderplayer port cmdline options
 
@@ -223,7 +223,7 @@ class BLive_OT_osc_connect(bpy.types.Operator):
 		server = bc.server
 		port = bc.port
 
-		cli = client.client()
+		cli = BLiveClient()
 		cli.connect(server, port)
 		return{'FINISHED'}
 
@@ -240,7 +240,7 @@ class BLive_OT_osc_quit(bpy.types.Operator):
 		return sc.blive_scene_settings.has_server_object
 
 	def execute(self, context):
-		client.client().quit()
+		BLiveClient().quit()
 		return{'FINISHED'}
 
 def register():

@@ -25,7 +25,7 @@ import sys
 from . import OSC
 from .OSC import OSCClient, OSCMessage
 
-class client(OSCClient):
+class BLiveClient(OSCClient):
 	def __new__(type, *args):
 		if not '_instance' in type.__dict__:
 			type._instance = object.__new__(type)

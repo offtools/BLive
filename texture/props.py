@@ -23,6 +23,9 @@ import bpy
 
 class ImagePlaylistEntry(bpy.types.PropertyGroup):
 	m_filepath = bpy.props.StringProperty()
+	m_inpoint = bpy.props.FloatProperty(default=0)
+	m_outpoint = bpy.props.FloatProperty(default=0)
+	m_preseek = bpy.props.IntProperty(default=0)
 
 def playlist_entry_changed(self, context):
 	player = context.active_object.active_material.active_texture.image.player

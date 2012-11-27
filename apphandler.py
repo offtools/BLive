@@ -24,7 +24,7 @@
 import bpy
 import bmesh
 from bpy.app.handlers import persistent
-from . import client
+from .client import BLiveClient
 
 @persistent
 def scene_update_post_handler(scene):
@@ -56,14 +56,14 @@ def scene_update_post_handler(scene):
 	#	ob color workaround (can't check update of this value')
 	for ob in scene.objects:
 		if ob.type == 'MESH':
-			client.client().send("/data/object/color", [ob.name, ob.color[0], ob.color[1], ob.color[2], ob.color[3]])					
+			BLiveClient().send("/data/object/color", [ob.name, ob.color[0], ob.color[1], ob.color[2], ob.color[3]])					
 
 	for ob in scene.objects:
 		if ob.is_updated:
-			client.client().send("/data/objects", [ob.name, ob.location[0], ob.location[1], ob.location[2], ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2]])
+			BLiveClient().send("/data/objects", [ob.name, ob.location[0], ob.location[1], ob.location[2], ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2]])
 
 			if ob.type == 'MESH':
-				client.client().send("/data/object/scaling", [ob.name, ob.scale[0], ob.scale[1], ob.scale[2]])					
+				BLiveClient().send("/data/object/scaling", [ob.name, ob.scale[0], ob.scale[1], ob.scale[2]])					
 
 		if ob.type == 'CAMERA':
 			camera = bpy.data.cameras[ob.name]
@@ -74,7 +74,7 @@ def scene_update_post_handler(scene):
 			if camera.type == 'ORTHO':
 				perspective = 0
 			aspect = scene.game_settings.resolution_y/scene.game_settings.resolution_x
-			client.client().send("/data/camera",[ ob.name, camera.angle, aspect, camera.ortho_scale, camera.clip_start, camera.clip_end, perspective, camera.shift_x, camera.shift_y])
+			BLiveClient().send("/data/camera",[ ob.name, camera.angle, aspect, camera.ortho_scale, camera.clip_start, camera.clip_end, perspective, camera.shift_x, camera.shift_y])
 
 		
 		#	lamp data except color and energy not working at the moment 
@@ -87,13 +87,13 @@ def scene_update_post_handler(scene):
 				continue
 			
 			#	common data for all lamps types including sun 
-			client.client().send("/data/light", [lamp.name, lamp.energy, lamp.color[0], lamp.color[1], lamp.color[2]])
+			BLiveClient().send("/data/light", [lamp.name, lamp.energy, lamp.color[0], lamp.color[1], lamp.color[2]])
 			if lamp.type == 'POINT':
-				client.client().send("/data/light/normal", [lamp.name, lamp.distance,  lamp.linear_attenuation, lamp.quadratic_attenuation])
+				BLiveClient().send("/data/light/normal", [lamp.name, lamp.distance,  lamp.linear_attenuation, lamp.quadratic_attenuation])
 			elif lamp.type == 'SPOT':
-				client.client().send("/data/light/spot",  [lamp.name, lamp.distance,  lamp.linear_attenuation, lamp.quadratic_attenuation, lamp.spot_size, lamp.spot_blend])
+				BLiveClient().send("/data/light/spot",  [lamp.name, lamp.distance,  lamp.linear_attenuation, lamp.quadratic_attenuation, lamp.spot_size, lamp.spot_blend])
 			elif lamp.type == 'SUN':
-				client.client().send("/data/light/sun", [lamp.name])
+				BLiveClient().send("/data/light/sun", [lamp.name])
 
 	# --- check mesh updates
 	for ob in scene.objects:
@@ -102,7 +102,7 @@ def scene_update_post_handler(scene):
 				mesh = bmesh.from_edit_mesh(ob.data)
 				for face in mesh.faces:
 					for vindex, vertex in enumerate(face.verts):
-						client.client().send("/data/objects/polygon", [ob.name, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2]])
+						BLiveClient().send("/data/objects/polygon", [ob.name, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2]])
 			except ValueError as err:
 				print('apphandler.py - mesh update: ', err)
 
