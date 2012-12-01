@@ -100,7 +100,7 @@ class BLive_OT_logic_add(bpy.types.Operator):
 		for i in paths:
 			path = os.path.join(i, "addons")
 			for j in bpy.path.module_names(path, True):
-				if "blive" in j[0]:
+				if bpy.context.user_preferences.addons['blive'].module in j[0]:
 					bpy.data.texts.new(name=filename)
 					
 					directory = os.path.dirname(j[1])
