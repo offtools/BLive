@@ -22,6 +22,7 @@
 #	TODO: fix debug message bug
 
 import bge
+import math
 
 def debug(path, tags, args, source):
 	print("Debug: ", path, tags, args, source)
@@ -65,11 +66,11 @@ def update_camera(path, tags, args, source):
 
 	angle = args[1]
 	aspect = args[2]
-#		camera.lens = lens
-#		camera.ortho_scale = args[3]
-#		camera.near = args[4]
-#		camera.far = args[5]
-#		camera.perspective = args[6]
+	#camera.lens = lens
+	camera.ortho_scale = args[3]
+	camera.near = args[4]
+	camera.far = args[5]
+	camera.perspective = args[6]
 
 	projection_matrix = camera.projection_matrix
 
