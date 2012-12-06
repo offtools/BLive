@@ -97,7 +97,7 @@ def scene_update_post_handler(scene):
 
 	# --- check mesh updates
 	for ob in scene.objects:
-		if ob.is_updated_data:
+		if ob.is_updated_data and ob.type == 'MESH':
 			try:
 				mesh = bmesh.from_edit_mesh(ob.data)
 				for face in mesh.faces:
