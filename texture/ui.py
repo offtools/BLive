@@ -46,15 +46,11 @@ class BLive_PT_texture_player(bpy.types.Panel):
 		player = image.player
 
 		row = self.layout.row(align=True)
-		row.alignment = 'EXPAND'
 		row.operator("blive.videotexture_filebrowser", text="", icon="FILESEL")
 		row.operator("blive.videotexture_play", text="", icon="PLAY")
 		row.operator("blive.videotexture_pause", text="", icon="PAUSE")
 		row.operator("blive.videotexture_stop", text="", icon="MESH_PLANE")
-
-		row = self.layout.row(align=True)
-		row.prop(player, "loop", text="loop video")
-		row.prop(player, "has_playlist", text="use playlist")
+		row.operator("blive.videotexture_close", text="", icon="PANEL_CLOSE")
 
 		if player.has_playlist:
 			row = self.layout.row(align=True)
@@ -62,11 +58,18 @@ class BLive_PT_texture_player(bpy.types.Panel):
 			_id = player.active_playlist_entry
 			if len(player.playlist):
 				row = self.layout.row(align=True)
-				row.prop(player.playlist[_id], "m_inpoint", text="in")
-				row.prop(player.playlist[_id], "m_outpoint", text="out")
+				row.prop(player.playlist[_id], "inpoint", text="in")
+				row.prop(player.playlist[_id], "outpoint", text="out")
 				row = self.layout.row()
-				row.prop(player.playlist[_id], "m_preseek", text="preseek")
-
+				row.prop(player.playlist[_id], "preseek", text="preseek")
+				row.prop(player.playlist[_id], "loop", text="loop")
+				row.prop(player.playlist[_id], "audio", text="sound")
+		else:
+			row = self.layout.row(align=True)
+			row.prop(player, "audio", text="play audio")
+			row.prop(player, "loop", text="loop video")
+			row.prop(player, "has_playlist", text="use playlist")
+			
 def register():
 	print("texture.ui.register")
 	bpy.utils.register_class(BLive_PT_texture_player)	

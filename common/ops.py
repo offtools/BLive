@@ -102,7 +102,7 @@ class BLive_OT_logic_add(bpy.types.Operator):
 			for j in bpy.path.module_names(path, True):
 				if bpy.context.user_preferences.addons['blive'].module in j[0]:
 					bpy.data.texts.new(name=filename)
-					
+
 					directory = os.path.dirname(j[1])
 					filepath = os.path.join(directory, tpl)
 					file = open(filepath, 'r')

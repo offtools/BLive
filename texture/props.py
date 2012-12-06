@@ -22,10 +22,13 @@
 import bpy
 
 class ImagePlaylistEntry(bpy.types.PropertyGroup):
-	m_filepath = bpy.props.StringProperty()
-	m_inpoint = bpy.props.FloatProperty(default=0)
-	m_outpoint = bpy.props.FloatProperty(default=0)
-	m_preseek = bpy.props.IntProperty(default=0)
+	filepath = bpy.props.StringProperty()
+	audio = bpy.props.BoolProperty(default=False)
+	inpoint = bpy.props.FloatProperty(default=0)
+	outpoint = bpy.props.FloatProperty(default=0)
+	preseek = bpy.props.IntProperty(default=0)
+	loop = bpy.props.BoolProperty(default=False)
+	deinterlace = bpy.props.BoolProperty(default=False)
 
 def playlist_entry_changed(self, context):
 	player = context.active_object.active_material.active_texture.image.player
@@ -35,8 +38,9 @@ class ImagePlayer(bpy.types.PropertyGroup):
 	loop = bpy.props.BoolProperty(default=True)
 	has_playlist = bpy.props.BoolProperty(default=False)
 	playlist = bpy.props.CollectionProperty(type=ImagePlaylistEntry)
-	active_playlist_entry = bpy.props.IntProperty(update=playlist_entry_changed)
+	active_playlist_entry = bpy.props.IntProperty(default=-1, update=playlist_entry_changed)
 	playlist_entry_changed = bpy.props.BoolProperty(default=True)
+	audio = bpy.props.BoolProperty(default=False)
 
 def register():
 	print("texture.props.register")

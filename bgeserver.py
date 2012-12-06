@@ -52,12 +52,73 @@ class BgeOSCServer(OSCServer):
 		self.addMsgHandler("/data/objects/polygon", bgehandler.update_mesh)
 		self.addMsgHandler("/scene", bgehandler.change_scene)
 
-		vtex = bgevideotexture.videotexture()
+		vtex = bgevideotexture.VideoTexture()
 		self._addUpdateModule(vtex)
-		self.addMsgHandler("/texture/state", vtex.state)
-		self.addMsgHandler("/texture/movie", vtex.movie)
-		self.addMsgHandler("/texture/camera", vtex.camera)
-			
+		#~ self.addMsgHandler("/texture/state", vtex.cb_state)
+		#~ self.addMsgHandler("/texture/movie", vtex.cb_movie)
+		#~ self.addMsgHandler("/texture/camera", vtex.cb_camera)
+
+		# --- open a Movie:
+		# --- object name (string)
+		# --- image name (string)
+		# --- filepath (string)
+		# --- sound (bool)
+		# --- inpoint (float)
+		# --- outpoint ()
+		# --- loop (bool)
+		# --- preseek (int)
+		# --- deinterlace (bool)
+		self.addMsgHandler("/texture/movie/open", vtex.cb_movie_open)
+
+		# --- set playback range:
+		# --- inpoint (float)
+		# --- outpoint (float)
+		self.addMsgHandler("/texture/movie/range", vtex.cb_movie_range)
+
+		# --- enable audio:
+		# --- audio (bool)
+		self.addMsgHandler("/texture/movie/audio", vtex.cb_movie_audio)
+
+		# --- loop playback:
+		# --- loop (bool)
+		self.addMsgHandler("/texture/movie/loop", vtex.cb_movie_loop)
+
+		# --- open a camera device:
+		# --- object name (string)
+		# --- image name (string)
+		# --- filepath (string)
+		# --- width (int)
+		# --- height (int)
+		# --- rate (float)
+		# --- deinterlace (bool)
+		self.addMsgHandler("/texture/camera/open", vtex.cb_camera_open)
+
+		#
+		# --- Texture Status ---
+		#
+		# --- close and reset texture:
+		# --- image name (string)
+		self.addMsgHandler("/texture/status/close", vtex.cb_texture_close)
+
+		# --- state is play:
+		# --- image name (string)
+		self.addMsgHandler("/texture/status/play", vtex.cb_texture_play)
+
+		# --- state is pause:
+		# --- image name (string)
+		self.addMsgHandler("/texture/status/pause", vtex.cb_texture_pause)
+
+		# --- state is stop:
+		# --- image name (string)
+		self.addMsgHandler("/texture/status/stop", vtex.cb_texture_stop)
+
+		#
+		# --- Filter ---
+		#
+		# --- deinterlace texture
+		# --- image name (string)
+		self.addMsgHandler("/texture/filter/deinterlace", vtex.cb_filter_deinterlace)
+
 	def handle_timeout(self):
 		self.timed_out = True
 		

@@ -22,6 +22,12 @@
 import bpy
 import sys
 
+#
+# --- BLive OSC Client, used by blender:
+#
+# --- OSC Messages are send via Operators, with prefix "BLive_OT_osc_"
+# --- These operators are defined in ops.py in the different module subfolders
+
 from . import OSC
 from .OSC import OSCClient, OSCMessage
 

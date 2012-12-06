@@ -21,208 +21,347 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-#   TODO: fix pause bug
-
 # --- import bge modules
 import bge
 import aud
 from bge import texture
 from bge import logic
 
-class player:
-	def __init__(self, obname, imgname):
-		if not obname in logic.getCurrentScene().objects:
-			raise IndexError
-			
-		self.__file = None
-		self.__state = 'STOP'
-		self.__loop = False
-		self.__hassound = False
-		self.__sound = None
-		self.__handle = None
 
+class _BasePlayer(object):
+	'''
+		_BasePlayer (base class for bge.texture wrapper modules)
+	'''
+	def __init__(self, obname, imgname):
+		if obname is None or imgname is None:
+			raise ValueError('no object name or image name given')
+		if not obname in logic.getCurrentScene().objects:
+			raise IndexError('requested object not found')
+
+
+		self.__state = 'STOP'
 		gameobject = logic.getCurrentScene().objects[obname]
 
 		# -- Get the material that is using our texture
-		if imgname:
-			img = "IM{0}".format(imgname)
-			print("image: ", gameobject, img)
-			matID = texture.materialID(gameobject, img)
-			# -- Create the video texture
-			self.video = texture.Texture(gameobject, matID)
+		img = "IM{0}".format(imgname)
+		matID = texture.materialID(gameobject, img)
+		# -- Create the video texture
+		self._texture = texture.Texture(gameobject, matID)
 
-	def refresh(self, doplay):
-		if hasattr(self, "video"):
-			if self.__hassound == True:
-				self.video.refresh(doplay, self.__handle.position)
-			else:
-				self.video.refresh(doplay)
-
-	@property
-	def source(self):
-		return self.__file
-	
-	@source.setter	
-	def source(self, file):
-		self.__file = file
-		print("player.source: ", self.__file)
-		# -- Load the file
-		self.video.source = texture.VideoFFmpeg(self.__file)
-
-		try:
-			self.__sound = aud.Factory(self.__file)
-			self.__sound.loop(-1)
-			device = aud.device()
-			self.__handle = device.play(self.__sound)
-			self.__handle.loop_count = -1
-			self.__hassound = True
-		except aud.error as err:
-			print('Error: MoviePlayer.load - no sound available')
-			self.__hassound = None
-			self.__sound = None
-
-		# -- scale the video
-		self.video.source.scale = True
-
-		# -- play the video
-		self.state = 'PLAY'
-
-	@property
-	def state(self):
+	def refresh(self, play):
+		self._texture.refresh(play)
+		
+	def get_state(self):
 		return self.__state
-	
-	@state.setter	
-	def state(self, state):
-		if state == 'PLAY':
-			self.video.source.play()
-		elif state == 'PAUSE':
-			self.video.source.pause()
-		elif state == 'STOP':
-			self.video.source.stop()
-			if self.__hassound:
-				self.__handle.stop()
-				self.__hassound = False
-				self.__sound = None
-				self.__handle = None
-			del self.video
-		else:
-			return
+
+	def set_state(self, state):
 		self.__state = state
 
-	@property
-	def loop(self):
-		return self.video.source.repeat
+	state = property(get_state, set_state)
 
-	@loop.setter
-	def loop(self, loop):
-		if loop:
-			self.video.source.repeat = -1
-		else:
-			self.video.source.repeat = 0
+class FFmpegPlayer(_BasePlayer):
+	'''
+		FFmpegPlayer (bge.texture Movie Playback)
+		param: obname (name of game object used for playback)
+		type: string
+		param: imgname (name of the texture image)
+		type: string
+		param: filename (file used for playback)
+		type: string
+		param: audio (decode audio)
+		type: bool
+		param: inp (movie inpoint in seconds)
+		type: float
+		param: outp (movie outpoint in seconds)
+		type: float
+		param: loop (loop movie playback)
+		type: bool
+		param: preseek (preseek seconds)
+		type: int
+		param: deinterlace (deinterlace movie)
+		type: bool
+	'''
+	def __init__(self, obname=None, imgname=None, filename=None, audio=True, inp=0.0, outp=0.0, loop=False, preseek=0, deinterlace=False):
+		super(FFmpegPlayer, self).__init__(obname, imgname)
+		print("loop", loop)
+		self.__file = filename
+		self.__hassound = False
+		self.__audio = audio
+		self.__sound = None
+		self.__handle = None
+
+		# --- set source
+		self.source = self.__file
+		self.range = (inp, outp)
+		self.preseek = preseek
+		self.loop = loop
+
+	def __del__(self):
 		if self.__hassound:
-			self.__sound.loop(self.video.source.repeat)
+			self.__handle.stop()
+			self.__hassound = False
+			self.__sound = None
+			self.__handle = None		
 
-	@property
-	def preseek(self):
-		return self.video.source.preseek
-	
-	@preseek.setter	
-	def preseek(self, preseek):
-		self.video.source.preseek = preseek
+	def refresh(self, play=True):
+		if hasattr(self, "_texture"):
+			if self.__hassound == True:
+				self._texture.refresh(play, self.range[0]+self.__handle.position)
+			else:
+				self._texture.refresh(play)
 
-	@property
-	def range(self):
-		return self.video.source.range
-	
-	@range.setter	
-	def range(self, seq):
-		if seq[0] < seq[1]:
-			if self.__hassound:
-				self.__sound.limit(seq[0], seq[1])
-			self.video.source.range = seq
-
-class camera(player):
-	def __init__(self, obname, imgname, width, height, deinterlace):
-		super().__init__(obname, imgname)
-		self.__width = width
-		self.__height = height
-		self.__deinterlace = deinterlace
-
-	@property
-	def source(self):
+	def get_source(self):
 		return self.__file
 	
-	@source.setter	
-	def source(self, file):
-		self.__file = file
-		# -- open device
-		# TODO: add parameter for width and size (no hardcoding) 
-		self.video.source = bge.texture.VideoFFmpeg(self.__file, 0, 25, 720, 576)
+	def set_source(self, _file):
+		if self.state != 'STOP':
+			self.state = 'STOP'
 
+		self._texture.source = texture.VideoFFmpeg(_file)
+		if not self._texture.source:
+			self.__file = None
+			self.__audio = None
+			return
+
+		# --- play audio stream
+		if self.__audio:
+			#~ self.__init_sound()
+			try:
+				if self.__hassound is True:
+					self.__handle.stop()
+				self.__sound = aud.Factory(self.__file)
+				device = aud.device()
+				self.__handle = device.play(self.__sound)
+				self.__handle.loop_count = -1
+				self.__hassound = True
+			except aud.error as err:
+				print('Error: MoviePlayer.load - no sound available\n', err)
+				self.__hassound = None
+				self.__sound = None
+			
 		# -- scale the video
-		self.video.source.scale = True
-		self.video.source.deinterlace = self.__deinterlace
+		self._texture.source.scale = True
 
-		# -- play
-		self.state = 'PLAY'
+		# -- play the video
+		self.set_state('PLAY')
 
-class videotexture(object):
-	TEXTURE_STATES = {'PLAY', 'PAUSE', 'STOP'}
-		
+	def get_state(self):
+		return super(FFmpegPlayer, self).state
+
+	def set_state(self, state):
+		if state == 'PLAY':
+			if self.state == 'PAUSE':
+				if self.__hassound:
+					self.__handle.resume()
+			if self.state == 'STOP' and self.__hassound:
+				self.__handle.resume()			
+			self._texture.source.play()
+
+		elif state == 'PAUSE':
+			self._texture.source.pause()
+			if self.__hassound:
+				self.__handle.pause()
+
+		elif state == 'STOP':
+			self._texture.source.stop()
+			if self.__hassound:
+				self.__handle.pause()
+				self.__handle.position = 0
+		else:
+			return		
+
+		super(FFmpegPlayer, self).set_state(state)
+
+	def get_loop(self):
+		return self._texture.source.repeat
+
+	def set_loop(self, loop):
+		print("self.loop", loop)
+		if loop is True:
+			self._texture.source.repeat = -1
+		else:
+			self._texture.source.repeat = 0
+		if self.__hassound:
+			self.__handle.loop_count = self._texture.source.repeat
+
+	def get_preseek(self):
+		return self._texture.source.preseek
+
+	def set_preseek(self, preseek):
+		self._texture.source.preseek = preseek
+
+	def get_range(self):
+		return self._texture.source.range
+ 
+	def set_range(self, seq):
+		inp = seq[0]
+		outp = seq[1]
+
+		if inp > 0 and inp < outp:
+			if self._texture.source:
+				self._texture.source.range = (inp, outp)
+			if self.__audio and self.__hassound:
+				self.__handle.stop()
+				self.__sound = self.__sound.limit(inp, outp)
+				device = aud.device()
+				self.__handle = device.play(self.__sound)
+
+	def get_audio(self):
+		return self.__audio
+
+	def set_audio(self, audio):
+		self.__audio = bool(audio)
+
+	source = property(get_source, set_source)
+	range = property(get_range, set_range)
+	state = property(get_state, set_state)
+	loop = property(get_loop, set_loop)
+
+#~ class CameraPlayer(_BasePlayer):
+	#~ def __init__(self, obname=None, imgname=None, filename=None, width=720, height=576, rate=25, deinterlace=True):
+		#~ super().__init__(obname, imgname)
+		#~ self.__rate = rate
+		#~ self.__width = width
+		#~ self.__height = height
+		#~ self.__deinterlace = deinterlace
+#~ 
+		#~ self.source = filename
+#~ 
+	#~ @property
+	#~ def source(self):
+		#~ return self.__file
+	#~ 
+	#~ @source.setter	
+	#~ def source(self, file):
+		#~ self.__file = file
+		#~ # -- open device
+		#~ self._texture.source = bge.texture.VideoFFmpeg(self.__file, 0, self.__rate, self.__width, self.__height)
+#~ 
+		#~ # -- scale the video
+		#~ self._texture.source.scale = True
+		#~ self._texture.source.deinterlace = self.__deinterlace
+#~ 
+		#~ # -- play
+		#~ self.state = 'PLAY'
+#~ 
+	#~ @property
+	#~ def state(self):
+		#~ return self.__state
+#~ 
+	#~ @state.setter
+	#~ def state(self, state):
+		#~ if state == 'PLAY':
+			#~ self._texture.source.play()
+		#~ elif state == 'PAUSE':
+			#~ self._texture.source.pause()
+		#~ elif state == 'STOP':
+			#~ self._texture.source.stop()
+		#~ else:
+			#~ return
+		#~ super().state = state
+
+
+class VideoTexture(object):
 	def __init__(self):
-		self.textures = dict()
+		self.TEXTURE_STATES = {'PLAY', 'PAUSE', 'STOP'}
+		self.__textures = dict()
+
+	def cb_movie_open(self, path, tags, args, source):
+		print(path, args)
+		obname = args[0]
+		imgname = args[1]
+		filename = args[2]
+		audio = bool(args[3])
+		inp = float(args[4])
+		outp = float(args[5])
+		loop = bool(args[6])
+		preseek = int(args[7])
+		deinterlace = bool(args[8])
+
+		if imgname in self.__textures.keys():
+			del self.__textures[imgname]
+
+		try:
+			self.__textures[imgname] = FFmpegPlayer(obname=obname,
+													imgname=imgname,
+													filename=filename,
+													audio=audio,
+													inp=inp,
+													outp=outp,
+													loop=loop,
+													preseek=preseek,
+													deinterlace=deinterlace
+													)
+													
+		except TypeError as err:
+			print("err in videotexture.open: ", err)
+
+	def cb_movie_audio(self, path, tags, args, source):
+		imgname = args[0]
+		audio = args[1]
+		
+		if imgname in self.__textures and isinstance(self.__textures[imgname], FFmpegPlayer):
+			self.__textures[imgname].audio = True
+
+	def cb_movie_loop(self, path, tags, args, source):
+		imgname = args[0]
+		loop = args[1]
+
+		if imgname in self.__textures and isinstance(self.__textures[imgname], FFmpegPlayer):
+			self.__textures[imgname].loop = True
+
+	def cb_movie_range(self, path, tags, args, source):
+		imgname = args[0]
+		inp = args[1]
+		outp = args[2]
+
+		if imgname in self.__textures and isinstance(self.__textures[imgname], FFmpegPlayer):
+			self.__textures[imgname].range = (inp, outp)
+
+	def cb_camera_open(self, path, tags, args, source):
+		print("Videotexture.cb_camera_open - not implemented")
+		#~ obname = args[0]
+		#~ imgname = args[1]
+		#~ filename = args[2]
+		#~ width = args[3]
+		#~ height = args[4]
+		#~ rate = args[5]
+		#~ deinterlace = bool(args[6])
+		#~ 
+		#~ if imgname in self.__textures:
+			#~ del self.__textures[imgname]
+		#~ try:
+			#~ self.__textures[imgname] = camera(obname, imgname, filename, width, height, rate, deinterlace)
+		#~ except TypeError as err:
+			#~ print("err in videotexture.open: ", err)
+
+	def cb_texture_play(self, path, tags, args, source):
+		imgname = args[0]
+		if imgname in self.__textures:
+			self.__textures[imgname].state = 'PLAY' 
+
+	def cb_texture_pause(self, path, tags, args, source):
+		imgname = args[0]
+		if imgname in self.__textures:
+			self.__textures[imgname].state = 'PAUSE'
+
+	def cb_texture_stop(self, path, tags, args, source):
+		imgname = args[0]
+		if imgname in self.__textures:
+			self.__textures[imgname].state = 'STOP'
+
+	def cb_texture_close(self, path, tags, args, source):
+		imgname = args[0]
+		if imgname in self.__textures:
+			del self.__textures[imgname]
+
+	def cb_filter_deinterlace(self, path, tags, args, source):
+		#~ imgname = args[0]
+		#~ deinterlace = args[1]
+		#~ if imgname in self.__textures:
+			#~ self.__textures[imgname].deinterlace = True
+		print("Videotexture.cb_filter_deinterlace - not implemented")
 
 	def update(self):
-		for i in self.textures:
-#			if self.textures[i].state == 'PLAY':
-			self.textures[i].refresh(True)
-
-	def movie(self, path, tags, args, source):
-		print(path, tags, args, source)
-		obname = args[0]
-		imgname = args[1]
-		filename = args[2]
-		loop = args[3]
-		preseek = args[4]
-		inp = float(args[5])
-		outp = float(args[6])
-
-		if imgname in self.textures:
-			del self.textures[imgname]
-		try:
-			print("videotexture.movie: ", obname,imgname,filename)
-			self.textures[imgname] = player(obname,imgname)
-			self.textures[imgname].source = filename
-			self.textures[imgname].loop = loop
-			self.textures[imgname].preseek = preseek
-			self.textures[imgname].range = (inp, outp)
-
-		except TypeError as err:
-			print("err in videotexture.open: ", err)
-
-	def camera(self, path, tags, args, source):
-		# TODO: add with and height
-		obname = args[0]
-		imgname = args[1]
-		filename = args[2]
-		width = args[3]
-		height = args[4]
-		deinterlace = bool(args[5])
-		
-		if imgname in self.textures:
-			del self.textures[imgname]
-		try:
-			print("videotexture.camera: ", obname,imgname,filename)
-			self.textures[imgname] = camera(obname, imgname, width, height, deinterlace)
-			self.textures[imgname].source = filename
-		except TypeError as err:
-			print("err in videotexture.open: ", err)
-
-	def state(self, path, tags, args, source):
-		print("videotexture.state: ", args)
-		obname = args[0]
-		imgname = args[1]
-		state = args[2]
-
-		if state in self.TEXTURE_STATES:
-			self.textures[imgname].state = state
+		for key in self.__textures.keys():
+			self.__textures[key].refresh(True)
