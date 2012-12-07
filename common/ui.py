@@ -44,7 +44,7 @@ class BLive_PT_common_settings(bpy.types.Panel):
 		row = layout.row(align=True)
 		row.prop(bs, "server", text="Server")
 		row.prop(bs, "port", text="")
-		row.operator("blive.osc_port", text="apply")
+		#~ row.operator("blive.osc_port", text="apply")
 		
 		layout. separator()
 		
