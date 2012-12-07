@@ -49,8 +49,9 @@ def update_object_scaling(path, tags, args, source):
 def update_object_color(path, tags, args, source):
 	scene = bge.logic.getCurrentScene()
 	_id = args[0]
-	ob = scene.objects[_id]
-	ob.color = (args[1],args[2],args[3],args[4])
+	if _id in scene.objects:
+		ob = scene.objects[_id]
+		ob.color = (args[1],args[2],args[3],args[4])
 	
 def update_object_property(path, tags, args, source):
 	scene = bge.logic.getCurrentScene()
@@ -103,7 +104,6 @@ def update_light_normal(path, tags, args, source):
 	light.quad_attenuation = args[3]
 	
 def update_light_spot(path, tags, args, source):
-	print(path, args)
 	scene = bge.logic.getCurrentScene()
 	light = scene.objects[args[0]]
 	light.type = 0

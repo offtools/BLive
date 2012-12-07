@@ -41,6 +41,8 @@ class BLive_OT_logic_add(bpy.types.Operator):
 		"""
 		sc = context.scene
 		bs = sc.blive_scene_settings
+		#~ if not bs.server_object in sc.objects:
+			#~ return True
 		return bool(bs.server_object) and bs.server_object in sc.objects
 
 	def execute(self, context):

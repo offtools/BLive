@@ -83,7 +83,6 @@ class FFmpegPlayer(_BasePlayer):
 	'''
 	def __init__(self, obname=None, imgname=None, filename=None, audio=True, inp=0.0, outp=0.0, loop=False, preseek=0, deinterlace=False):
 		super(FFmpegPlayer, self).__init__(obname, imgname)
-		print("loop", loop)
 		self.__file = filename
 		self.__hassound = False
 		self.__audio = audio
@@ -125,7 +124,6 @@ class FFmpegPlayer(_BasePlayer):
 
 		# --- play audio stream
 		if self.__audio:
-			#~ self.__init_sound()
 			try:
 				if self.__hassound is True:
 					self.__handle.stop()
@@ -143,7 +141,7 @@ class FFmpegPlayer(_BasePlayer):
 		self._texture.source.scale = True
 
 		# -- play the video
-		self.set_state('PLAY')
+		self.state = 'PLAY'
 
 	def get_state(self):
 		return super(FFmpegPlayer, self).state
@@ -154,7 +152,7 @@ class FFmpegPlayer(_BasePlayer):
 				if self.__hassound:
 					self.__handle.resume()
 			if self.state == 'STOP' and self.__hassound:
-				self.__handle.resume()			
+				self.__handle.resume()
 			self._texture.source.play()
 
 		elif state == 'PAUSE':
@@ -176,7 +174,6 @@ class FFmpegPlayer(_BasePlayer):
 		return self._texture.source.repeat
 
 	def set_loop(self, loop):
-		print("self.loop", loop)
 		if loop is True:
 			self._texture.source.repeat = -1
 		else:
@@ -267,7 +264,6 @@ class VideoTexture(object):
 		self.__textures = dict()
 
 	def cb_movie_open(self, path, tags, args, source):
-		print(path, args)
 		obname = args[0]
 		imgname = args[1]
 		filename = args[2]

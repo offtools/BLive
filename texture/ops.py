@@ -60,7 +60,7 @@ class BLive_OT_videotexture_filebrowser(bpy.types.Operator):
 										  imgname=image.name,
 										  filepath=self.filepath,
 										  audio=image.player.audio,
-										  loop=image.player.loop,
+										  loop=image.player.loop
 										  )
 
 		return {'FINISHED'}

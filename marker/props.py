@@ -19,6 +19,7 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
+# TODO: user operators instead calling BLiveClient
 
 import bpy
 from ..client import BLiveClient
@@ -49,20 +50,21 @@ class TriggerDummy(bpy.types.PropertyGroup):
 
 class TriggerVideoOpen(bpy.types.PropertyGroup):
 	m_hidden = bpy.props.BoolProperty(default=True)
-	m_oscpath = bpy.props.StringProperty(default="/texture/movie")
+	m_oscpath = bpy.props.StringProperty(default="/texture/movie/open")
 
 	m_object = bpy.props.StringProperty()
 	m_filepath = bpy.props.StringProperty(subtype="FILE_PATH")
 	m_image = bpy.props.StringProperty()
+	m_audio = bpy.props.BoolProperty()
 	m_loop = bpy.props.BoolProperty(default=False)
 	m_preseek = bpy.props.IntProperty(default=0)
 	m_inp = bpy.props.FloatProperty(default=0.0)
 	m_outp = bpy.props.FloatProperty(default=0.0)
+	m_deinterlace = bpy.props.BoolProperty(default=False)
 
 	def send(self):
-		print("play movie")
 		filepath = bpy.path.abspath(self.m_filepath)
-		BLiveClient().send(self.m_oscpath, [self.m_object, self.m_image, filepath, int(self.m_loop)], self.m_preseek, self.m_inp, self.m_outp)
+		bpy.ops.blive.osc_movie_open(obname=self.m_object, imgname=self.m_image, filepath=filepath, audio=self.m_audio, inpoint=self.m_inp, outpoint=self.m_outp, loop=self.m_loop, preseek=self.m_preseek, deinterlace=self.m_deinterlace)
 
 class TriggerCameraOpen(bpy.types.PropertyGroup):
 	m_hidden = bpy.props.BoolProperty(default=True)
@@ -77,28 +79,35 @@ class TriggerCameraOpen(bpy.types.PropertyGroup):
 	m_deinterlace = bpy.props.BoolProperty(default=False)
 	
 	def send(self):
-		print("connect camera")
-		BLiveClient().send(self.m_oscpath, [self.m_object, self.m_image, self.m_filepath, self.m_width, self.m_height, int(self.m_deinterlace)])
+		print("connect camera - not implemented")
+		# TODO: write operator
+		#~ BLiveClient().send(self.m_oscpath, [self.m_object, self.m_image, self.m_filepath, self.m_width, self.m_height, int(self.m_deinterlace)])
 
 class TriggerVideoState(bpy.types.PropertyGroup):
 	m_hidden = bpy.props.BoolProperty(default=True)
-	m_oscpath = bpy.props.StringProperty(default="/texture/state")
+	#~ m_oscpath = bpy.props.StringProperty(default="/texture/state")
 
 	m_image = bpy.props.StringProperty()
 	m_state = bpy.props.EnumProperty(
-		items = [("PLAY","play","play Video"),
-				("PAUSE","pause","pause Video"), 
-				("STOP","stop","stop Video"),
-				("REMOVE","remove","remove dynamic Texture")],
-		name = "state")
+	items = [("PLAY","play","play Video"),
+			("PAUSE","pause","pause Video"), 
+			("STOP","stop","stop Video"),
+			("CLOSE","close","reset Texture")],
+			name = "state")
 
 	def send(self):
-		BLiveClient().send(self.m_oscpath, [self.m_image, self.m_state])
+		if self.m_state == "PLAY":
+			bpy.ops.blive.osc_videotexture_play(imgname=self.m_image)
+		elif self.m_state == "PAUSE":
+			bpy.ops.blive.osc_videotexture_pause(imgname=self.m_image)
+		elif self.m_state == "STOP":
+			bpy.ops.blive.osc_videotexture_stop(imgname=self.m_image)
+		elif self.m_state == "CLOSE":
+			bpy.ops.blive.osc_videotexture_close(imgname=self.m_image)
 
 class TriggerChangeScene(bpy.types.PropertyGroup):
 	m_hidden = bpy.props.BoolProperty(default=True)
 	m_oscpath = bpy.props.StringProperty(default="/scene")
-
 	m_scene = bpy.props.StringProperty()
 
 	def send(self):
