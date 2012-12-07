@@ -276,12 +276,12 @@ class BLive_OT_osc_movie_loop(bpy.types.Operator):
 	bl_label = "BLive Loop Movie"
 	
 	imgname = bpy.props.StringProperty()
-	loop = bpy.props.IntProperty(default=-1.0)
+	loop = bpy.props.BoolProperty(default=False)
 
 	def execute(self, context):
 		BLiveClient().send("/texture/movie/loop", [ 
 							self.imgname, 
-							self.loop ]
+							int(self.loop) ]
 							)
 		return {'FINISHED'}
 
