@@ -43,7 +43,7 @@ if "bpy" in locals():
 	imp.reload(common)
 	imp.reload(client)
 	imp.reload(texture)
-	imp.reload(apphandler)
+	#~ imp.reload(apphandler)
 	imp.reload(marker)
 	imp.reload(object)
 	imp.reload(material)
@@ -51,7 +51,7 @@ else:
 	from . import common
 	from . import client
 	from . import texture
-	from . import apphandler
+	#~ from . import apphandler
 	from . import marker
 	from . import object
 	from . import material
@@ -63,7 +63,7 @@ def register():
 	common.register()
 	client.register()
 	texture.register()
-	apphandler.register()
+	#~ apphandler.register()
 	marker.register()
 	object.register()
 	material.register()
@@ -73,7 +73,7 @@ def unregister():
 	material.unregister()
 	object.unregister()
 	marker.unregister()
-	apphandler.unregister()
+	#~ apphandler.unregister()
 	texture.unregister()
 	client.unregister()
 	common.unregister()
