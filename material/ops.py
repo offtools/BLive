@@ -25,7 +25,7 @@ from ..client import BLiveClient
 # TODO: poll method
 class BLive_OT_osc_object_diffuse_color(bpy.types.Operator):
 	"""
-		Operator - creates gamelogic used by osc server in gameengine
+		Operator - send object diffuse color
 	"""
 	bl_idname = "blive.osc_object_diffuse_color"
 	bl_label = "BLive - send diffuse color and transparency"
@@ -44,7 +44,7 @@ class BLive_OT_osc_object_diffuse_color(bpy.types.Operator):
 # TODO: poll method
 class BLive_OT_osc_object_obcolor(bpy.types.Operator):
 	"""
-		Operator - creates gamelogic used by osc server in gameengine
+		Operator - send obcolor
 	"""
 	bl_idname = "blive.osc_object_obcolor"
 	bl_label = "BLive - send object color"
