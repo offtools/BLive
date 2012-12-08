@@ -54,16 +54,16 @@ def scene_update_post_handler(scene):
 			pass
 			
 	#	ob color workaround (can't check update of this value')
-	for ob in scene.objects:
-		if ob.type == 'MESH':
-			BLiveClient().send("/data/object/color", [ob.name, ob.color[0], ob.color[1], ob.color[2], ob.color[3]])					
+	#~ for ob in scene.objects:
+		#~ if ob.type == 'MESH':
+			#~ BLiveClient().send("/data/object/color", [ob.name, ob.color[0], ob.color[1], ob.color[2], ob.color[3]])
 
 	for ob in scene.objects:
 		if ob.is_updated:
 			BLiveClient().send("/data/objects", [ob.name, ob.location[0], ob.location[1], ob.location[2], ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2]])
 
 			if ob.type == 'MESH':
-				BLiveClient().send("/data/object/scaling", [ob.name, ob.scale[0], ob.scale[1], ob.scale[2]])					
+				BLiveClient().send("/data/object/scaling", [ob.name, ob.scale[0], ob.scale[1], ob.scale[2]])
 
 		if ob.type == 'CAMERA':
 			camera = bpy.data.cameras[ob.name]
@@ -105,6 +105,12 @@ def scene_update_post_handler(scene):
 						BLiveClient().send("/data/objects/polygon", [ob.name, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2]])
 			except ValueError as err:
 				print('apphandler.py - mesh update: ', err)
+
+	#~ if bpy.data.materials.is_updated:
+		#~ for mat in bpy.data.materials:
+			#~ if mat.is_updated:
+				#~ oblist = [ob for ob in scene.objects if ob.active_material == mat]
+				#~ print(oblist)
 
 @persistent
 def frame_change_pre_handler(scene):

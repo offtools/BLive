@@ -44,16 +44,13 @@ class BLive_PT_common_settings(bpy.types.Panel):
 		row = layout.row(align=True)
 		row.prop(bs, "server", text="Server")
 		row.prop(bs, "port", text="")
-		#~ row.operator("blive.osc_port", text="apply")
-		
+
 		layout. separator()
 		
 		row = layout.row()
-		row.label("Material Hacks (not implemented)")
+		row.label("Material Hacks")
 		row = layout.row()
-		row.prop(bs, "diffuse_to_obcolor", text="Diffuse to ObColor")
-		row = layout.row()
-		row.prop(bs, "ztrans_to_obcolor", text="ZTransparency to ObColor")
+		row.prop(bs, "diffuse_to_obcolor", text="Diffuse and Transparency to ObColor")
 
 ###############################################
 #

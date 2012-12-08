@@ -52,7 +52,7 @@ def update_object_color(path, tags, args, source):
 	if _id in scene.objects:
 		ob = scene.objects[_id]
 		ob.color = (args[1],args[2],args[3],args[4])
-	
+
 def update_object_property(path, tags, args, source):
 	scene = bge.logic.getCurrentScene()
 	_id = args[0]
