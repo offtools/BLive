@@ -107,7 +107,7 @@ class TriggerVideoState(bpy.types.PropertyGroup):
 
 class TriggerChangeScene(bpy.types.PropertyGroup):
 	m_hidden = bpy.props.BoolProperty(default=True)
-	m_oscpath = bpy.props.StringProperty(default="/scene")
+	m_oscpath = bpy.props.StringProperty(default="/scene/active")
 	m_scene = bpy.props.StringProperty()
 
 	def send(self):

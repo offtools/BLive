@@ -59,7 +59,7 @@ class BgeOSCServer(OSCServer):
 
 		self.addMsgHandler("/data/object/mesh", bgehandler.update_mesh)
 
-		self.addMsgHandler("/scene", bgehandler.update_active_scene)
+		self.addMsgHandler("/scene/active", bgehandler.update_active_scene)
 
 		#
 		# --- Videotexture Message handlers
