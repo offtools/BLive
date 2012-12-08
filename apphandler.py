@@ -120,20 +120,20 @@ def save_pre_handler(dummy):
 
 def register():
 	print("apphandler.register")
-	bpy.app.handlers.frame_change_pre.append(frame_change_post_handler)
-	bpy.app.handlers.scene_update_post.append(scene_update_post_handler)
-	bpy.app.handlers.load_pre.append(load_pre_handler)
-	bpy.app.handlers.save_pre.append(save_pre_handler)
+	#~ bpy.app.handlers.frame_change_pre.append(frame_change_post_handler)
+	#~ bpy.app.handlers.scene_update_post.append(scene_update_post_handler)
+	#~ bpy.app.handlers.load_pre.append(load_pre_handler)
+	#~ bpy.app.handlers.save_pre.append(save_pre_handler)
 
 def unregister():
 	print("apphandler.unregister")
 
-	idx = bpy.app.handlers.scene_update_post.index(scene_update_post_handler)
-	bpy.app.handlers.scene_update_post.remove(bpy.app.handlers.scene_update_post[idx])
+	#~ idx = bpy.app.handlers.scene_update_post.index(scene_update_post_handler)
+	#~ bpy.app.handlers.scene_update_post.remove(bpy.app.handlers.scene_update_post[idx])
 
-	idx = bpy.app.handlers.load_pre.index(load_pre_handler)
-	bpy.app.handlers.load_pre.remove(bpy.app.handlers.load_pre[idx])
+	#~ idx = bpy.app.handlers.load_pre.index(load_pre_handler)
+	#~ bpy.app.handlers.load_pre.remove(bpy.app.handlers.load_pre[idx])
 
-	idx = bpy.app.handlers.save_pre.index(save_pre_handler)
-	bpy.app.handlers.save_pre.remove(bpy.app.handlers.save_pre[idx])
+	#~ idx = bpy.app.handlers.save_pre.index(save_pre_handler)
+	#~ bpy.app.handlers.save_pre.remove(bpy.app.handlers.save_pre[idx])
     

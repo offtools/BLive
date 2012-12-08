@@ -45,6 +45,7 @@ if "bpy" in locals():
 	imp.reload(texture)
 	imp.reload(apphandler)
 	imp.reload(marker)
+	imp.reload(object)
 	imp.reload(material)
 else:
 	from . import common
@@ -52,6 +53,7 @@ else:
 	from . import texture
 	from . import apphandler
 	from . import marker
+	from . import object
 	from . import material
 
 import bpy
@@ -63,11 +65,13 @@ def register():
 	texture.register()
 	apphandler.register()
 	marker.register()
+	object.register()
 	material.register()
 
 def unregister():
 	print("__init__.unregister")
 	material.unregister()
+	object.unregister()
 	marker.unregister()
 	apphandler.unregister()
 	texture.unregister()

@@ -33,12 +33,20 @@ def quit(path, tags, args, source):
 		bge.logic.server.close()
 	bge.logic.endGame()
 
-def update_objects(path, tags, args, source):
+#
+# --- object handlers
+#
+def update_object_location(path, tags, args, source):
 	scene = bge.logic.getCurrentScene()
 	_id = args[0]
 	ob = scene.objects[_id]
 	ob.position = (args[1],args[2],args[3])
-	ob.orientation = (args[4],args[5],args[6])
+
+def update_object_rotation(path, tags, args, source):
+	scene = bge.logic.getCurrentScene()
+	_id = args[0]
+	ob = scene.objects[_id]
+	ob.orientation = (args[1],args[2],args[3])
 
 def update_object_scaling(path, tags, args, source):
 	scene = bge.logic.getCurrentScene()
@@ -53,13 +61,43 @@ def update_object_color(path, tags, args, source):
 		ob = scene.objects[_id]
 		ob.color = (args[1],args[2],args[3],args[4])
 
-def update_object_property(path, tags, args, source):
+def update_object_gameproperty(path, tags, args, source):
 	scene = bge.logic.getCurrentScene()
 	_id = args[0]
 	_prop = args[1]
 	_value = args[2]
 	scene.objects[_id][_prop] = _value
 
+#
+# --- mesh update handler
+#
+def update_mesh(path, tags, args, source):
+	scene = bge.logic.getCurrentScene()
+	ob = scene.objects[args[0]]
+	polygon_index = args[1]
+	vertex_index = args[2]
+	x = args[3]
+	y = args[4]
+	z = args[5]
+
+	#	retrieve polygon
+	polygon = ob.meshes[0].getPolygon(polygon_index)
+	
+	#	get verts from polygon
+	verts = [polygon.v1, polygon.v2, polygon.v3, polygon.v4]
+	if verts[3] == 0: verts.pop()
+
+	#	get material index (workaround for matid bug, matid is not an attr of KX_PolyProxy)
+	mat_index = ob.meshes[0].materials.index(polygon.material)
+	mesh = ob.meshes[0]
+	try:
+		vertex = mesh.getVertex(mat_index, verts[vertex_index])
+		vertex.setXYZ([x,y,z])
+	except IndexError as err:
+		print("%s : mat_idx: %d vert_idx: %d" %(err, mat_index, vertex_index))
+#
+# --- camera data handlers
+#
 def update_camera(path, tags, args, source):
 
 	scene = bge.logic.getCurrentScene()
@@ -88,14 +126,17 @@ def update_camera(path, tags, args, source):
 	
 	camera.projection_matrix = projection_matrix
 
-def update_light(path, tags, args, source):
+#
+# --- lamp data handlers
+#
+def update_lamp(path, tags, args, source):
 	scene = bge.logic.getCurrentScene()
 	light = scene.objects[args[0]]
 	light.energy = args[1]
 	light.color = (args[2], args[3], args[4])
 	light.spotblend = float(0)
 
-def update_light_normal(path, tags, args, source):
+def update_lamp_normal(path, tags, args, source):
 	scene = bge.logic.getCurrentScene()
 	light = scene.objects[args[0]]
 	light.type = 2
@@ -103,7 +144,7 @@ def update_light_normal(path, tags, args, source):
 	light.lin_attenuation = args[2]
 	light.quad_attenuation = args[3]
 	
-def update_light_spot(path, tags, args, source):
+def update_lamp_spot(path, tags, args, source):
 	scene = bge.logic.getCurrentScene()
 	light = scene.objects[args[0]]
 	light.type = 0
@@ -113,37 +154,15 @@ def update_light_spot(path, tags, args, source):
 	light.spotsize = args[4]
 	light.spotblend = args[5]
 	
-def update_light_sun(path, tags, args, source):
+def update_lamp_sun(path, tags, args, source):
 	scene = bge.logic.getCurrentScene()
 	light = scene.objects[args[0]]
 	light.type = 1
-	
-def update_mesh(path, tags, args, source):
-	scene = bge.logic.getCurrentScene()
-	ob = scene.objects[args[0]]
-	polygon_index = args[1]
-	vertex_index = args[2]
-	x = args[3]
-	y = args[4]
-	z = args[5]
 
-	#	retrieve polygon
-	polygon = ob.meshes[0].getPolygon(polygon_index)
-	
-	#	get verts from polygon
-	verts = [polygon.v1, polygon.v2, polygon.v3, polygon.v4]
-	if verts[3] == 0: verts.pop()
-
-	#	get material index (workaround for matid bug, matid is not an attr of KX_PolyProxy)
-	mat_index = ob.meshes[0].materials.index(polygon.material)
-	mesh = ob.meshes[0]
-	try:
-		vertex = mesh.getVertex(mat_index, verts[vertex_index])
-		vertex.setXYZ([x,y,z])
-	except IndexError as err:
-		print("%s : mat_idx: %d vert_idx: %d" %(err, mat_index, vertex_index))
-
-def change_scene(path, tags, args, source):
+#
+# --- scene handler (change ative scene)
+#
+def update_active_scene(path, tags, args, source):
 	name = args[0]
 	scene = bge.logic.getCurrentScene()
 	scene.replace(name)

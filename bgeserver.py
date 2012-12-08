@@ -34,31 +34,38 @@ class BgeOSCServer(OSCServer):
 	def __init__(self, ip="127.0.0.1", port=9900):
 		super().__init__((ip,port))
 		self.timeout = 0
-		self.__module = list()
 
+		# --- add videotexture module to server
+		self.__module = list()
+		vtex = bgevideotexture.VideoTexture()
+		self._addUpdateModule(vtex)
+		
 		self.addMsgHandler('/connect', self.callback_connect)
 		self.addMsgHandler('/debug', bgehandler.debug)
 		self.addMsgHandler('/quit', bgehandler.quit)
-		self.addMsgHandler('/debug', bgehandler.update_objects)
-		self.addMsgHandler("/data/objects", bgehandler.update_objects)
+
+		self.addMsgHandler("/data/object/location", bgehandler.update_object_location)
+		self.addMsgHandler("/data/object/rotation", bgehandler.update_object_rotation)
 		self.addMsgHandler("/data/object/scaling", bgehandler.update_object_scaling)
 		self.addMsgHandler("/data/object/color", bgehandler.update_object_color)
-		self.addMsgHandler("/data/object/gameproperty", bgehandler.update_object_property)
-		self.addMsgHandler("/data/camera", bgehandler.update_camera)
-		self.addMsgHandler("/data/light", bgehandler.update_light)
-		self.addMsgHandler("/data/light/normal", bgehandler.update_light_normal)
-		self.addMsgHandler("/data/light/spot", bgehandler.update_light_spot)
-		self.addMsgHandler("/data/light/sun", bgehandler.update_light_sun)
-		self.addMsgHandler("/data/objects/polygon", bgehandler.update_mesh)
-		self.addMsgHandler("/scene", bgehandler.change_scene)
+		self.addMsgHandler("/data/object/gameproperty", bgehandler.update_object_gameproperty)
 
-		vtex = bgevideotexture.VideoTexture()
-		self._addUpdateModule(vtex)
-		#~ self.addMsgHandler("/texture/state", vtex.cb_state)
-		#~ self.addMsgHandler("/texture/movie", vtex.cb_movie)
-		#~ self.addMsgHandler("/texture/camera", vtex.cb_camera)
+		self.addMsgHandler("/data/object/camera", bgehandler.update_camera)
 
-		# --- open a Movie:
+		self.addMsgHandler("/data/object/lamp", bgehandler.update_lamp)
+		self.addMsgHandler("/data/object/lamp/normal", bgehandler.update_lamp_normal)
+		self.addMsgHandler("/data/object/lamp/spot", bgehandler.update_lamp_spot)
+		self.addMsgHandler("/data/object/lamp/sun", bgehandler.update_lamp_sun)
+
+		self.addMsgHandler("/data/object/mesh", bgehandler.update_mesh)
+
+		self.addMsgHandler("/scene", bgehandler.update_active_scene)
+
+		#
+		# --- Videotexture Message handlers
+		#
+
+		# --- Videotexture - open a Movie:
 		# --- object name (string)
 		# --- image name (string)
 		# --- filepath (string)
@@ -70,20 +77,20 @@ class BgeOSCServer(OSCServer):
 		# --- deinterlace (bool)
 		self.addMsgHandler("/texture/movie/open", vtex.cb_movie_open)
 
-		# --- set playback range:
+		# --- Videotexture - set playback range:
 		# --- inpoint (float)
 		# --- outpoint (float)
 		self.addMsgHandler("/texture/movie/range", vtex.cb_movie_range)
 
-		# --- enable audio:
+		# --- Videotexture - enable audio:
 		# --- audio (bool)
 		self.addMsgHandler("/texture/movie/audio", vtex.cb_movie_audio)
 
-		# --- loop playback:
+		# --- Videotexture - loop playback:
 		# --- loop (bool)
 		self.addMsgHandler("/texture/movie/loop", vtex.cb_movie_loop)
 
-		# --- open a camera device:
+		# --- Videotexture - open a camera device:
 		# --- object name (string)
 		# --- image name (string)
 		# --- filepath (string)
@@ -94,28 +101,28 @@ class BgeOSCServer(OSCServer):
 		self.addMsgHandler("/texture/camera/open", vtex.cb_camera_open)
 
 		#
-		# --- Texture Status ---
+		# --- Videotexture - Status ---
 		#
-		# --- close and reset texture:
+		# --- Videotexture - close and reset texture:
 		# --- image name (string)
 		self.addMsgHandler("/texture/status/close", vtex.cb_texture_close)
 
-		# --- state is play:
+		# --- Videotexture - state is play:
 		# --- image name (string)
 		self.addMsgHandler("/texture/status/play", vtex.cb_texture_play)
 
-		# --- state is pause:
+		# --- Videotexture - state is pause:
 		# --- image name (string)
 		self.addMsgHandler("/texture/status/pause", vtex.cb_texture_pause)
 
-		# --- state is stop:
+		# --- Videotexture - state is stop:
 		# --- image name (string)
 		self.addMsgHandler("/texture/status/stop", vtex.cb_texture_stop)
 
 		#
 		# --- Filter ---
 		#
-		# --- deinterlace texture
+		# --- Videotexture - deinterlace texture:
 		# --- image name (string)
 		self.addMsgHandler("/texture/filter/deinterlace", vtex.cb_filter_deinterlace)
 
