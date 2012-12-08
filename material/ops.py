@@ -56,11 +56,11 @@ class BLive_OT_osc_object_obcolor(bpy.types.Operator):
 		return{'FINISHED'}
 
 def register():
-	print("objects.ops.register")
+	print("material.ops.register")
 	bpy.utils.register_class(BLive_OT_osc_object_diffuse_color)
 	bpy.utils.register_class(BLive_OT_osc_object_obcolor)
 
 def unregister():
-	print("objects.ops.unregister")
+	print("material.ops.unregister")
 	bpy.utils.unregister_class(BLive_OT_osc_object_diffuse_color)
 	bpy.utils.unregister_class(BLive_OT_osc_object_obcolor)

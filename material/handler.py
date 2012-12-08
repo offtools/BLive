@@ -51,10 +51,10 @@ def material_update_handler(scene):
 						BLiveClient().send("/data/object/color", [ob.name, mat.diffuse_color[0], mat.diffuse_color[1], mat.diffuse_color[2], mat.alpha])
 
 def register():
-	print("objects.handler.register")
+	print("material.handler.register")
 	bpy.app.handlers.scene_update_post.append(material_update_handler)
 
 def unregister():
-	print("objects.handler.unregister")
+	print("material.handler.unregister")
 	idx = bpy.app.handlers.scene_update_post.index(material_update_handler)
 	bpy.app.handlers.scene_update_post.remove(bpy.app.handlers.scene_update_post[idx])

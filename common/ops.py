@@ -88,7 +88,7 @@ class BLive_OT_logic_add(bpy.types.Operator):
 		# TODO: remove this
 		#~ if not 'PORT' in context.active_object.game.properties:
 			#~ bpy.ops.object.game_property_new(type='INT', name='PORT')
-		#~ context.active_object.game.properties['PORT'].value = context.window_manager.blive_settings.port
+		#~ context.active_object.game.properties['PORT'].value = context.window_mamanger.blive_settings.port
 
 		bs.has_server_object = True
 
@@ -103,7 +103,7 @@ class BLive_OT_logic_add(bpy.types.Operator):
 		for i in paths:
 			path = os.path.join(i, "addons")
 			for j in bpy.path.module_names(path, True):
-				if bpy.context.user_preferences.addons['blive'].module in j[0]:
+				if bpy.context.window_manager.addons['blive'].module in j[0]:
 					bpy.data.texts.new(name=filename)
 
 					directory = os.path.dirname(j[1])
@@ -178,7 +178,7 @@ class BLive_OT_logic_remove(bpy.types.Operator):
 		#~ bs = sc.blive_scene_settings
 		#~ bc = context.window_manager.blive_settings
 		#~ 
-		context.scene.objects[bs.server_object].game.properties['PORT'].value = bc.port
+		#~ context.scene.objects[bs.server_object].game.properties['PORT'].value = bc.port
 		#~ return{'FINISHED'}
 
 class BLive_OT_fork_blenderplayer(bpy.types.Operator):
