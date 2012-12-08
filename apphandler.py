@@ -106,57 +106,6 @@ def scene_update_post_handler(scene):
 			except ValueError as err:
 				print('apphandler.py - mesh update: ', err)
 
-	#~ if bpy.data.materials.is_updated:
-		#~ for mat in bpy.data.materials:
-			#~ if mat.is_updated:
-				#~ oblist = [ob for ob in scene.objects if ob.active_material == mat]
-				#~ print(oblist)
-
-@persistent
-def frame_change_pre_handler(scene):
-	'''
-		app handler mainly used to trigger timelinemarkers
-	'''
-	#   ignored if animation is not playing
-	if not bpy.context.screen.is_animation_playing:    
-		return
-
-	#   stop animation in editmode
-	if not bpy.context.active_object.mode == 'OBJECT':
-		if bpy.context.screen.is_animation_playing:
-			bpy.ops.screen.animation_play()
-
-	markframes = dict((i.frame, i) for i in scene.timeline_markers)
-	cur = scene.frame_current
-	prev = cur - 1
-	
-	#	check for marker in current frame
-	if cur in markframes and markframes[cur].name in scene.timeline_queues:
-		markerid = markframes[cur].name
-		
-		if markerid in scene.timeline_queues:
-			
-			#	check pause - stop animation 
-			if scene.timeline_queues[markerid].m_pause and	bpy.context.screen.is_animation_playing:
-				bpy.ops.screen.animation_play()
-			
-			# send events - if not execute_after
-			if not scene.timeline_queues[markerid].m_execute_after:
-				for item in scene.timeline_queues[markerid].m_items:
-					item.trigger()
-				
-	#	check for marker in prev frame (execute after flag)
-	if prev in markframes and markframes[prev].name:
-		markerid =  markframes[prev].name
-		
-		#	check for timelinequeue
-		if markerid in scene.timeline_queues:
-			
-			# send events - execute_after
-			if scene.timeline_queues[markerid].m_execute_after:
-				for item in scene.timeline_queues[markerid].m_items:
-					item.trigger()
-
 @persistent
 def frame_change_post_handler(scene):
 	pass
@@ -171,7 +120,6 @@ def save_pre_handler(dummy):
 
 def register():
 	print("apphandler.register")
-	#~ bpy.app.handlers.frame_change_pre.append(frame_change_pre_handler)
 	bpy.app.handlers.frame_change_pre.append(frame_change_post_handler)
 	bpy.app.handlers.scene_update_post.append(scene_update_post_handler)
 	bpy.app.handlers.load_pre.append(load_pre_handler)
@@ -179,8 +127,6 @@ def register():
 
 def unregister():
 	print("apphandler.unregister")
-	#~ idx = bpy.app.handlers.frame_change_pre.index(frame_change_pre_handler)
-	#~ bpy.app.handlers.frame_change_pre.remove(bpy.app.handlers.frame_change_pre[idx])
 
 	idx = bpy.app.handlers.scene_update_post.index(scene_update_post_handler)
 	bpy.app.handlers.scene_update_post.remove(bpy.app.handlers.scene_update_post[idx])

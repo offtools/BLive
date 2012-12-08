@@ -85,11 +85,6 @@ class BLive_OT_logic_add(bpy.types.Operator):
 		context.active_object.game.sensors['s.init'].link(context.active_object.game.controllers['c.init'])	
 		context.active_object.game.sensors['s.update'].link(context.active_object.game.controllers['c.update'])
 
-		# TODO: remove this
-		#~ if not 'PORT' in context.active_object.game.properties:
-			#~ bpy.ops.object.game_property_new(type='INT', name='PORT')
-		#~ context.active_object.game.properties['PORT'].value = context.window_mamanger.blive_settings.port
-
 		bs.has_server_object = True
 
 	def add_script(self):
@@ -152,34 +147,10 @@ class BLive_OT_logic_remove(bpy.types.Operator):
 	
 		if "c.update" in context.active_object.game.controllers:
 			bpy.ops.logic.controller_remove(controller="c.update")
-	
-		#~ if "PORT" in context.active_object.game.properties:
-			#~ idx = context.active_object.game.properties.keys().index("PORT")
-			#~ bpy.ops.object.game_property_remove(index=0)
 		
 		bs.has_server_object = False
 
 		return{'FINISHED'}
-
-#~ class BLive_OT_osc_set_port(bpy.types.Operator):
-	#~ bl_idname = "blive.osc_port"
-	#~ bl_label = "BLive set OSC port"
-#~ 
-	#~ @classmethod
-	#~ def poll(self, context):
-		#~ """
-			#~ test logic setup
-		#~ """
-		#~ sc = context.scene
-		#~ return sc.blive_scene_settings.has_server_object
-#~ 
-	#~ def execute(self, context):
-		#~ sc = context.scene
-		#~ bs = sc.blive_scene_settings
-		#~ bc = context.window_manager.blive_settings
-		#~ 
-		#~ context.scene.objects[bs.server_object].game.properties['PORT'].value = bc.port
-		#~ return{'FINISHED'}
 
 class BLive_OT_fork_blenderplayer(bpy.types.Operator):
 	bl_idname = "blive.fork_blenderplayer"
@@ -251,7 +222,6 @@ def register():
 	print("settings.ops.register")
 	bpy.utils.register_class(BLive_OT_logic_add)
 	bpy.utils.register_class(BLive_OT_logic_remove)
-	#~ bpy.utils.register_class(BLive_OT_osc_set_port)
 	bpy.utils.register_class(BLive_OT_fork_blenderplayer)
 	bpy.utils.register_class(BLive_OT_osc_connect)
 	bpy.utils.register_class(BLive_OT_osc_quit)
@@ -260,7 +230,6 @@ def unregister():
 	print("settings.ops.unregister")
 	bpy.utils.unregister_class(BLive_OT_logic_add)
 	bpy.utils.unregister_class(BLive_OT_logic_remove)
-	#~ bpy.utils.unregister_class(BLive_OT_osc_set_port)
 	bpy.utils.unregister_class(BLive_OT_fork_blenderplayer)
 	bpy.utils.unregister_class(BLive_OT_osc_connect)
 	bpy.utils.unregister_class(BLive_OT_osc_quit)
