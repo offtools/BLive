@@ -20,6 +20,7 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 import bpy
+import math
 import bmesh 
 from ..client import BLiveClient
 
@@ -83,8 +84,8 @@ def osc_object_camera(camera):
 	perspective = 1
 	if camera.type == 'ORTHO':
 		perspective = 0
-	aspect = context.scene.game_settings.resolution_y/context.scene.game_settings.resolution_x
-	BLiveClient().send("/data/object/camera",[ self.obname, camera.angle, aspect, camera.ortho_scale, camera.clip_start, camera.clip_end, perspective, camera.shift_x, camera.shift_y])
+	aspect = bpy.context.scene.game_settings.resolution_y/bpy.context.scene.game_settings.resolution_x
+	BLiveClient().send("/data/object/camera",[ camera.name, camera.angle, aspect, camera.ortho_scale, camera.clip_start, camera.clip_end, perspective, camera.shift_x, camera.shift_y])
 
 class BLive_OT_osc_object_camera(bpy.types.Operator):
 	"""
@@ -112,7 +113,7 @@ def osc_object_lamp(lamp):
 	if lamp.type == 'POINT':
 		BLiveClient().send("/data/object/lamp/normal", [lamp.name, lamp.distance,  lamp.linear_attenuation, lamp.quadratic_attenuation])
 	elif lamp.type == 'SPOT':
-		BLiveClient().send("/data/object/lamp/spot",  [lamp.name, lamp.distance,  lamp.linear_attenuation, lamp.quadratic_attenuation, lamp.spot_size, lamp.spot_blend])
+		BLiveClient().send("/data/object/lamp/spot",  [lamp.name, lamp.distance,  lamp.linear_attenuation, lamp.quadratic_attenuation, math.degrees(lamp.spot_size), lamp.spot_blend])
 	elif lamp.type == 'SUN':
 		BLiveClient().send("/data/object/lamp/sun", [lamp.name])
 

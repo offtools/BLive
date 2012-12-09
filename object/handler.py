@@ -27,29 +27,22 @@ from . import ops
 def object_update_handler(scene):
 	# --- check objects updates
 	for ob in scene.objects:
+
 		if ob.is_updated:
-			#~ bpy.ops.blive.osc_object_location(obname=ob.name)
-			#~ bpy.ops.blive.osc_object_rotation(obname=ob.name)
 			ops.osc_object_location(ob)
 			ops.osc_object_rotation(ob)
-
 			if ob.type == 'MESH':
-				#~ bpy.ops.blive.osc_object_scaling(obname=ob.name)
 				ops.osc_object_scaling(ob)
 
+		if ob.is_updated_data:
 			if ob.type == 'CAMERA':
-				#~ bpy.ops.blive.osc_object_camera(obname=ob.name)
-				ops.osc_object_camera(ob)
-
-			if ob.type == 'LAMP':
-				#~ bpy.ops.blive.osc_object_lamp(obname=ob.name)
-				ops.osc_object_lamp(ob)
-
-	# --- check mesh update
-	for ob in scene.objects:
-		if ob.is_updated_data and ob.type == 'MESH' and ob.mode == 'EDIT':
-			#~ bpy.ops.blive.osc_object_meshdata(obname=ob.name)
-			ops.osc_object_meshdata(ob)
+				camera = ob.data
+				ops.osc_object_camera(camera)
+			elif ob.type == 'LAMP':
+				lamp = ob.data
+				ops.osc_object_lamp(lamp)
+			elif ob.type == 'MESH' and ob.mode == 'EDIT':
+				ops.osc_object_meshdata(ob)
 
 def register():
 	print("object.handler.register")
