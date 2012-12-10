@@ -29,7 +29,7 @@ import sys
 # --- These operators are defined in ops.py in the different module subfolders
 
 from . import OSC
-from .OSC import OSCClient, OSCMessage
+from .OSC import OSCClient, OSCMessage, OSCServer
 
 class BLiveClient(OSCClient):
 	def __new__(type, *args):
@@ -46,6 +46,14 @@ class BLiveClient(OSCClient):
 		if self.address():
 			super().send(OSCMessage("/quit"))
 			self.close()
+
+	def set_server(self, server):
+		if not isinstance(server, OSCServer):
+			raise TypeError
+		super().set_server(server)
+
+	def addMsgHandler(self, path, callback):
+		self.server.addMsgHandler( path, callback )
 
 	def connect(self, ip, port):
 		super().connect((ip,port))

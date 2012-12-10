@@ -77,6 +77,6 @@ def unregister():
 	texture.unregister()
 	client.unregister()
 	common.unregister()
-	
+
 if __name__ == "__main__":
 	pass
