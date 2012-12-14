@@ -28,6 +28,7 @@ class BLiveSettings(bpy.types.PropertyGroup):
 	port = bpy.props.IntProperty(default=9900)
 	server = bpy.props.StringProperty(default="127.0.0.1")
 	diffuse_to_obcolor = bpy.props.BoolProperty(default=False)
+	use_dmx_over_osc = bpy.props.BoolProperty(default=False)
 
 class BLiveSceneSettings(bpy.types.PropertyGroup):
 	"""

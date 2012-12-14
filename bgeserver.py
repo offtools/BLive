@@ -33,6 +33,7 @@ class BgeOSCServer(OSCServer):
 
 	def __init__(self, ip="127.0.0.1", port=9900):
 		super().__init__((ip,port))
+
 		self.timeout = 0
 
 		# --- add videotexture module to server
@@ -128,7 +129,7 @@ class BgeOSCServer(OSCServer):
 
 	def handle_timeout(self):
 		self.timed_out = True
-		
+
 	def _addUpdateModule(self, instance):
 		if hasattr(instance, 'update'):
 			if type(instance.update) in (types.FunctionType, types.MethodType):
@@ -136,7 +137,7 @@ class BgeOSCServer(OSCServer):
 		
 	def callback_connect(self, path, tags, args, source):
 		print('receiving connect: ', path, tags, args, source)
-		
+
 	def update(self):
 		self.timed_out = False
 		while not self.timed_out:

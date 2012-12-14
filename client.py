@@ -19,8 +19,8 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-import bpy
 import sys
+import types
 
 #
 # --- BLive OSC Client, used by blender:
@@ -30,6 +30,27 @@ import sys
 
 from . import OSC
 from .OSC import OSCClient, OSCMessage, OSCServer
+
+class BLiveServer(OSCServer):
+	#~ def __new__(cls, *args, **kwargs):
+		#~ if not '_instance' in cls.__dict__:
+			#~ cls._instance = object.__new__(cls)
+		#~ return cls._instance
+
+	def __init__(self,name=None):
+		self.name = name
+
+	def __init__(self, ip="127.0.0.1", port=9900):
+		super().__init__((ip,port))
+		self.timeout = 0
+
+	def handle_timeout(self):
+		self.timed_out = True
+
+	def update(self):
+		self.timed_out = False
+		while not self.timed_out:
+			self.handle_request()
 
 class BLiveClient(OSCClient):
 	def __new__(type, *args):
@@ -47,13 +68,17 @@ class BLiveClient(OSCClient):
 			super().send(OSCMessage("/quit"))
 			self.close()
 
-	def set_server(self, server):
-		if not isinstance(server, OSCServer):
-			raise TypeError
-		super().set_server(server)
+	def set_server(self, ip, port):
+		if not self.server:
+			self.setServer(BLiveServer(ip,port))
+			print("BLiveClient.set_server", self.server)
+		else:
+			print("BLive Error in Client set_server - server instance already exists")
 
 	def addMsgHandler(self, path, callback):
-		self.server.addMsgHandler( path, callback )
+		if self.server:
+			print("adding msghandler:", path, callback, self.server.callbacks.keys())
+			self.server.addMsgHandler( path, callback )
 
 	def connect(self, ip, port):
 		super().connect((ip,port))
@@ -69,6 +94,10 @@ class BLiveClient(OSCClient):
 			except TypeError:
 				print('[BLive] - connection to server lost')
 				self.close()
+
+	def update(self):
+		if self.server:
+			self.server.update()
 
 def register():
 	print("client.register")

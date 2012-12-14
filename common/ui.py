@@ -51,6 +51,11 @@ class BLive_PT_common_settings(bpy.types.Panel):
 		row.label("Material Hacks")
 		row = layout.row()
 		row.prop(bs, "diffuse_to_obcolor", text="Diffuse and Transparency to ObColor")
+		row = layout.row(align=True)
+		if context.window_manager.blive_settings.use_dmx_over_osc == True:
+			row.operator("blive.oscdmx_disable", icon='CHECKBOX_HLT', text="oscdmx", emboss=False)
+		else:
+			row.operator("blive.oscdmx_enable", icon='CHECKBOX_DEHLT', text="oscdmx", emboss=False)
 
 ###############################################
 #
