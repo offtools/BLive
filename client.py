@@ -37,12 +37,29 @@ class BLiveServer(OSCServer):
 			#~ cls._instance = object.__new__(cls)
 		#~ return cls._instance
 
-	def __init__(self,name=None):
-		self.name = name
-
 	def __init__(self, ip="127.0.0.1", port=9900):
 		super().__init__((ip,port))
 		self.timeout = 0
+
+	def handle_timeout(self):
+		self.timed_out = True
+
+	def update(self):
+		self.timed_out = False
+		while not self.timed_out:
+			self.handle_request()
+
+class BLiveServerSingleton(OSCServer):
+	def __new__(cls, *args, **kwargs):
+		if not '_instance' in cls.__dict__:
+			cls._instance = object.__new__(cls)
+		return cls._instance
+
+	def __init__(self, ip="127.0.0.1", port=9900):
+		if not '_init' in dir(self):
+			self._init = True
+			super().__init__((ip,port))
+			self.timeout = 0
 
 	def handle_timeout(self):
 		self.timed_out = True
