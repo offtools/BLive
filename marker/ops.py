@@ -22,23 +22,7 @@
 import bpy
 from .props import TRIGGER_TYPE_ENUM
 from .props import TRIGGER_TYPE_DESCRIPTION
-
-def unique_name(collection, name):
-	'''
-		find a unique name for a new object in a collection
-	'''
-	def check_name(collection, name, num):
-	
-		if "{0}.{1}".format(name, str(num).zfill(3)) in collection:
-			return check_name(collection, name, num+1)
-		return num
-	
-	if not name in collection:
-		return name
-
-	num = check_name(collection, name, 1)
-	unique = "{0}.{1}".format(name, str(num).zfill(3))
-	return unique
+from ..utils.utils import unique_name
 
 class BLive_OT_trigger_new(bpy.types.Operator):
 	'''
