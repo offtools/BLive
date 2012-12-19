@@ -47,7 +47,7 @@ if "bpy" in locals():
 	imp.reload(marker)
 	imp.reload(object)
 	imp.reload(material)
-	imp.reload(oscdmx)
+	imp.reload(olaosc)
 else:
 	from . import common
 	from . import client
@@ -56,7 +56,7 @@ else:
 	from . import marker
 	from . import object
 	from . import material
-	from . import oscdmx
+	from . import olaosc
 
 import bpy
 
@@ -69,11 +69,11 @@ def register():
 	marker.register()
 	object.register()
 	material.register()
-	oscdmx.register()
+	olaosc.register()
 
 def unregister():
 	print("__init__.unregister")
-	oscdmx.unregister()
+	olaosc.unregister()
 	material.unregister()
 	object.unregister()
 	marker.unregister()
