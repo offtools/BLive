@@ -20,31 +20,52 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 import bpy
-from ..client import BLiveServerSingleton
+from ..client import BLiveServer
 from ..utils.utils import unique_name
 
-# --- currently harcoded number of channels
-dmxpatch = {1,2}
-universe = [(i,0) for i in range(512)]
-#~ dmxserver = BLiveServer(ip="127.0.0.1", port=20001)
+class OLAOSCServer(BLiveServer):
+	def __init__(self, ip="127.0.0.1", port=9900):
+		super().__init__(ip, port)
+
+server = None
+
+def ServerInstance():
+	global server
+	return server
 
 def cb_dmx(path, tags, args, source):
-	global universe
-	global dmxpatch
-
 	if bpy.context.window_manager.blive_settings.use_olaosc == True:
 		data = args[0]
+		olaosc = bpy.context.scene.olaosc
+		universe = olaosc.universes[olaosc.active_universe]
+		patch = universe.patch
 
-		for channel in dmxpatch:
-			value = int(data[channel-1])
-			# --- value changed
-			if not value == universe[channel-1]:
-				universe[channel-1] = int(value)
-				if channel == 1 and bool(value>>7):
-					if not bpy.context.screen.is_animation_playing is True:
-						bpy.ops.screen.animation_play() 
-				elif channel == 2:
-					bpy.context.active_object.color[3] = float(value/255)
+		for key in patch.keys():
+			value = data[int(key)-1]
+			id_action = patch[key].action
+			action = universe.actions[id_action]
+
+			# --- Objects
+			if action.context == "ctx_object":
+				target = bpy.context.scene.objects[action.target]
+				if action.use_data:
+					target = target.data
+				if hasattr(action, "attr_idx"):
+					prop = getattr(target, action.attr)
+					prop[int(action.attr_idx)] = value/255
+					print(prop, value/255)
+				else:
+					setattr(target, action.attr, value/255)
+
+			if action.context == "ctx_material":
+				bpy.data.materials[action.target]
+
+			if action.context == "ctx_texture":
+				bpy.data.textures[action.target]
+
+			if action.context == "ctx_operator":
+				op = eval("bpy.ops.%s"%action.target)
+				target = op.get_rna()
 
 class BLive_OT_olaosc_enable(bpy.types.Operator):
 	"""
@@ -54,17 +75,15 @@ class BLive_OT_olaosc_enable(bpy.types.Operator):
 	bl_label = "BLive - enable olaosc "
 
 	def execute(self, context):
-		#~ global dmxserver
+		global server
 		context.window_manager.blive_settings.use_olaosc = True
-		#~ port = context.window_manager.blive_settings.port+1
-		port = 20001
-		ip = '127.0.0.1'
-		#~ dmxserver.addMsgHandler('/dmx/universe/1', cb_dmx)
+		port = context.window_manager.blive_settings.olaosc_port
+		ip = context.window_manager.blive_settings.olaosc_server
 		try:
-			BLiveServerSingleton(ip, port)
-			BLiveServerSingleton().addMsgHandler('/dmx/universe/1', cb_dmx)
+			server = OLAOSCServer(ip, port)
+			print(server)
 		except OSError as err:
-			print("#####SIngleton error", err)
+			print("OLA OSC: ", err)
 		return{'FINISHED'} 
 
 class BLive_OT_olaosc_disable(bpy.types.Operator):
@@ -75,80 +94,26 @@ class BLive_OT_olaosc_disable(bpy.types.Operator):
 	bl_label = "BLive - disable olaosc "
 
 	def execute(self, context):
-		BLiveServerSingleton().close()
-		context.window_manager.blive_settings.use_olaosc = False
+		global server
+		if server:
+			server.close()
+			server = None
+			context.window_manager.blive_settings.use_olaosc = False
 		return{'FINISHED'} 
 
-#~ class BLive_OT_olaosc_add_channel(bpy.types.Operator):
-	#~ """
-		#~ Operator - olaosc patch, add channel to patch
-	#~ """
-	#~ bl_idname = "blive.olaosc_add_channel"
-	#~ bl_label = "BLive - olaosc add channel"
-	#~ channel = bpy.props.IntProperty(min=1,max=512)
-#~ 
-	#~ def execute(self, context):
-		#~ olaosc = context.scene.olaosc
-		#~ universe = olaosc.universes[olaosc.active_universe]
-		#~ patch = universe.patch
-#~ 
-		#~ if not "%s"%self.channel in patch:
-			#~ channel = patch.add()
-			#~ channel.name = "%s"%self.channel
-			#~ return{'FINISHED'}
-		#~ else:
-			#~ return{'CANCELLED'}
-#~ 
-#~ class BLive_OT_olaosc_del_channel(bpy.types.Operator):
-	#~ """
-		#~ Operator - olaosc patch, delete channel
-	#~ """
-	#~ bl_idname = "blive.olaosc_del_channel"
-	#~ bl_label = "BLive - olaosc del channel"
-	#~ channel = bpy.props.IntProperty(min=1,max=512)
-#~ 
-	#~ def execute(self, context):
-		#~ olaosc = context.scene.olaosc
-		#~ universe = olaosc.universes[olaosc.active_universe]
-		#~ patch = universe.patch
-#~ 
-		#~ if "%s"%self.channel in patch:
-			#~ idx = patch.keys().index("%s"%self.channel)
-			#~ patch.remove(idx)
-			#~ return{'FINISHED'}
-		#~ else:
-			#~ return{'CANCELLED'}
-#~ 
-#~ class BLive_OT_olaosc_add_operator(bpy.types.Operator):
-	#~ """
-		#~ Operator - olaosc add operator to dmx channel
-	#~ """
-	#~ bl_idname = "blive.olaosc_add_operator"
-	#~ bl_label = "BLive - olaosc add operator"
-#~ 
-	#~ def execute(self, context):
-		#~ olaosc = context.scene.olaosc
-		#~ universe = olaosc.universes[olaosc.active_universe]
-		#~ patch = universe.patch
-		#~ channel = patch[universe.active_channel_str]
-		#~ op = channel.operator.add()
-		#~ op.name = unique_name(channel.operator, "Operator")
-		#~ return{'FINISHED'}
-#~ 
-#~ class BLive_OT_olaosc_del_operator(bpy.types.Operator):
-	#~ """
-		#~ Operator - olaosc del dmx operator
-	#~ """
-	#~ bl_idname = "blive.olaosc_del_operator"
-	#~ bl_label = "BLive - olaosc del operator"
-#~ 
-	#~ def execute(self, context):
-		#~ olaosc = context.scene.olaosc
-		#~ universe = olaosc.universes[olaosc.active_universe]
-		#~ patch = universe.patch
-		#~ channel = patch[universe.active_channel_str]
-		#~ channel.operator.remove(channel.active_operator)
-		#~ return{'FINISHED'}
+class BLive_OT_olaosc_set_attr_arrayidx(bpy.types.Operator):
+	"""
+		Operator - set array idx enum
+	"""
+	bl_idname = "blive.olaosc_set_attr_arrayidx"
+	bl_label = "BLive - set attr arrayidx"
+	length = bpy.props.IntProperty()
+
+	def execute(self, context):
+		if self.length:
+			gen = [ (str(i),str(i),'') for i in range(self.length) ]
+			bpy.types.BLiveDMXAction.attr_idx = bpy.props.EnumProperty(name="attr_idx", items=gen)
+		return{'FINISHED'}
 
 class BLive_OT_olaosc_add_universe(bpy.types.Operator):
 	"""
@@ -158,14 +123,16 @@ class BLive_OT_olaosc_add_universe(bpy.types.Operator):
 	bl_label = "BLive - add dmx universe "
 
 	def execute(self, context):
+		global server
 		olaosc = context.scene.olaosc
 		u = olaosc.universes.add()
 		u.name = unique_name(olaosc.universes, "Universe")
-		u.oscpath = "/universe/dmx/%d"%len(olaosc.universes)
+		u.oscpath = "/dmx/universe/%d"%len(olaosc.universes)
 		olaosc.active_by_name = u.name
 		
-		#TODO: add callback here
-		#~ BLiveServerSingleton().addMsgHandler('/dmx/universe/1', cb_dmx)
+		if ServerInstance():
+			print(u.oscpath)
+			ServerInstance().addMsgHandler(u.oscpath, cb_dmx)
 
 		return{'FINISHED'}
 
@@ -216,21 +183,76 @@ class BLive_OT_olaosc_del_action(bpy.types.Operator):
 		else:
 			return{'CANCELLED'}
 
+class BLive_OT_olaosc_patch(bpy.types.Operator):
+	"""
+		Operator - olaosc patch channel
+	"""
+	bl_idname = "blive.olaosc_patch"
+	bl_label = "BLive - olaosc patch channel"
+
+	def execute(self, context):
+		olaosc = context.scene.olaosc
+		universe = olaosc.universes[olaosc.active_universe]
+		action = universe.actions[universe.active_action]
+		req_chan = action.channel
+		num_chan = action.num_channels
+
+		# --- check if channels already set
+		for i in range(num_chan):
+			chan = req_chan + i
+			if "%s"%chan in universe.patch:
+				action.is_patched = False
+				return{'CANCELLED'}
+
+		for i in range(num_chan):
+			chan = universe.patch.add()
+			chan.name = "%s"%(req_chan + i)
+			chan.action = action.name
+			action.is_patched = True
+		return{'FINISHED'}
+
+class BLive_OT_olaosc_unpatch(bpy.types.Operator):
+	"""
+		Operator - olaosc unpatch channel
+	"""
+	bl_idname = "blive.olaosc_unpatch"
+	bl_label = "BLive - olaosc unpatch channel"
+
+	def execute(self, context):
+		olaosc = context.scene.olaosc
+		universe = olaosc.universes[olaosc.active_universe]
+		action = universe.actions[universe.active_action]
+		req_chan = action.channel
+		num_chan = action.num_channels
+
+		for i in range(num_chan):
+			chan = req_chan + 1
+			if "%s"%chan in universe.patch:
+				universe.patch.remove(universe.patch.keys().index("%s"%chan))
+				action.is_patched = False
+				return{'CANCELLED'}
+
 def register():
 	print("olaosc.ops.register")
 	bpy.utils.register_class(BLive_OT_olaosc_enable)
 	bpy.utils.register_class(BLive_OT_olaosc_disable)
+	bpy.utils.register_class(BLive_OT_olaosc_set_attr_arrayidx)
 	bpy.utils.register_class(BLive_OT_olaosc_add_universe)
 	bpy.utils.register_class(BLive_OT_olaosc_del_universe)
 	bpy.utils.register_class(BLive_OT_olaosc_add_action)
 	bpy.utils.register_class(BLive_OT_olaosc_del_action)
+	bpy.utils.register_class(BLive_OT_olaosc_patch)
+	bpy.utils.register_class(BLive_OT_olaosc_unpatch)
 
 def unregister():
 	print("olaosc.ops.unregister")
 	bpy.utils.unregister_class(BLive_OT_olaosc_enable)
 	bpy.utils.unregister_class(BLive_OT_olaosc_disable)
+	bpy.utils.unregister_class(BLive_OT_olaosc_set_attr_arrayidx)
 	bpy.utils.unregister_class(BLive_OT_olaosc_add_universe)
 	bpy.utils.unregister_class(BLive_OT_olaosc_del_universe)
 	bpy.utils.unregister_class(BLive_OT_olaosc_add_action)
 	bpy.utils.unregister_class(BLive_OT_olaosc_del_action)
+	bpy.utils.unregister_class(BLive_OT_olaosc_patch)
+	bpy.utils.unregister_class(BLive_OT_olaosc_unpatch)
 

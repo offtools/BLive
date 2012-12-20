@@ -20,15 +20,13 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 import bpy
-from ..client import BLiveServerSingleton
+from .ops import ServerInstance
 from bpy.app.handlers import persistent
-#~ from .ops import dmxserver
 
 @persistent
 def update_dmx_handler(scene):
-	if bpy.context.window_manager.blive_settings.use_olaosc == True:
-		#~ dmxserver.update()
-		BLiveServerSingleton().update()
+	if ServerInstance():
+		ServerInstance().update()
 
 def register():
 	print("olaosc.handler.register")
