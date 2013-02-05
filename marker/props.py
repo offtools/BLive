@@ -64,7 +64,16 @@ class TriggerVideoOpen(bpy.types.PropertyGroup):
 
 	def send(self):
 		filepath = bpy.path.abspath(self.m_filepath)
-		bpy.ops.blive.osc_movie_open(obname=self.m_object, imgname=self.m_image, filepath=filepath, audio=self.m_audio, inpoint=self.m_inp, outpoint=self.m_outp, loop=self.m_loop, preseek=self.m_preseek, deinterlace=self.m_deinterlace)
+		print("send: ", self.m_object, self.m_image, filepath)
+		bpy.ops.blive.osc_movie_open(obname=self.m_object,
+									imgname=self.m_image,
+									filepath=filepath,
+									audio=self.m_audio,
+									inpoint=self.m_inp,
+									outpoint=self.m_outp,
+									loop=self.m_loop,
+									preseek=self.m_preseek,
+									deinterlace=self.m_deinterlace)
 
 class TriggerCameraOpen(bpy.types.PropertyGroup):
 	m_hidden = bpy.props.BoolProperty(default=True)

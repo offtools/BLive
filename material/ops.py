@@ -41,7 +41,7 @@ class BLive_OT_osc_object_diffuse_color(bpy.types.Operator):
 		BLiveClient().send("/data/object/color", [self.obname, mat.diffuse_color[0], mat.diffuse_color[1], mat.diffuse_color[2], mat.alpha])
 		return{'FINISHED'} 
 
-# TODO: poll method
+# TODO: poll method, move to object
 class BLive_OT_osc_object_obcolor(bpy.types.Operator):
 	"""
 		Operator - send obcolor

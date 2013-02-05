@@ -51,8 +51,6 @@ class BLive_PT_common_settings(bpy.types.Panel):
 		row.label("Material Hacks")
 		row = layout.row()
 		row.prop(bs, "diffuse_to_obcolor", text="Diffuse and Transparency to ObColor")
-		row = layout.row()
-		row.prop(bs, "use_olaosc", text="enable OLAOSC")
 
 ###############################################
 #
@@ -96,13 +94,13 @@ class BLive_PT_network_setup(bpy.types.Panel):
 	bl_region_type = 'WINDOW'
 	bl_context = "render"
 
-	#~ @classmethod
-	#~ def poll(self, context):
-		#~ """
-			#~ test logic setup
-		#~ """
-		#~ sc = context.scene
-		#~ return sc.blive_scene_settings.has_server_object
+	@classmethod
+	def poll(self, context):
+		"""
+			test logic setup
+		"""
+		sc = context.scene
+		return sc.blive_scene_settings.has_server_object
 
 	def draw(self, context):
 		layout = self.layout

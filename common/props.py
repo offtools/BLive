@@ -28,9 +28,6 @@ class BLiveSettings(bpy.types.PropertyGroup):
 	port = bpy.props.IntProperty(default=9900)
 	server = bpy.props.StringProperty(default="127.0.0.1")
 	diffuse_to_obcolor = bpy.props.BoolProperty(default=False)
-	use_olaosc = bpy.props.BoolProperty(default=False)
-	olaosc_port = bpy.props.IntProperty(default=20001)
-	olaosc_server = bpy.props.StringProperty(default="127.0.0.1")
 
 class BLiveSceneSettings(bpy.types.PropertyGroup):
 	"""
