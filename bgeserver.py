@@ -66,6 +66,9 @@ class BgeOSCServer(OSCServer):
 		# --- Videotexture Message handlers
 		#
 
+		# --- VideoTexture Movie:
+		# --- path "/texture/movie/open"
+		#
 		# --- Videotexture - open a Movie:
 		# --- object name (string)
 		# --- image name (string)
@@ -91,10 +94,14 @@ class BgeOSCServer(OSCServer):
 		# --- loop (bool)
 		self.addMsgHandler("/texture/movie/loop", vtex.cb_movie_loop)
 
+
+		# --- VideoTexture Camera:
+		# --- path "/texture/camera/open"
+		#
 		# --- Videotexture - open a camera device:
 		# --- object name (string)
 		# --- image name (string)
-		# --- filepath (string)
+		# --- device (string)
 		# --- width (int)
 		# --- height (int)
 		# --- rate (float)

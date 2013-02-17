@@ -40,39 +40,106 @@ class BLive_PT_texture_player(bpy.types.Panel):
 		except AttributeError:
 			return False
 
-	def draw(self, context):
-		ob = context.active_object
-		image = ob.active_material.active_texture.image
-		player = image.player
-
-		row = self.layout.row(align=True)
-		row.operator("blive.videotexture_filebrowser", text="", icon="FILESEL")
+	def draw_control(self, context):
+		layout = self.layout
+		layout.row().label("Controls")
+		row = layout.row(align=True)
+		row.scale_x = 2
+		row.scale_y = 2
+		row.alignment = 'CENTER'
 		row.operator("blive.videotexture_play", text="", icon="PLAY")
 		row.operator("blive.videotexture_pause", text="", icon="PAUSE")
 		row.operator("blive.videotexture_stop", text="", icon="MESH_PLANE")
 		row.operator("blive.videotexture_close", text="", icon="PANEL_CLOSE")
 
-		if player.has_playlist:
+	def draw_source_properties(self, context):
+		ob = context.active_object
+		image = ob.active_material.active_texture.image
+		player = image.player
+		layout = self.layout
+
+		source = player.source
+		#if player.mode == "playlist" and len(player.playlist):
+			#source = player.playlist[player.playlist_entry]
+
+		if source.sourcetype == "Movie":
 			row = self.layout.row(align=True)
-			row.template_list(player, "playlist", player, "active_playlist_entry", rows=2, maxrows=8)
-			_id = player.active_playlist_entry
-			if len(player.playlist):
-				row = self.layout.row(align=True)
-				row.prop(player.playlist[_id], "inpoint", text="in")
-				row.prop(player.playlist[_id], "outpoint", text="out")
-				row = self.layout.row()
-				row.prop(player.playlist[_id], "preseek", text="preseek")
-				row.prop(player.playlist[_id], "loop", text="loop")
-				row.prop(player.playlist[_id], "audio", text="sound")
-		else:
+			row.prop(source, "inpoint", text="in")
+			row.prop(source, "outpoint", text="out")
 			row = self.layout.row(align=True)
-			row.prop(player, "audio", text="play audio")
-			row.prop(player, "loop", text="loop video")
-			row.prop(player, "has_playlist", text="use playlist")
-			
+			row.prop(source, "preseek", text="preseek")
+			row = self.layout.row(align=True)
+			row.prop(source, "audio", text="sound")
+			row.prop(source, "loop", text="loop")
+
+		if source.sourcetype == "Camera":
+			row = self.layout.row(align=True)
+			row.prop(source, "width", text="width")
+			row.prop(source, "height", text="height")
+
+		if source.sourcetype == "Stream":
+			row = self.layout.row(align=True)
+			row.prop(source, "audio", text="sound")
+			row.prop(source, "loop", text="loop")
+
+	def draw_playlist(self, context, player):
+		layout = self.layout
+		row = layout.row(align=True)
+		row.label("Playlist:") 
+
+		try:
+			# get source from playlist collection 
+			source = player.playlist[player.playlist_entry]
+
+			# draw playlist
+			row = layout.row()
+			row.template_list(player, "playlist", player, "playlist_entry", rows=2, maxrows=8)
+		except IndexError:
+			pass
+
+	def draw_source_type(self, context, player):
+		layout = self.layout
+		layout.row().label("Choose Source Type")
+		row = layout.row(align=True)
+		row.prop(player.source, "sourcetype", expand=True)
+
+	def draw(self, context):
+		ob = context.active_object
+		image = ob.active_material.active_texture.image
+		player = image.player
+		layout = self.layout
+
+		layout.row().label("Switch between single media or playlist")
+
+		row = layout.row(align=True)
+		row.prop(player, "mode", expand=True)
+
+		# mode Playlist
+		if player.mode == "playlist":
+			self.draw_playlist(context, player)
+
+		# draw source type switch
+		self.draw_source_type(context, player)
+
+		source = player.source
+
+		row = layout.row(align=True)
+		row.prop(source, "filepath", text="")
+		row.operator("blive.videotexture_filebrowser", text="", icon="FILESEL")
+
+		if player.mode == "playlist":
+			row.operator("blive.videotexture_playlist_add", icon="ZOOMIN", text="")
+			row.operator("blive.videotexture_playlist_remove", icon="ZOOMOUT", text="")
+
+		# draw controls
+		self.draw_control(context)
+
+		# source properties
+		self.draw_source_properties(context)
+
 def register():
 	print("texture.ui.register")
-	bpy.utils.register_class(BLive_PT_texture_player)	
+	bpy.utils.register_class(BLive_PT_texture_player)
 
 def unregister():
 	print("texture.ui.unregister")

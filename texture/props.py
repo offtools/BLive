@@ -21,34 +21,79 @@
 
 import bpy
 
-class ImagePlaylistEntry(bpy.types.PropertyGroup):
-	filepath = bpy.props.StringProperty()
+def ImagePlayer_sourcetype_changed(self, context):
+	player = context.active_object.active_material.active_texture.image.player
+	player.source.filepath = ""
+
+def ImageSource_filepath_changed(self, context):
+	bpy.ops.blive.videotexture_open()
+
+class ImageSource(bpy.types.PropertyGroup):
+	sourcetype = bpy.props.EnumProperty(items=( ("Movie","Movie",""),("Camera", "Camera",""),("Stream","Stream","") ), update=ImagePlayer_sourcetype_changed)
+	filepath = bpy.props.StringProperty(default="", update=ImageSource_filepath_changed)
 	audio = bpy.props.BoolProperty(default=False)
 	inpoint = bpy.props.FloatProperty(default=0)
 	outpoint = bpy.props.FloatProperty(default=0)
 	preseek = bpy.props.IntProperty(default=0)
 	loop = bpy.props.BoolProperty(default=False)
 	deinterlace = bpy.props.BoolProperty(default=False)
+	width = bpy.props.IntProperty(default=320)
+	height = bpy.props.IntProperty(default=240)
+	rate = bpy.props.FloatProperty(default=25.0)
 
-def playlist_entry_changed(self, context):
+def ImagePlayer_entry_changed(self, context):
 	player = context.active_object.active_material.active_texture.image.player
-	player.playlist_entry_changed = True
+	player.entry_changed = True
+	source = player.playlist[player.playlist_entry]
+	player.source.sourcetype = source.sourcetype
+	player.source.filepath = source.filepath
+	player.source.audio = source.audio
+	player.source.inpoint = source.inpoint
+	player.source.outpoint = source.outpoint
+	player.source.preseek = source.preseek
+	player.source.loop = source.loop
+	player.source.deinterlace = source.deinterlace
+	player.source.width = source.width
+	player.source.height = source.height
+	player.source.rate = source.rate
 
 class ImagePlayer(bpy.types.PropertyGroup):
-	loop = bpy.props.BoolProperty(default=True)
-	has_playlist = bpy.props.BoolProperty(default=False)
-	playlist = bpy.props.CollectionProperty(type=ImagePlaylistEntry)
-	active_playlist_entry = bpy.props.IntProperty(default=-1, update=playlist_entry_changed)
-	playlist_entry_changed = bpy.props.BoolProperty(default=True)
-	audio = bpy.props.BoolProperty(default=False)
+	'''
+	Class: ImagePlayer
+	control media playback on textures
+	
+	Method: get source
+	returns the current source of type ImageSource,
+	either a single source or playlist entry or None
+	
+	Attribute: mode
+	play a single media source or use the playlist
+	
+	Attribute: playlist
+	playlist, collection of ImageSource
+	
+	Attribute: source
+	single media data, PointerProperty ImageSource
+
+	Attribute: sourcetype
+	enum in {"Movie","Stream","Camera"}
+	
+	Attribute: active_entry
+	index of the active playlist entry
+	'''
+
+	mode = bpy.props.EnumProperty(name="mode", items=(("single","Single Media",""),("playlist","Playlist","")))
+	playlist = bpy.props.CollectionProperty(type=ImageSource)
+	source = bpy.props.PointerProperty(type=ImageSource)
+	playlist_entry = bpy.props.IntProperty(default=0, update=ImagePlayer_entry_changed)
 
 def register():
 	print("texture.props.register")
-	bpy.utils.register_class(ImagePlaylistEntry)
+	bpy.utils.register_class(ImageSource)
 	bpy.utils.register_class(ImagePlayer)
 	bpy.types.Image.player = bpy.props.PointerProperty(type=ImagePlayer)
 
 def unregister():
 	print("texture.props.unregister")
 	bpy.utils.unregister_class(ImagePlayer)
-	bpy.utils.unregister_class(ImagePlaylistEntry)
+	bpy.utils.unregister_class(ImageSource)
