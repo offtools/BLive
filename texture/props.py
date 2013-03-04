@@ -26,22 +26,22 @@ def ImagePlayer_sourcetype_changed(self, context):
 	#player.source.filepath = ""
 	pass
 
-def ImageSource_filepath_changed(self, context):
+def ImageSource_source_changed(self, context):
 	player = context.active_object.active_material.active_texture.image.player
 	player.source_changed = True
 
 class ImageSource(bpy.types.PropertyGroup):
 	sourcetype = bpy.props.EnumProperty(items=( ("Movie","Movie",""),("Camera", "Camera",""),("Stream","Stream","") ), update=ImagePlayer_sourcetype_changed)
-	filepath = bpy.props.StringProperty(default="", update=ImageSource_filepath_changed)
-	audio = bpy.props.BoolProperty(default=False)
-	inpoint = bpy.props.FloatProperty(default=0)
-	outpoint = bpy.props.FloatProperty(default=0)
-	preseek = bpy.props.IntProperty(default=0)
-	loop = bpy.props.BoolProperty(default=False)
-	deinterlace = bpy.props.BoolProperty(default=False)
-	width = bpy.props.IntProperty(default=320)
-	height = bpy.props.IntProperty(default=240)
-	rate = bpy.props.FloatProperty(default=0.0)
+	filepath = bpy.props.StringProperty(default="", update=ImageSource_source_changed)
+	audio = bpy.props.BoolProperty(default=False, update=ImageSource_source_changed)
+	inpoint = bpy.props.FloatProperty(default=0, update=ImageSource_source_changed)
+	outpoint = bpy.props.FloatProperty(default=0, update=ImageSource_source_changed)
+	preseek = bpy.props.IntProperty(default=0, update=ImageSource_source_changed)
+	loop = bpy.props.BoolProperty(default=False, update=ImageSource_source_changed)
+	deinterlace = bpy.props.BoolProperty(default=False, update=ImageSource_source_changed)
+	width = bpy.props.IntProperty(default=320, update=ImageSource_source_changed)
+	height = bpy.props.IntProperty(default=240, update=ImageSource_source_changed)
+	rate = bpy.props.FloatProperty(default=0.0, update=ImageSource_source_changed)
 
 def ImagePlayer_entry_changed(self, context):
 	player = context.active_object.active_material.active_texture.image.player
