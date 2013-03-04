@@ -141,7 +141,7 @@ class BgeOSCServer(OSCServer):
 		if hasattr(instance, 'update'):
 			if type(instance.update) in (types.FunctionType, types.MethodType):
 				self.__module.append(instance)
-		
+
 	def callback_connect(self, path, tags, args, source):
 		print('receiving connect: ', path, tags, args, source)
 

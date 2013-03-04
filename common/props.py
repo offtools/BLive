@@ -46,8 +46,9 @@ def register():
 
 	#	initial settings
 	#	game engine and GLSL mode
-	bpy.context.scene.render.engine = 'BLENDER_GAME'
-	bpy.context.scene.game_settings.material_mode = 'GLSL'
+	# throws error in 2.66: AttributeError: '_RestrictContext' object has no attribute 'scene'
+	#bpy.context.scene.render.engine = 'BLENDER_GAME'
+	#bpy.context.scene.game_settings.material_mode = 'GLSL'
 
 def unregister():
 	print("settings.props.unregister")

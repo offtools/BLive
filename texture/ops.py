@@ -135,29 +135,15 @@ class BLive_OT_videotexture_play(bpy.types.Operator):
 			return False
 
 	def execute(self, context):
-		#ob = context.active_object
-		#image = ob.active_material.active_texture.image
-		#player = image.player
-		#source = player.source
+		image = context.active_object.active_material.active_texture.image
+		player = image.player
+		
+		if player.source_changed:
+			bpy.ops.blive.videotexture_open()
+			player.source_changed = False
+		else:
+			bpy.ops.blive.osc_videotexture_play(imgname=context.active_object.active_material.active_texture.image.name)
 
-		#if not source:
-			#return{'CANCELLED'}
-
-		#if image.player.mode == "playlist" and image.player.entry_changed:
-			#bpy.ops.blive.osc_movie_open(obname=ob.name,
-											#imgname=image.name,
-											#filepath=source.filepath,
-											#audio=source.audio,
-											#inpoint=source.inpoint,
-											#outpoint=source.outpoint,
-											#loop=source.loop,
-											#preseek=source.preseek,
-											#deinterlace=source.deinterlace  )
-			#image.player.entry_changed=False
-		#else:
-		bpy.ops.blive.osc_videotexture_play(imgname=context.active_object.active_material.active_texture.image.name)
-
-		#image.player.entry_changed=False
 		return {'FINISHED'}
 
 class BLive_OT_videotexture_pause(bpy.types.Operator):
@@ -240,7 +226,7 @@ class BLive_OT_videotexture_playlist_add(bpy.types.Operator):
 		entry.loop = source.loop
 		entry.deinterlace = source.deinterlace
 		entry.width = source.width
-		entry.heigt = source.height
+		entry.height = source.height
 		entry.rate = source.rate
 
 		player.playlist_entry = len(player.playlist)-1
@@ -296,19 +282,6 @@ class BLive_OT_osc_movie_open(bpy.types.Operator):
 		#~ return self.obname in context.scene.objects and self.imgname in bpy.data.images
 
 	def execute(self, context):
-		print("/texture/movie/open", 
-							self.obname, 
-							self.imgname, 
-							self.filepath, 
-							int(self.audio), 
-							self.inpoint, 
-							self.outpoint, 
-							int(self.loop), 
-							self.preseek, 
-							int(self.deinterlace)
-							)
-
-
 		BLiveClient().send("/texture/movie/open", [ 
 							self.obname, 
 							self.imgname, 
@@ -384,7 +357,7 @@ class BLive_OT_osc_movie_loop(bpy.types.Operator):
 class BLive_OT_osc_camera_open(bpy.types.Operator):
 	'''
 		OSC Command: open a camera device and play it on a texture
-		bpy.ops.blive.osc_camera_open(obname='object', imgname='image', device=0, width=320, height=240, rate=25, preseek=0, deinterlace=False)
+		bpy.ops.blive.osc_camera_open(obname='object', imgname='image', device=0, width=320, height=240, rate=25, deinterlace=False)
 	'''
 	bl_idname = "blive.osc_camera_open"
 	bl_label = "BLive Open Camera Device"
@@ -395,21 +368,9 @@ class BLive_OT_osc_camera_open(bpy.types.Operator):
 	width = bpy.props.IntProperty(default=320)
 	height = bpy.props.IntProperty(default=240)
 	rate = bpy.props.IntProperty(default=25)
-	preseek = bpy.props.IntProperty(default=0)
 	deinterlace = bpy.props.BoolProperty(default=False)
 
 	def execute(self, context):
-		print("/texture/camera/open", 
-							self.obname,
-							self.imgname,
-							self.filepath,
-							self.width, 
-							self.height, 
-							self.rate, 
-							self.preseek, 
-							int(self.deinterlace)
-							)
-
 		BLiveClient().send("/texture/camera/open", [ 
 							self.obname,
 							self.imgname,
@@ -417,7 +378,6 @@ class BLive_OT_osc_camera_open(bpy.types.Operator):
 							self.width, 
 							self.height, 
 							self.rate, 
-							self.preseek, 
 							int(self.deinterlace) ]
 							)
 

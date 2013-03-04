@@ -22,11 +22,13 @@
 import bpy
 
 def ImagePlayer_sourcetype_changed(self, context):
-	player = context.active_object.active_material.active_texture.image.player
-	player.source.filepath = ""
+	#player = context.active_object.active_material.active_texture.image.player
+	#player.source.filepath = ""
+	pass
 
 def ImageSource_filepath_changed(self, context):
-	bpy.ops.blive.videotexture_open()
+	player = context.active_object.active_material.active_texture.image.player
+	player.source_changed = True
 
 class ImageSource(bpy.types.PropertyGroup):
 	sourcetype = bpy.props.EnumProperty(items=( ("Movie","Movie",""),("Camera", "Camera",""),("Stream","Stream","") ), update=ImagePlayer_sourcetype_changed)
@@ -39,7 +41,7 @@ class ImageSource(bpy.types.PropertyGroup):
 	deinterlace = bpy.props.BoolProperty(default=False)
 	width = bpy.props.IntProperty(default=320)
 	height = bpy.props.IntProperty(default=240)
-	rate = bpy.props.FloatProperty(default=25.0)
+	rate = bpy.props.FloatProperty(default=0.0)
 
 def ImagePlayer_entry_changed(self, context):
 	player = context.active_object.active_material.active_texture.image.player
@@ -85,6 +87,7 @@ class ImagePlayer(bpy.types.PropertyGroup):
 	mode = bpy.props.EnumProperty(name="mode", items=(("single","Single Media",""),("playlist","Playlist","")))
 	playlist = bpy.props.CollectionProperty(type=ImageSource)
 	source = bpy.props.PointerProperty(type=ImageSource)
+	source_changed = bpy.props.BoolProperty(default=False)
 	playlist_entry = bpy.props.IntProperty(default=0, update=ImagePlayer_entry_changed)
 
 def register():

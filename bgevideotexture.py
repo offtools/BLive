@@ -77,7 +77,8 @@ class FFmpegPlayer(_BasePlayer):
 	'''
 	def __init__(self, obname=None, imgname=None, filename=None, audio=True, inp=0.0, outp=0.0, loop=False, preseek=0, deinterlace=False):
 		super(FFmpegPlayer, self).__init__(obname, imgname)
-		self.__file = filename
+
+		self.__file = None
 		self.__hassound = False
 		self.__audio = audio
 		self.__sound = None
@@ -85,7 +86,7 @@ class FFmpegPlayer(_BasePlayer):
 		self.__state = 'STOP'
 
 		# --- set source
-		self.source = self.__file
+		self.source = filename
 		self.range = (inp, outp)
 		self.preseek = preseek
 		self.loop = loop
@@ -108,6 +109,7 @@ class FFmpegPlayer(_BasePlayer):
 		return self.__file
 
 	def set_source(self, _file):
+		self.__file = _file
 		if self.state != 'STOP':
 			self.state = 'STOP'
 
@@ -123,9 +125,12 @@ class FFmpegPlayer(_BasePlayer):
 			try:
 				if self.__hassound is True:
 					self.__handle.stop()
-				self.__sound = aud.Factory(self.__file)
+				self.__sound = aud.Factory(_file)
+				print("self.__sound ", self.__sound)
 				device = aud.device()
+				print("device ", device)
 				self.__handle = device.play(self.__sound)
+				print("self.__handle ", self.__handle)
 				self.__handle.loop_count = -1
 				self.__hassound = True
 			except aud.error as err:
@@ -210,19 +215,21 @@ class FFmpegPlayer(_BasePlayer):
 	state = property(get_state, set_state)
 	loop = property(get_loop, set_loop)
 
-class CameraPlayer():
-	def __init__(self, obname=None, imgname=None, device="/dev/video0", width=720, height=576, rate=25.0, deinterlace=True):
+class CameraPlayer(_BasePlayer):
+	def __init__(self, obname=None, imgname=None, device="/dev/video0", width=720, height=576, rate=0.0, deinterlace=True):
 		super().__init__(obname, imgname)
+
+		print("CameraPlayer: ", device, width, height, rate, deinterlace)
 
 		self.__rate = rate
 		self.__width = width
 		self.__height = height
-		self.__preseek = 0
-		self.__deinterlace = deinterlace
 		self.__device = device
 		self.__state = 'STOP'
-		
+
 		self.source = self.__device
+		self.deinterlace = deinterlace
+		self.state = 'PLAY'
 
 	def get_state(self):
 		return self.__state
@@ -247,7 +254,6 @@ class CameraPlayer():
 			self.state = 'STOP'
 
 		self._texture.source = texture.VideoFFmpeg(self.__device, 1, self.__rate, self.__width, self.__height)
-		#self._texture.source = texture.VideoFFmpeg("/dev/video0", 0, 25.0, 320, 240)
 
 		if not self._texture.source:
 			print("Error! inopening Camera")
@@ -256,8 +262,15 @@ class CameraPlayer():
 		# -- scale the video
 		self._texture.source.scale = True
 
-		# -- play the video
-		self.state = 'PLAY'
+	def get_deinterlace(self):
+		if hasattr(self._texture, "source"):
+			return self._texture.source.deinterlace
+		else:
+			return False
+
+	def set_deinterlace(self, deinterlace):
+		if hasattr(self._texture, "source"):
+			self._texture.source.deinterlace = deinterlace
 
 	def refresh(self, play=True):
 		if hasattr(self._texture, "source"):
@@ -265,6 +278,7 @@ class CameraPlayer():
 
 	source = property(get_device, set_device)
 	state = property(get_state, set_state)
+	deinterlace = property(get_deinterlace, set_deinterlace)
 
 class VideoTexture(object):
 	def __init__(self):
@@ -338,31 +352,6 @@ class VideoTexture(object):
 		except TypeError as err:
 			print("Error in VideoTexture.cb_camera_open: ", err)
 
-	#def cb_stream_open(self, path, tags, args, source):
-		#obname = args[0]
-		#imgname = args[1]
-		#filename = args[2]
-		#audio = bool(args[3])
-		#preseek = int(args[7])
-		#deinterlace = bool(args[8])
-		#if imgname in self.__textures.keys():
-			#del self.__textures[imgname]
-
-		#try:
-			#self.__textures[imgname] = FFmpegPlayer(obname=obname,
-													#imgname=imgname,
-													#filename=filename,
-													#audio=audio,
-													#inp=0,
-													#outp=0,
-													#loop=False,
-													#preseek=preseek,
-													#deinterlace=deinterlace
-													#)
-													
-		#except TypeError as err:
-			#print("err in videotexture.open: ", err)
-
 	def cb_texture_play(self, path, tags, args, source):
 		imgname = args[0]
 		if imgname in self.__textures:
@@ -384,10 +373,10 @@ class VideoTexture(object):
 			del self.__textures[imgname]
 
 	def cb_filter_deinterlace(self, path, tags, args, source):
-		#~ imgname = args[0]
-		#~ deinterlace = args[1]
-		#~ if imgname in self.__textures:
-			#~ self.__textures[imgname].deinterlace = True
+		imgname = args[0]
+		deinterlace = args[1]
+		if imgname in self.__textures:
+			self.__textures[imgname].deinterlace = True
 		print("Videotexture.cb_filter_deinterlace - not implemented")
 
 	def update(self):

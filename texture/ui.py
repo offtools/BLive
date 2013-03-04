@@ -76,6 +76,9 @@ class BLive_PT_texture_player(bpy.types.Panel):
 			row = self.layout.row(align=True)
 			row.prop(source, "width", text="width")
 			row.prop(source, "height", text="height")
+			row = self.layout.row(align=True)
+			row.prop(source, "deinterlace", text="deinterlace")
+			row.prop(source, "rate", text="framerate")
 
 		if source.sourcetype == "Stream":
 			row = self.layout.row(align=True)
@@ -93,7 +96,7 @@ class BLive_PT_texture_player(bpy.types.Panel):
 
 			# draw playlist
 			row = layout.row()
-			row.template_list(player, "playlist", player, "playlist_entry", rows=2, maxrows=8)
+			row.template_list("UI_UL_list", "playlist_entry", player, "playlist", player, "playlist_entry", rows=2, maxrows=8)
 		except IndexError:
 			pass
 

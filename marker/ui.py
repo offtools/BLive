@@ -47,7 +47,7 @@ class BLive_PT_timeline_trigger(bpy.types.Panel):
 
 		#	list Timeline Markers
 		row = layout.row()
-		row.template_list(scene, "timeline_markers", trigger, "m_sel_marker", rows=2, maxrows=8)
+		row.template_list("UI_UL_list", "timeline_markers", scene, "timeline_markers", trigger, "m_sel_marker", rows=2, maxrows=8)
 		marker = context.scene.timeline_markers[trigger.m_sel_marker]
 
 		if marker.name in context.scene.timeline_trigger.m_markerdict:
