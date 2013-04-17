@@ -19,23 +19,5 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-# import modules
-if "bpy" in locals():
-	print("imp.reload")
-	import imp
-	imp.reload(ops)
-	imp.reload(handler)
-else:
-	print("import")
-	from . import ops
-	from . import handler
+print("BLive LibloServer:")
 
-def register():
-	print("material.register")
-	ops.register()
-	handler.register()
-
-def unregister():
-	print("material.unregister")
-	handler.unregister()
-	ops.unregister()

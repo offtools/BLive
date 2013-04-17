@@ -19,21 +19,25 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-#~ from . import props
-from . import ops
-#~ from . import ui
-from . import handler
+# import modules
+if "bpy" in locals():
+	print("imp.reload")
+	import imp
+	imp.reload(ops)
+	imp.reload(handler)
+else:
+	print("import")
+	from . import ops
+	from . import handler
+	pass
+
 
 def register():
 	print("object.register")
-	#~ props.register()
 	ops.register()
-	#~ ui.register()
 	handler.register()
 
 def unregister():
 	print("object.unregister")
 	handler.unregister()
-	#~ ui.unregister()
 	ops.unregister()
-	#~ props.unregister()

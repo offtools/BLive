@@ -27,10 +27,20 @@
 #	the BGE instance (start/stop movies, change Scene, ...)
 #
 
-from . import props
-from . import ops
-from . import ui
-from . import handler
+# import modules
+if "bpy" in locals():
+	print("imp.reload")
+	import imp
+	imp.reload(props)
+	imp.reload(ops)
+	imp.reload(ui)
+	imp.reload(handler)
+else:
+	print("import")
+	from . import props
+	from . import ops
+	from . import ui
+	from . import handler
 
 def register():
 	print("marker.register")

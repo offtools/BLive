@@ -27,9 +27,19 @@
 #	the BGE instance (start/stop movies, change Scene, ...)
 #
 
-from . import props
-from . import ops
-from . import ui
+# import modules
+if "bpy" in locals():
+	print("imp.reload")
+	import imp
+	imp.reload(props)
+	imp.reload(ops)
+	imp.reload(ui)
+else:
+	print("import")
+	from . import props
+	from . import ops
+	from . import ui
+	pass
 
 def register():
 	print("texture.register")

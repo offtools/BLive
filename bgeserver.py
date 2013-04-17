@@ -152,3 +152,10 @@ class BgeOSCServer(OSCServer):
 
 		for mod in self.__module:
 			mod.update()
+
+class BgeOSCModul():
+	def __init__(self, oscserver):
+		self.__oscserver = oscserver
+
+	def registerCallback(self, prefix, func)
+		self.__oscserver.addMsgHandler(prefix, func)

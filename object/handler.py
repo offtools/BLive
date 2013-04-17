@@ -19,36 +19,44 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
+
 import bpy
+from liblo import Bundle, Message
 from bpy.app.handlers import persistent
-from . import ops 
+from ..common.libloclient import Client
 
 @persistent
 def object_update_handler(scene):
+	if scene.is_updated:
+		print("Scene updated")
+
 	# --- check objects updates
 	for ob in scene.objects:
-
 		if ob.is_updated:
-			ops.osc_object_location(ob)
-			ops.osc_object_rotation(ob)
+			bundle = Bundle()
+			bundle.add(Message("/scene/objects/position", ob.name, ob.location[0], ob.location[1], ob.location[2]))
+			bundle.add(Message("/scene/objects/orientation", ob.name, ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2]))
+
 			if ob.type == 'MESH':
-				ops.osc_object_scaling(ob)
+				bundle.add(Message("/scene/objects/scaling", ob.name, ob.scale[0], ob.scale[1], ob.scale[2]))
+
+			Client().send(bundle)
 
 		if ob.is_updated_data:
 			if ob.type == 'CAMERA':
 				camera = ob.data
-				ops.osc_object_camera(camera)
+				#ops.osc_object_camera(camera)
 			elif ob.type == 'LAMP':
 				lamp = ob.data
-				ops.osc_object_lamp(lamp)
+				#ops.osc_object_lamp(lamp)
 			elif ob.type == 'MESH' and ob.mode == 'EDIT':
-				ops.osc_object_meshdata(ob)
+				#ops.osc_object_meshdata(ob)
+				pass
 
 def register():
 	print("object.handler.register")
-	bpy.app.handlers.scene_update_post.append(object_update_handler)
+	Client().add_apphandler('scene_update_post', object_update_handler)
 
 def unregister():
 	print("object.handler.unregister")
-	idx = bpy.app.handlers.scene_update_post.index(object_update_handler)
-	bpy.app.handlers.scene_update_post.remove(bpy.app.handlers.scene_update_post[idx])
+	pass

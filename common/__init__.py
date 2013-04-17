@@ -23,9 +23,20 @@
 # They are added to bpy.data.windowmanger[...], because its
 # a unique stucture in the BlendData
 
-from . import props
-from . import ops
-from . import ui
+# import modules
+if "bpy" in locals():
+	print("imp.reload")
+	import imp
+	imp.reload(props)
+	imp.reload(ops)
+	imp.reload(ui)
+else:
+	print("import")
+	from . import props
+	from . import ops
+	from . import ui
+	pass
+
 
 def register():
 	print("common.register")

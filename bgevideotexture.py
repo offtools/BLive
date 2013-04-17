@@ -280,8 +280,12 @@ class CameraPlayer(_BasePlayer):
 	state = property(get_state, set_state)
 	deinterlace = property(get_deinterlace, set_deinterlace)
 
-class VideoTexture(object):
-	def __init__(self):
+class VideoTexture(BgeOSCModul):
+	def __init__(self, oscserver):
+		super().__init__(self, oscserver)
+
+		#self.registerCallback()
+
 		self.TEXTURE_STATES = {'PLAY', 'PAUSE', 'STOP'}
 		self.__textures = dict()
 
@@ -366,10 +370,12 @@ class VideoTexture(object):
 		imgname = args[0]
 		if imgname in self.__textures:
 			self.__textures[imgname].state = 'STOP'
+			print("cb_texture_stop: ", imgname)
 
 	def cb_texture_close(self, path, tags, args, source):
 		imgname = args[0]
 		if imgname in self.__textures:
+			print("cb_texture_stop: ", imgname)
 			del self.__textures[imgname]
 
 	def cb_filter_deinterlace(self, path, tags, args, source):

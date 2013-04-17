@@ -23,9 +23,10 @@ import bpy
 import os
 import sys
 import subprocess
-from ..client import BLiveClient
+from .libloclient import Client
 
-# TODO: test blenderplayer port cmdline options
+INITSCRIPT = "blive_init.py"
+UPDATESCRIPT = "blive_update.py"
 
 class BLive_OT_logic_add(bpy.types.Operator):
 	"""
@@ -46,8 +47,10 @@ class BLive_OT_logic_add(bpy.types.Operator):
 		return bool(bs.server_object) and bs.server_object in sc.objects
 
 	def execute(self, context):
-		if not 'main.py' in bpy.data.texts:
-			self.add_script()
+		if not 'start.py' in bpy.data.texts:
+			self.add_script(INITSCRIPT)
+		if not 'update.py' in bpy.data.texts:
+			self.add_script(UPDATESCRIPT)
 		self.add_gamelogic(context)
 		return{'FINISHED'} 
 
@@ -74,26 +77,24 @@ class BLive_OT_logic_add(bpy.types.Operator):
 
 		if not 'c.init' in context.active_object.game.controllers:
 			bpy.ops.logic.controller_add(type='PYTHON', name='c.init')
-		context.active_object.game.controllers['c.init'].mode = 'MODULE'
-		context.active_object.game.controllers['c.init'].module = "main.start"
+		context.active_object.game.controllers['c.init'].mode = 'SCRIPT'
+		context.active_object.game.controllers['c.init'].text = bpy.data.texts[INITSCRIPT]
 
 		if not 'c.update' in context.active_object.game.controllers:
 			bpy.ops.logic.controller_add(type='PYTHON', name='c.update')
-		context.active_object.game.controllers['c.update'].mode = 'MODULE'
-		context.active_object.game.controllers['c.update'].module = "main.update"
+		context.active_object.game.controllers['c.update'].mode = 'SCRIPT'
+		context.active_object.game.controllers['c.update'].text = bpy.data.texts[UPDATESCRIPT]
 
 		context.active_object.game.sensors['s.init'].link(context.active_object.game.controllers['c.init'])	
 		context.active_object.game.sensors['s.update'].link(context.active_object.game.controllers['c.update'])
 
 		bs.has_server_object = True
 
-	def add_script(self):
+	def add_script(self, filename):
 		'''
 			add server script for bge, appends import path dynamicly
 		'''
 
-		filename = "main.py"
-		tpl = "bgetemplate.tpl"
 		paths = bpy.utils.script_paths()
 		for i in paths:
 			path = os.path.join(i, "addons")
@@ -102,17 +103,19 @@ class BLive_OT_logic_add(bpy.types.Operator):
 					bpy.data.texts.new(name=filename)
 
 					directory = os.path.dirname(j[1])
-					filepath = os.path.join(directory, tpl)
+					filepath = os.path.join(directory, "gameengine", filename)
 					file = open(filepath, 'r')
-					
+
+					textblock = bpy.data.texts[filename]
+
 					# add import path
-					textblock = bpy.data.texts[filename] 
 					textblock.write("import sys\n")
 					textblock.write("sys.path.append(r'{0}')\n".format(directory))
 
 					for line in file:
 						textblock.write(line)
 					file.close()
+
 					return
 		#   TODO?: error handling
 		print("Error: addon path not found")
@@ -147,10 +150,14 @@ class BLive_OT_logic_remove(bpy.types.Operator):
 	
 		if "c.update" in context.active_object.game.controllers:
 			bpy.ops.logic.controller_remove(controller="c.update")
-		
+
+		bpy.data.texts.remove( bpy.data.texts[INITSCRIPT] )
+		bpy.data.texts.remove( bpy.data.texts[UPDATESCRIPT] )
+
 		bs.has_server_object = False
 
 		return{'FINISHED'}
+
 
 class BLive_OT_fork_blenderplayer(bpy.types.Operator):
 	bl_idname = "blive.fork_blenderplayer"
@@ -198,8 +205,7 @@ class BLive_OT_osc_connect(bpy.types.Operator):
 		server = bc.server
 		port = bc.port
 
-		cli = BLiveClient()
-		cli.connect(server, port)
+		Client().connect(server, port)
 		return{'FINISHED'}
 
 class BLive_OT_osc_quit(bpy.types.Operator):
@@ -215,7 +221,7 @@ class BLive_OT_osc_quit(bpy.types.Operator):
 		return sc.blive_scene_settings.has_server_object
 
 	def execute(self, context):
-		BLiveClient().quit()
+		Client().disconnect()
 		return{'FINISHED'}
 
 def register():
