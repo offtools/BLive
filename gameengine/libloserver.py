@@ -19,6 +19,11 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
+#TODO: 
+#gameobject - attrDict, properties, rayCast
+#
+#errors: use only BLiveError
+
 
 #OSC Paths:
 #path('/scene/attr', [args, ...])
@@ -29,6 +34,7 @@
 #mesh: obj=bge.logic.getCurrentScene().objects[args[0]].meshes[args[1]]
 #path('/scene/objects/meshes/material/attr', 'Object', 0, 0, [args, ...])
 #material: obj=bge.logic.getCurrentScene().objects[args[0]].meshes[args[1]].materials[args[2]]
+
 
 import bge
 from liblo import Server, Message, UDP
@@ -50,12 +56,19 @@ class AttributeType():
 class AttributeTypeString(AttributeType):
 	@classmethod
 	def get(cls, obj, attr):
-		return [str(obj.__getattribute__(attr))]
+		val = obj.__getattribute__(attr)
+		if val:
+			return [str(obj.__getattribute__(attr))]
+		else:
+			return ['']
 
-class AttributeObjectList(AttributeType):
+class AttributeNames(AttributeType):
 	@classmethod
 	def get(cls, obj, attr):
-		return [i.name for i in obj.__getattribute__(attr)]
+		try:
+			return [", ".join([i.name for i in obj.__getattribute__(attr)])]
+		except TypeError:
+			return ['']
 
 class AttributeObject(AttributeType):
 	@classmethod
@@ -179,8 +192,20 @@ class BaseRequestHandler():
 		typehandler.set(obj, attr, data)
 
 	@classmethod
-	def _method(cls, obj, attr, data):
-		pass
+	def _method(cls, path, args, types, source, user_data):
+		obj, attr = cls._get_instance(path, args)
+		data = cls._parse_data(args)
+		if data:
+			return obj.__getattribute__(attr)(*data)
+		else:
+			return obj.__getattribute__(attr)()
+
+	@classmethod
+	def _method_reply(cls, path, source, target, data):
+		msg = Message(path)
+		msg.add(*target)
+		msg.add(*data)
+		bge.logic.server.send(source.url, msg)
 
 # Reply Handler
 
@@ -189,8 +214,8 @@ class BaseRequestHandler():
 		cls._reply(AttributeTypeBool, path, args, types, source, user_data)
 
 	@classmethod
-	def reply_objectlist(cls, path, args, types, source, user_data):
-		cls._reply(AttributeObjectList, path, args, types, source, user_data)
+	def reply_names(cls, path, args, types, source, user_data):
+		cls._reply(AttributeNames, path, args, types, source, user_data)
 
 	@classmethod
 	def reply_string(cls, path, args, types, source, user_data):
@@ -214,7 +239,6 @@ class BaseRequestHandler():
 
 	@classmethod
 	def reply_matrix3x3(cls, path, args, types, source, user_data):
-		print("reply_matrix3x3")
 		cls._reply(AttributeTypeMatrix3x3, path, args, types, source, user_data)
 
 	@classmethod
@@ -255,16 +279,75 @@ class BaseRequestHandler():
 		cls._setvalue(AttributeTypeMatrix4x4, path, args, types, source, user_data)
 
 # Method Handler
+# naming convention:
+# call_method => no param conversion, no return value
+# call_method_reply => no param conversion, return non iterable type (numbers)
+# call_method_reply_bool[vec3,...] => no param conversion, return type that need a conversion (e.g. vec3 to fff) 
+# custom handler defined in RequestHandler classes should look like this:
+# call_method_[fmt]_reply_[return type]
+# example: call_method_sfffx_reply_none (param: sfff, sfffi, sfffii, ...; returns nothing)
 	@classmethod
 	def call_method(cls, path, args, types, source, user_data):
-		obj, attr = cls._get_instance(path, args)
-		data = cls._parse_data(args)
-		if data:
-			ret = obj.__getattribute__(attr)(*data)
+		cls._method(path, args, types, source, user_data)
+
+	@classmethod
+	def call_method_reply(cls, path, args, types, source, user_data):
+		value = cls._method(path, args, types, source, user_data)
+		target = cls._parse_instance(args)
+		cls._method_reply(path, source, target, [value])
+
+	@classmethod
+	def call_method_reply_names(cls, path, args, types, source, user_data):
+		value = cls._method(path, args, types, source, user_data)
+		target = cls._parse_instance(args)
+		if not value is None:
+			cls._method_reply(path, source, target, [", ".join([i.name for i in value])])
 		else:
-			ret = obj.__getattribute__(attr)()
-		if ret:
-			print("call_method - return value: ", ret)
+			cls._method_reply(path, source, target, [''])
+
+	@classmethod
+	def call_method_reply_name(cls, path, args, types, source, user_data):
+		value = cls._method(path, args, types, source, user_data)
+		target = cls._parse_instance(args)
+		if not value is None:
+			cls._method_reply(path, source, target, [value.name])
+		else:
+			cls._method_reply(path, source, target, [''])
+
+	@classmethod
+	def call_method_reply_string(cls, path, args, types, source, user_data):
+		value = cls._method(path, args, types, source, user_data)
+		target = cls._parse_instance(args)
+		if not value is None:
+			cls._method_reply(path, source, target, [str(value)])
+		else:
+			cls._method_reply(path, source, target, [''])
+
+	@classmethod
+	def call_method_reply_bool(cls, path, args, types, source, user_data):
+		value = cls._method(path, args, types, source, user_data)
+		target = cls._parse_instance(args)
+		cls._method_reply(path, source, target, [int(value)])
+
+	@classmethod
+	def call_method_reply_vec3(cls, path, args, types, source, user_data):
+		value = cls._method(path, args, types, source, user_data)
+		target = cls._parse_instance(args)
+		cls._method_reply(path, source, target, value)
+
+	@classmethod
+	def call_method_reply_vec4(cls, path, args, types, source, user_data):
+		value = cls._method(path, args, types, source, user_data)
+		target = cls._parse_instance(args)
+		cls._method_reply(path, source, target, value)
+
+	@classmethod
+	def call_method_reply_matrix3x3(cls, path, args, types, source, user_data):
+		pass
+
+	@classmethod
+	def call_method_reply_matrix4x4(cls, path, args, types, source, user_data):
+		pass
 
 class SceneRequestHandler(BaseRequestHandler):
 	@classmethod
@@ -292,7 +375,97 @@ class GameObjectRequestHandler(BaseRequestHandler):
 		if args[0] in sc.objects:
 			return (sc.objects[args[0]], attr)
 		elif args[0] in sc.objectsInactive:
-			return (scene.objectsInactive[args[0]], attr)
+			return (sc.objectsInactive[args[0]], attr)
+		else:
+			raise ValueError
+
+	@classmethod
+	def _parse_instance(cls, args):
+		return args[:1]
+
+	@classmethod
+	def _parse_data(cls, args):
+		return args[1:]
+
+	# custom handlers
+	@classmethod
+	def call_alignAxisToVect(cls, path, args, types, source, user_data):
+		args = [args[0], (args[1],args[2],args[3]), args[4], args[5]]
+		cls._method(path, args, types, source, user_data)
+
+	@classmethod
+	def call_getAxisVect(cls, path, args, types, source, user_data):
+		nargs = [args[0], (args[1],args[2],args[3])]
+		cls.call_method_reply_vec3(path, nargs, types, source, user_data)
+
+	@classmethod
+	def call_method_sfffx_reply_none(cls, path, args, types, source, user_data):
+		nargs = [args[0], (args[1],args[2],args[3])]
+		for i in args[4:]:
+			nargs.append(i)
+		cls.call_method(path, nargs, types, source, user_data)
+
+	@classmethod
+	def call_method_sfffx_reply_vec3(cls, path, args, types, source, user_data):
+		nargs = [args[0], (args[1],args[2],args[3])]
+		for i in args[4:]:
+			nargs.append(i)
+		cls.call_method_reply_vec3(path, nargs, types, source, user_data)
+
+	@classmethod
+	def call_method_sffffff_reply_none(cls, path, args, types, source, user_data):
+		nargs = [args[0], (args[1],args[2],args[3]), (args[4],args[5],args[6])]
+		cls.call_method(path, nargs, types, source, user_data)
+
+	@classmethod
+	def call_method_ssx_reply_none(cls, path, args, types, source, user_data):
+		nargs = [ args[0], bge.logic.getCurrentScene().objects[args[1]] ]
+		for i in args[2:]:
+			nargs.append(i)
+		cls.call_method(path, nargs, types, source, user_data)
+
+	@classmethod
+	def call_method_ssx_reply_f(cls, path, args, types, source, user_data):
+		nargs = [ args[0], bge.logic.getCurrentScene().objects[args[1]] ]
+		for i in args[2:]:
+			nargs.append(i)
+		cls.call_method_reply(path, nargs, types, source, user_data)
+
+	@classmethod
+	def call_method_sfffx_reply_f(cls, path, args, types, source, user_data):
+		nargs = [args[0], (args[1],args[2],args[3])]
+		for i in args[4:]:
+			nargs.append(i)
+		cls.call_method_reply(path, nargs, types, source, user_data)
+
+	@classmethod
+	def call_method_ssx_reply_vec3(cls, path, args, types, source, user_data):
+		nargs = [ args[0], bge.logic.getCurrentScene().objects[args[1]] ]
+		for i in args[2:]:
+			nargs.append(i)
+		cls.call_method_reply_vec3(path, nargs, types, source, user_data)
+
+	@classmethod
+	def call_method_ssx_reply_string(cls, path, args, types, source, user_data):
+		nargs = [ args[0], bge.logic.getCurrentScene().objects[args[1]] ]
+		for i in args[2:]:
+			nargs.append(i)
+		cls.call_method_reply_string(path, nargs, types, source, user_data)
+
+	@classmethod
+	def call_method_sfffx_reply_string(cls, path, args, types, source, user_data):
+		nargs = [args[0], (args[1],args[2],args[3])]
+		for i in args[4:]:
+			nargs.append(i)
+		cls.call_method_reply_string(path, nargs, types, source, user_data)
+
+class CameraRequestHandler(BaseRequestHandler):
+	@classmethod
+	def _get_instance(cls, path, args):
+		sc = bge.logic.getCurrentScene()
+		attr = path.split('/')[-1:][0]
+		if args[0] in sc.cameras:
+			return (sc.cameras[args[0]], attr)
 		else:
 			raise ValueError
 
@@ -309,16 +482,17 @@ class LibloServer(Server):
 		super().__init__(port, proto)
 		self.clients = set()
 
-		# all optional parameters needed
-
+		# TODO: projection matrix stored in blendfile is not used on startup
+		#       it needs to be set after connecting with first client
+		self.init = False
 
 		# Handler for KX_Scene
 
 		self.add_method("/scene/name", "", SceneRequestHandler.reply_string)
-		self.add_method("/scene/objects", "", SceneRequestHandler.reply_objectlist)
-		self.add_method("/scene/objectsInactive", "", SceneRequestHandler.reply_objectlist)
-		self.add_method("/scene/lights", "", SceneRequestHandler.reply_objectlist)
-		self.add_method("/scene/cameras", "", SceneRequestHandler.reply_objectlist)
+		self.add_method("/scene/objects", "", SceneRequestHandler.reply_names)
+		self.add_method("/scene/objectsInactive", "", SceneRequestHandler.reply_names)
+		self.add_method("/scene/lights", "", SceneRequestHandler.reply_names)
+		self.add_method("/scene/cameras", "", SceneRequestHandler.reply_names)
 		self.add_method("/scene/active_camera", "", SceneRequestHandler.reply_string)
 
 		self.add_method("/scene/suspended", "", SceneRequestHandler.reply_bool)
@@ -329,8 +503,8 @@ class LibloServer(Server):
 
 		self.add_method("/scene/dbvt_culling", "", SceneRequestHandler.reply_bool)
 
-		self.add_method("/scene/pre_draw", "", SceneRequestHandler.reply_objectlist)
-		self.add_method("/scene/post_draw", "", SceneRequestHandler.reply_objectlist)
+		self.add_method("/scene/pre_draw", "", SceneRequestHandler.reply_names)
+		self.add_method("/scene/post_draw", "", SceneRequestHandler.reply_names)
 
 		self.add_method("/scene/gravity", "", SceneRequestHandler.reply_vec3)
 		self.add_method("/scene/gravity", "fff", SceneRequestHandler.set_vec3_value)
@@ -358,12 +532,11 @@ class LibloServer(Server):
 		self.add_method("/scene/objects/linVelocityMax", "sf", GameObjectRequestHandler.set_float_value)
 		self.add_method("/scene/objects/linVelocityMax", "s", GameObjectRequestHandler.reply_float)
 
-		self.add_method("/scene/objects/localInertia", "sfff", GameObjectRequestHandler.set_vec3_value)
 		self.add_method("/scene/objects/localInertia", "s", GameObjectRequestHandler.reply_vec3)
 
 		self.add_method("/scene/objects/parent", "s", GameObjectRequestHandler.reply_string)
 
-		self.add_method("/scene/objects/groupMembers", "s", GameObjectRequestHandler.reply_objectlist)
+		self.add_method("/scene/objects/groupMembers", "s", GameObjectRequestHandler.reply_names)
 
 		self.add_method("/scene/objects/groupObject", "s", GameObjectRequestHandler.reply_string)
 
@@ -382,7 +555,7 @@ class LibloServer(Server):
 		self.add_method("/scene/objects/position", "sfff", GameObjectRequestHandler.set_vec3_value)
 
 		self.add_method("/scene/objects/orientation", "sfff", GameObjectRequestHandler.set_vec3_value)
-		self.add_method("/scene/objects/orientation", "s", GameObjectRequestHandler.reply_vec3)
+		self.add_method("/scene/objects/orientation", "s", GameObjectRequestHandler.reply_matrix3x3)
 
 		self.add_method("/scene/objects/scaling", "sfff", GameObjectRequestHandler.set_vec3_value)
 		self.add_method("/scene/objects/scaling", "s", GameObjectRequestHandler.reply_vec3)
@@ -426,22 +599,23 @@ class LibloServer(Server):
 		self.add_method("/scene/objects/timeOffset", "sf", GameObjectRequestHandler.set_float_value)
 		self.add_method("/scene/objects/timeOffset", "s", GameObjectRequestHandler.reply_float)
 
-		self.add_method("/scene/objects/state", "sf", GameObjectRequestHandler.set_int_value)
+		self.add_method("/scene/objects/state", "si", GameObjectRequestHandler.set_int_value)
 		self.add_method("/scene/objects/state", "s", GameObjectRequestHandler.reply_int)
 
-		self.add_method("/scene/objects/meshes", "s", GameObjectRequestHandler.reply_objectlist)
+		self.add_method("/scene/objects/meshes", "s", GameObjectRequestHandler.reply_names)
 
-		self.add_method("/scene/objects/sensors", "s", GameObjectRequestHandler.reply_objectlist)
+		self.add_method("/scene/objects/sensors", "s", GameObjectRequestHandler.reply_names)
 
-		self.add_method("/scene/objects/controllers", "s", GameObjectRequestHandler.reply_objectlist)
+		self.add_method("/scene/objects/controllers", "s", GameObjectRequestHandler.reply_names)
 
-		self.add_method("/scene/objects/actuators", "s", GameObjectRequestHandler.reply_objectlist)
+		self.add_method("/scene/objects/actuators", "s", GameObjectRequestHandler.reply_names)
 
-		self.add_method("/scene/objects/attrDict", "s", GameObjectRequestHandler.reply_objectlist)
+		#TODO
+		#self.add_method("/scene/objects/attrDict", "s", GameObjectRequestHandler.reply_names)
 
-		self.add_method("/scene/objects/children", "s", GameObjectRequestHandler.reply_objectlist)
+		self.add_method("/scene/objects/children", "s", GameObjectRequestHandler.reply_names)
 
-		self.add_method("/scene/objects/childrenRecursive", "s", GameObjectRequestHandler.reply_objectlist)
+		self.add_method("/scene/objects/childrenRecursive", "s", GameObjectRequestHandler.reply_names)
 
 		self.add_method("/scene/objects/life", "sf", GameObjectRequestHandler.set_float_value)
 		self.add_method("/scene/objects/life", "s", GameObjectRequestHandler.reply_float)
@@ -456,25 +630,117 @@ class LibloServer(Server):
 
 		self.add_method("/scene/objects/setVisible", "sii", GameObjectRequestHandler.call_method)
 
-		self.add_method("/scene/objects/alignAxisToVect", "sfffif", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/alignAxisToVect", "sfffif", GameObjectRequestHandler.call_alignAxisToVect)
 
-		self.add_method("/scene/objects/getAxisVect", "sfff", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/getAxisVect", "sfff", GameObjectRequestHandler.call_getAxisVect)
 
-		self.add_method("/scene/objects/applyMovement", "sfffii", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/applyMovement", "sfffi", GameObjectRequestHandler.call_method_sfffx_reply_none)
+		self.add_method("/scene/objects/applyMovement", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_none)
 
-		self.add_method("/scene/objects/applyRotation", "sfffii", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/applyRotation", "sfffi", GameObjectRequestHandler.call_method_sfffx_reply_none)
+		self.add_method("/scene/objects/applyRotation", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_none)
 
-		self.add_method("/scene/objects/applyForce", "sfffi", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/applyForce", "sfffi", GameObjectRequestHandler.call_method_sfffx_reply_none)
+		self.add_method("/scene/objects/applyForce", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_none)
 
-		self.add_method("/scene/objects/applyTorque", "sfffi", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/applyTorque", "sfffi", GameObjectRequestHandler.call_method_sfffx_reply_none)
+		self.add_method("/scene/objects/applyTorque", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_none)
 
-		self.add_method("/scene/objects/getLinearVelocity", "si", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/getLinearVelocity", "si", GameObjectRequestHandler.call_method_reply_vec3)
+		self.add_method("/scene/objects/getLinearVelocity", "s", GameObjectRequestHandler.call_method_reply_vec3)
 
-		self.add_method("/scene/objects/setLinearVelocity", "sfffi", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/setLinearVelocity", "sfffi", GameObjectRequestHandler.call_method_sfffx_reply_none)
+		self.add_method("/scene/objects/setLinearVelocity", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_none)
 
-		self.add_method("/scene/objects/getAngularVelocity", "si", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/getAngularVelocity", "si", GameObjectRequestHandler.call_method_reply_vec3)
+		self.add_method("/scene/objects/getAngularVelocity", "s", GameObjectRequestHandler.call_method_reply_vec3)
 
-		self.add_method("/scene/objects/setAngularVelocity", "sfffi", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/setAngularVelocity", "sfffi", GameObjectRequestHandler.call_method_sfffx_reply_none)
+		self.add_method("/scene/objects/setAngularVelocity", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_none)
+
+		self.add_method("/scene/objects/getVelocity", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_vec3)
+		self.add_method("/scene/objects/getVelocity", "s", GameObjectRequestHandler.call_method_reply_vec3)
+
+		self.add_method("/scene/objects/getReactionForce", "s", GameObjectRequestHandler.call_method_reply_vec3)
+
+		self.add_method("/scene/objects/applyImpulse", "sffffff", GameObjectRequestHandler.call_method_sffffff_reply_none)
+
+		self.add_method("/scene/objects/suspendDynamics", "s", GameObjectRequestHandler.call_method)
+
+		self.add_method("/scene/objects/restoreDynamics", "s", GameObjectRequestHandler.call_method)
+
+		self.add_method("/scene/objects/enableRigidBody", "s", GameObjectRequestHandler.call_method)
+
+		self.add_method("/scene/objects/disableRigidBody", "s", GameObjectRequestHandler.call_method)
+
+		self.add_method("/scene/objects/setParent", "ssii", GameObjectRequestHandler.call_method_ssx_reply_none)
+		self.add_method("/scene/objects/setParent", "ssi", GameObjectRequestHandler.call_method_ssx_reply_none)
+		self.add_method("/scene/objects/setParent", "ss", GameObjectRequestHandler.call_method_ssx_reply_none)
+
+		self.add_method("/scene/objects/removeParent", "s", GameObjectRequestHandler.call_method)
+
+		self.add_method("/scene/objects/getPhysicsId", "s", GameObjectRequestHandler.call_method_reply)
+
+		self.add_method("/scene/objects/getPropertyNames", "s", GameObjectRequestHandler.call_method_reply_names)
+
+		self.add_method("/scene/objects/getDistanceTo", "ss", GameObjectRequestHandler.call_method_ssx_reply_f)
+		self.add_method("/scene/objects/getDistanceTo", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_f)
+
+		self.add_method("/scene/objects/getVectTo", "ss", GameObjectRequestHandler.call_method_ssx_reply_vec3)
+		self.add_method("/scene/objects/getVectTo", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_vec3)
+
+		self.add_method("/scene/objects/rayCastTo", "ssfs", GameObjectRequestHandler.call_method_ssx_reply_string)
+		self.add_method("/scene/objects/rayCastTo", "sffffs", GameObjectRequestHandler.call_method_sfffx_reply_string)
+
+#		self.add_method("/scene/objects/rayCast", "ssffffsiii", GameObjectRequestHandler.call_method_sfffx_reply_string)
+#		self.add_method("/scene/objects/rayCast", "sfffsfsiii", GameObjectRequestHandler.call_method_sfffx_reply_string)
+#		self.add_method("/scene/objects/rayCast", "sfffffffsiii", GameObjectRequestHandler.call_method_sfffx_reply_string)
+
+		self.add_method("/scene/objects/setCollisionMargin", "sf", GameObjectRequestHandler.call_method)
+
+		self.add_method("/scene/objects/sendMessage", "ssss", GameObjectRequestHandler.call_method)
+
+		self.add_method("/scene/objects/reinstancePhysicsMesh", "sss", GameObjectRequestHandler.call_method_reply_bool)
+
+		self.add_method("/scene/objects/playAction", "sff", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/playAction", "sffi", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/playAction", "sffii", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/playAction", "sffiif", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/playAction", "sffiifi", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/playAction", "sffiifif", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/playAction", "sffiififi", GameObjectRequestHandler.call_method)
+
+		self.add_method("/scene/objects/playAction", "s", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/playAction", "si", GameObjectRequestHandler.call_method)
+
+		self.add_method("/scene/objects/getActionFrame", "si", GameObjectRequestHandler.call_method_reply)
+		self.add_method("/scene/objects/getActionFrame", "s", GameObjectRequestHandler.call_method_reply)
+
+		self.add_method("/scene/objects/setActionFrame", "sif", GameObjectRequestHandler.call_method)
+		self.add_method("/scene/objects/setActionFrame", "si", GameObjectRequestHandler.call_method)
+
+		self.add_method("/scene/objects/isPlayingAction", "si", GameObjectRequestHandler.call_method_reply_bool)
+		self.add_method("/scene/objects/isPlayingAction", "s", GameObjectRequestHandler.call_method_reply_bool)
+
+		# Handler for KX_GameObject
+
+		self.add_method("/scene/cameras/lens", "sf", CameraRequestHandler.set_float_value)
+		self.add_method("/scene/cameras/lens", "s", CameraRequestHandler.reply_float)
+
+		self.add_method("/scene/cameras/ortho_scale", "sf", CameraRequestHandler.set_float_value)
+		self.add_method("/scene/cameras/ortho_scale", "s", CameraRequestHandler.reply_float)
+
+		self.add_method("/scene/cameras/near", "sf", CameraRequestHandler.set_float_value)
+		self.add_method("/scene/cameras/near", "s", CameraRequestHandler.reply_float)
+
+		self.add_method("/scene/cameras/far", "sf", CameraRequestHandler.set_float_value)
+		self.add_method("/scene/cameras/far", "s", CameraRequestHandler.reply_float)
+
+		self.add_method("/scene/cameras/perspective", "si", CameraRequestHandler.set_bool_value)
+		self.add_method("/scene/cameras/perspective", "s", CameraRequestHandler.reply_bool)
+
+		self.add_method("/scene/cameras/frustum_culling", "si", CameraRequestHandler.set_bool_value)
+		self.add_method("/scene/cameras/frustum_culling", "s", CameraRequestHandler.reply_bool)
 
 		self.add_method("/connect", '', self.cb_connect)
 		self.add_method(None, None, self.cb_fallback)
