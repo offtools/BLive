@@ -18,20 +18,30 @@
 
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
+import os
+import bpy
+
+def import_path():
+    paths = bpy.utils.script_paths()
+    for i in paths:
+        path = os.path.join(i, "addons")
+        for j in bpy.path.module_names(path, True):
+            if bpy.context.user_preferences.addons['BLive'].module in j[0]:
+                return os.path.dirname(j[1])
 
 def unique_name(collection, name):
-	'''
-		find a unique name for a new object in a collection
-	'''
-	def check_name(collection, name, num):
-	
-		if "{0}.{1}".format(name, str(num).zfill(3)) in collection:
-			return check_name(collection, name, num+1)
-		return num
-	
-	if not name in collection:
-		return name
+    '''
+        find a unique name for a new object in a collection
+    '''
+    def check_name(collection, name, num):
 
-	num = check_name(collection, name, 1)
-	unique = "{0}.{1}".format(name, str(num).zfill(3))
-	return unique
+        if "{0}.{1}".format(name, str(num).zfill(3)) in collection:
+            return check_name(collection, name, num+1)
+        return num
+
+    if not name in collection:
+        return name
+
+    num = check_name(collection, name, 1)
+    unique = "{0}.{1}".format(name, str(num).zfill(3))
+    return unique

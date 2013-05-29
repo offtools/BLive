@@ -19,223 +19,161 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
+# TODO: add basic blive_init on every startup (only path append and import statement)
+
 import bpy
+# TODO: remove import os, sys later
 import os
 import sys
+import time
 import subprocess
 from .libloclient import Client
+from ..utils.utils import import_path
 
 INITSCRIPT = "blive_init.py"
 UPDATESCRIPT = "blive_update.py"
 
-class BLive_OT_logic_add(bpy.types.Operator):
-	"""
-		Operator - creates gamelogic used by osc server in gameengine
-	"""
-	bl_idname = "blive.logic_add"
-	bl_label = "BLive - create logic brick"
-	
-	@classmethod
-	def poll(self, context):
-		"""
-			test server_object is set and exists
-		"""
-		sc = context.scene
-		bs = sc.blive_scene_settings
-		#~ if not bs.server_object in sc.objects:
-			#~ return True
-		return bool(bs.server_object) and bs.server_object in sc.objects
+class BLive_OT_start_gameengine(bpy.types.Operator):
+    bl_idname = "blive.start_gameengine"
+    bl_label = "BLive start gameengine"
 
-	def execute(self, context):
-		if not 'start.py' in bpy.data.texts:
-			self.add_script(INITSCRIPT)
-		if not 'update.py' in bpy.data.texts:
-			self.add_script(UPDATESCRIPT)
-		self.add_gamelogic(context)
-		return{'FINISHED'} 
+    def add_start_script(self):
+        '''create startup script
+        '''
 
-	def add_gamelogic(self, context):
-		'''
-			create gamelogic bricks 
-		'''
+        bpy.data.texts.new(name=INITSCRIPT)
+        textblock = bpy.data.texts[INITSCRIPT]
 
-		sc = context.scene
-		bs = sc.blive_scene_settings
-		server_object = sc.objects[bs.server_object]
-		context.scene.objects.active = server_object
+        textblock.write("import sys\n")
+        textblock.write("sys.path.append(r'{0}')\n".format(import_path()))
+        textblock.write("import gameengine\n")
+        textblock.write("gameengine.register()\n")
 
-		if not 's.init' in context.active_object.game.sensors:
-			bpy.ops.logic.sensor_add(type='ALWAYS', name='s.init')
-		context.active_object.game.sensors['s.init'].use_pulse_true_level = False
-		context.active_object.game.sensors['s.init'].use_pulse_false_level = False
+    def add_update_script(self):
+        '''create update script
+        '''
 
-		if not 's.update' in context.active_object.game.sensors:
-			bpy.ops.logic.sensor_add(type='ALWAYS', name='s.update')
-		context.active_object.game.sensors['s.update'].use_pulse_true_level = True
-		context.active_object.game.sensors['s.update'].use_pulse_false_level = False
-		context.active_object.game.sensors['s.update'].frequency = 0
+        bpy.data.texts.new(name=UPDATESCRIPT)
+        textblock = bpy.data.texts[UPDATESCRIPT]
 
-		if not 'c.init' in context.active_object.game.controllers:
-			bpy.ops.logic.controller_add(type='PYTHON', name='c.init')
-		context.active_object.game.controllers['c.init'].mode = 'SCRIPT'
-		context.active_object.game.controllers['c.init'].text = bpy.data.texts[INITSCRIPT]
+        textblock.write('import bge\n')
+        textblock.write('if hasattr(bge.logic, "server"):\n')
+        textblock.write('\twhile bge.logic.server.recv(0): pass\n')
 
-		if not 'c.update' in context.active_object.game.controllers:
-			bpy.ops.logic.controller_add(type='PYTHON', name='c.update')
-		context.active_object.game.controllers['c.update'].mode = 'SCRIPT'
-		context.active_object.game.controllers['c.update'].text = bpy.data.texts[UPDATESCRIPT]
+    def add_logic(self, sc):
+        '''create gamelogic bricks
+        '''
 
-		context.active_object.game.sensors['s.init'].link(context.active_object.game.controllers['c.init'])	
-		context.active_object.game.sensors['s.update'].link(context.active_object.game.controllers['c.update'])
+        # active in scene camera holds game logic
+        if not sc.camera:
+            bpy.ops.object.camera_add()
+            for ob in sc.objects:
+                if ob.type == 'CAMERA':
+                    sc.camera = ob #set object as camera
+                    break
 
-		bs.has_server_object = True
+        sc.objects.active = sc.camera #make camera active
 
-	def add_script(self, filename):
-		'''
-			add server script for bge, appends import path dynamicly
-		'''
+        if not 's.init' in sc.camera.game.sensors:
+            bpy.ops.logic.sensor_add(type='ALWAYS', name='s.init')
+        sc.camera.game.sensors['s.init'].use_pulse_true_level = False
+        sc.camera.game.sensors['s.init'].use_pulse_false_level = False
 
-		paths = bpy.utils.script_paths()
-		for i in paths:
-			path = os.path.join(i, "addons")
-			for j in bpy.path.module_names(path, True):
-				if bpy.context.user_preferences.addons['BLive'].module in j[0]:
-					bpy.data.texts.new(name=filename)
+        if not 's.update' in sc.camera.game.sensors:
+            bpy.ops.logic.sensor_add(type='ALWAYS', name='s.update')
+        sc.camera.game.sensors['s.update'].use_pulse_true_level = True
+        sc.camera.game.sensors['s.update'].use_pulse_false_level = False
+        sc.camera.game.sensors['s.update'].frequency = 0
 
-					directory = os.path.dirname(j[1])
-					filepath = os.path.join(directory, "gameengine", filename)
-					file = open(filepath, 'r')
+        if not 'c.init' in sc.camera.game.controllers:
+            bpy.ops.logic.controller_add(type='PYTHON', name='c.init')
+        sc.camera.game.controllers['c.init'].mode = 'SCRIPT'
+        sc.camera.game.controllers['c.init'].text = bpy.data.texts[INITSCRIPT]
 
-					textblock = bpy.data.texts[filename]
+        if not 'c.update' in sc.camera.game.controllers:
+            bpy.ops.logic.controller_add(type='PYTHON', name='c.update')
+        sc.camera.game.controllers['c.update'].mode = 'SCRIPT'
+        sc.camera.game.controllers['c.update'].text = bpy.data.texts[UPDATESCRIPT]
 
-					# add import path
-					textblock.write("import sys\n")
-					textblock.write("sys.path.append(r'{0}')\n".format(directory))
+        sc.camera.game.sensors['s.init'].link(sc.camera.game.controllers['c.init'])
+        sc.camera.game.sensors['s.update'].link(sc.camera.game.controllers['c.update'])
 
-					for line in file:
-						textblock.write(line)
-					file.close()
+    @classmethod
+    def poll(self, context):
+        return True
 
-					return
-		#   TODO?: error handling
-		print("Error: addon path not found")
+    def execute(self, context):
+        # check for logic bricks and server object in all scenes
+        if not INITSCRIPT in bpy.data.texts:
+            self.add_start_script()
+        if not UPDATESCRIPT in bpy.data.texts:
+            self.add_update_script()
 
-class BLive_OT_logic_remove(bpy.types.Operator):
-	bl_idname = "blive.logic_remove"
-	bl_label = "BLive - remove logic brick"
+        # add logic to every scene
+        curscene = bpy.context.screen.scene #save current active scene
 
-	@classmethod
-	def poll(self, context):
-		"""
-			test server_object is set and exists
-		"""
-		sc = context.scene
-		bs = sc.blive_scene_settings
-		return bool(bs.server_object) and bs.server_object in sc.objects
+        for sc in bpy.data.scenes:
+            bpy.context.screen.scene=sc #change active scene
+            self.add_logic(sc)
 
-	def execute(self, context):
-		sc = context.scene
-		bs = sc.blive_scene_settings
-		server_object = sc.objects[bs.server_object]
-		context.scene.objects.active = server_object
+        bpy.context.screen.scene = curscene #restore scene
 
-		if "s.init" in context.active_object.game.sensors:
-			bpy.ops.logic.sensor_remove(sensor="s.init")
-		
-		if "s.update" in context.active_object.game.sensors:
-			bpy.ops.logic.sensor_remove(sensor="s.update")
-	
-		if "c.init" in context.active_object.game.controllers:
-			bpy.ops.logic.controller_remove(controller="c.init")
-	
-		if "c.update" in context.active_object.game.controllers:
-			bpy.ops.logic.controller_remove(controller="c.update")
+        # save snapshot into tmp
+        filepath = os.path.join(context.user_preferences.filepaths.temporary_directory, "blive-{0}".format(int(time.time())))
+        bpy.ops.wm.save_as_mainfile(filepath=filepath, copy=True)
 
-		bpy.data.texts.remove( bpy.data.texts[INITSCRIPT] )
-		bpy.data.texts.remove( bpy.data.texts[UPDATESCRIPT] )
+        # fork blenderplayer
+        sc = context.scene
+        bc = context.window_manager.blive_settings
+        server = bc.server
+        port = bc.port
 
-		bs.has_server_object = False
+        app = "blenderplayer"
+        blendfile = bpy.data.filepath
+        sep = '-'
+        portarg = "-p {0}".format(port)
+        cmd = [app,  blendfile, sep, portarg]
+        blendprocess = subprocess.Popen(cmd)
 
-		return{'FINISHED'}
+        Client().connect(server, port)
 
+        return{'FINISHED'}
 
-class BLive_OT_fork_blenderplayer(bpy.types.Operator):
-	bl_idname = "blive.fork_blenderplayer"
-	bl_label = "BLive fork blenderplayer"
+class BLive_OT_reload_gameengine(bpy.types.Operator):
+    bl_idname = "blive.reload_gameengine"
+    bl_label = "BLive reload gameengine"
 
-	@classmethod
-	def poll(self, context):
-		"""
-			test logic setup
-		"""
-		sc = context.scene
-		return sc.blive_scene_settings.has_server_object
+    @classmethod
+    def poll(self, context):
+        pass
 
-	def execute(self, context):
-		sc = context.scene
-		bs = sc.blive_scene_settings
-		bc = context.window_manager.blive_settings
-		server = bc.server
-		port = bc.port
-		
-		app = "blenderplayer"
-		blendfile = bpy.context.blend_data.filepath
-		empty = '-'
-		port = "-p {0}".format(port)
-		cmd = [app,  blendfile, empty, port]
-		blendprocess = subprocess.Popen(cmd)
-		return{'FINISHED'}
+    def execute(self, context):
+        # stop gameengine
 
-class BLive_OT_osc_connect(bpy.types.Operator):
-	bl_idname = "blive.osc_connect"
-	bl_label = "connect to bge"
+        # start gameengine
+        pass
 
-	@classmethod
-	def poll(self, context):
-		"""
-			test logic setup
-		"""
-		sc = context.scene
-		return sc.blive_scene_settings.has_server_object
+class BLive_OT_stop_gameengine(bpy.types.Operator):
+    bl_idname = "blive.stop_gameengine"
+    bl_label = "BLive stop gameengine"
 
-	def execute(self, context):
-		sc = context.scene
-		bs = sc.blive_scene_settings
-		bc = context.window_manager.blive_settings
-		server = bc.server
-		port = bc.port
+    @classmethod
+    def poll(self, context):
+        return True
 
-		Client().connect(server, port)
-		return{'FINISHED'}
-
-class BLive_OT_osc_quit(bpy.types.Operator):
-	bl_idname = "blive.osc_quit"
-	bl_label = "BLive quit blenderplayer"
-
-	@classmethod
-	def poll(self, context):
-		"""
-			test logic setup
-		"""
-		sc = context.scene
-		return sc.blive_scene_settings.has_server_object
-
-	def execute(self, context):
-		Client().disconnect()
-		return{'FINISHED'}
+    def execute(self, context):
+        # send disconnect to quit gameengine
+        Client().shutdown()
+        return{'FINISHED'}
 
 def register():
-	print("settings.ops.register")
-	bpy.utils.register_class(BLive_OT_logic_add)
-	bpy.utils.register_class(BLive_OT_logic_remove)
-	bpy.utils.register_class(BLive_OT_fork_blenderplayer)
-	bpy.utils.register_class(BLive_OT_osc_connect)
-	bpy.utils.register_class(BLive_OT_osc_quit)
+    print("settings.ops.register")
+    bpy.utils.register_class(BLive_OT_start_gameengine)
+    bpy.utils.register_class(BLive_OT_reload_gameengine)
+    bpy.utils.register_class(BLive_OT_stop_gameengine)
 
 def unregister():
-	print("settings.ops.unregister")
-	bpy.utils.unregister_class(BLive_OT_logic_add)
-	bpy.utils.unregister_class(BLive_OT_logic_remove)
-	bpy.utils.unregister_class(BLive_OT_fork_blenderplayer)
-	bpy.utils.unregister_class(BLive_OT_osc_connect)
-	bpy.utils.unregister_class(BLive_OT_osc_quit)
+    print("settings.ops.unregister")
+    bpy.utils.unregister_class(BLive_OT_start_gameengine)
+    bpy.utils.unregister_class(BLive_OT_reload_gameengine)
+    bpy.utils.unregister_class(BLive_OT_stop_gameengine)

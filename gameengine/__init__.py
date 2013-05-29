@@ -19,5 +19,31 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-print("BLive LibloServer:")
+import sys
+import getopt
+import bge
+from gameengine import libloserver
 
+_PORT = 9901
+
+def register():
+    '''registers and starts a osc server inside bge
+    '''
+
+    try:
+        index = sys.argv.index('-')
+
+        # --- check for port argument (all args after empty '-')
+        if len(sys.argv) > index:
+            args = sys.argv[index+1:]
+            optlist, args = getopt.getopt(args, 'p:', ['port='])
+            for o, a in optlist:
+                if o in ("-p", "--port"):
+                    _PORT = int(a)
+
+    except getopt.GetoptError as err:
+        print("Error in setting Port using"%_PORT)
+
+    if not hasattr(bge.logic, "server"):
+        bge.logic.server = libloserver.LibloServer(_PORT)
+        print(bge.logic.server.url)
