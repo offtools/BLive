@@ -44,7 +44,6 @@ def register():
     #bpy.utils.register_class(BLiveSceneSettings)
 
     bpy.types.WindowManager.blive_settings = bpy.props.PointerProperty(type=BLiveSettings)
-    #bpy.types.Scene.blive_scene_settings = bpy.props.PointerProperty(type=BLiveSceneSettings)
 
     #   initial settings
     #   game engine and GLSL mode

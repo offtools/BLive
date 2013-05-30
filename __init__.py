@@ -21,62 +21,62 @@
 
 
 #
-#	Blender OSC-BGE addon, this addon allows to send changes from blender 
-#	to a running gameengine instance
+#   Blender OSC-BGE addon, this addon allows to send changes from blender
+#   to a running gameengine instance
 #
 
 bl_info = {
-	"name": "BLive",
-	"author": "offtools",
-	"version": (0, 0, 1),
-	"blender": (2, 6, 4),
-	"location": "various Panels with prefix BLive",
-	"description": "blender to bge osc network addon",
-	"warning": "",
-	"wiki_url": "",
-	"tracker_url": "",
-	"category": "Game Engine"}
-	
+    "name": "BLive",
+    "author": "offtools",
+    "version": (0, 0, 1),
+    "blender": (2, 6, 4),
+    "location": "various Panels with prefix BLive",
+    "description": "blender to bge osc network addon",
+    "warning": "",
+    "wiki_url": "",
+    "tracker_url": "",
+    "category": "Game Engine"}
+
 # import modules
 if "bpy" in locals():
-	import imp
-	imp.reload(common)
-	imp.reload(client)
-	imp.reload(texture)
-	#~ imp.reload(apphandler)
-	imp.reload(marker)
-	imp.reload(object)
-	imp.reload(material)
+    import imp
+    imp.reload(common)
+    #imp.reload(client)
+    #imp.reload(texture)
+    #imp.reload(apphandler)
+    #imp.reload(marker)
+    imp.reload(object)
+    #imp.reload(material)
 else:
-	from . import common
-	from . import client
-	from . import texture
-	#~ from . import apphandler
-	from . import marker
-	from . import object
-	from . import material
+    from . import common
+    #from . import client
+    #from . import texture
+    #~ from . import apphandler
+    #from . import marker
+    from . import object
+    #from . import material
 
 import bpy
 
 def register():
-	print("__init__.register")
-	common.register()
-	client.register()
-	texture.register()
-	#~ apphandler.register()
-	marker.register()
-	object.register()
-	material.register()
+    print("__init__.register")
+    common.register()
+    #client.register()
+    #texture.register()
+    #apphandler.register()
+    #marker.register()
+    object.register()
+    #material.register()
 
 def unregister():
-	print("__init__.unregister")
-	material.unregister()
-	object.unregister()
-	marker.unregister()
-	#~ apphandler.unregister()
-	texture.unregister()
-	client.unregister()
-	common.unregister()
+    print("__init__.unregister")
+    #material.unregister()
+    object.unregister()
+    #marker.unregister()
+    #apphandler.unregister()
+    #texture.unregister()
+    #client.unregister()
+    common.unregister()
 
 if __name__ == "__main__":
-	pass
+    pass
