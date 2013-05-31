@@ -19,18 +19,20 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
+#TODO: stop Client Thread not from inside, stop it on, load blendfile, ...
+
 import bpy
 import liblo
 import threading
 import time
 from liblo import make_method
 
-
 class LibloClient(liblo.ServerThread):
     def __init__(self):
         super().__init__()
         self.appHandler = dict()
         self.__await_connect = False
+        self.__thread_started = False
 
     class ConnectRequest(threading.Thread):
         def __init__(self, client):
@@ -55,7 +57,7 @@ class LibloClient(liblo.ServerThread):
     @make_method('/shutdown', 's')
     def cb_shutdown(self, path, args, types, source, user_data):
         print ("CLIENT: received shutdown - closing client", args)
-        self.close() #TODO: dont close thread from inside thread, just notify blender
+        #self.close() #TODO: dont close thread from inside thread, just notify blender
 
     @make_method(None, None)
     def cb_fallback(self, path, args, types, source, user_data):
@@ -121,6 +123,16 @@ class LibloClient(liblo.ServerThread):
             liblo.send(self.target, "/shutdown")
         except AttributeError:
             pass
+
+    def start(self):
+        self.stop()
+        super().start()
+        self.__thread_started = True
+
+    def stop(self):
+        if self.__thread_started:
+            super().stop()
+            self.__thread_started = False
 
     def close(self):
         self._stop_apphandler()

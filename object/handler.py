@@ -27,36 +27,35 @@ from ..common.libloclient import Client
 
 @persistent
 def object_update_handler(scene):
-	if scene.is_updated:
-		print("Scene updated")
+    if scene.is_updated:
+        print("Scene updated")
 
-	# --- check objects updates
-	for ob in scene.objects:
-		if ob.is_updated:
-			bundle = Bundle()
-			bundle.add(Message("/scene/objects/position", ob.name, ob.location[0], ob.location[1], ob.location[2]))
-			bundle.add(Message("/scene/objects/orientation", ob.name, ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2]))
+    # check objects updates
+    for ob in scene.objects:
+        if ob.is_updated:
+            bundle = Bundle()
+            bundle.add(Message("/scene/objects/position", ob.name, ob.location[0], ob.location[1], ob.location[2]))
+            bundle.add(Message("/scene/objects/orientation", ob.name, ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2]))
 
-			if ob.type == 'MESH':
-				bundle.add(Message("/scene/objects/scaling", ob.name, ob.scale[0], ob.scale[1], ob.scale[2]))
+            if ob.type == 'MESH':
+                bundle.add(Message("/scene/objects/scaling", ob.name, ob.scale[0], ob.scale[1], ob.scale[2]))
 
-			Client().send(bundle)
+            Client().send(bundle)
 
-		if ob.is_updated_data:
-			if ob.type == 'CAMERA':
-				camera = ob.data
-				#ops.osc_object_camera(camera)
-			elif ob.type == 'LAMP':
-				lamp = ob.data
-				#ops.osc_object_lamp(lamp)
-			elif ob.type == 'MESH' and ob.mode == 'EDIT':
-				#ops.osc_object_meshdata(ob)
-				pass
+        if ob.is_updated_data:
+            if ob.type == 'CAMERA':
+                camera = ob.data
+                #ops.osc_object_camera(camera)
+            elif ob.type == 'LAMP':
+                lamp = ob.data
+                #ops.osc_object_lamp(lamp)
+            elif ob.type == 'MESH' and ob.mode == 'EDIT':
+                #ops.osc_object_meshdata(ob)
+                pass
 
 def register():
-	print("object.handler.register")
-	Client().add_apphandler('scene_update_post', object_update_handler)
+    print("object.handler.register")
+    Client().add_apphandler('scene_update_post', object_update_handler)
 
 def unregister():
-	print("object.handler.unregister")
-	pass
+    print("object.handler.unregister")

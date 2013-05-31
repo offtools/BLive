@@ -57,11 +57,17 @@ class BLive_PT_network_setup(bpy.types.Panel):
         flow.prop(bs, "port", text="")
 
         row = layout.row()
+        row.label("Start Gameengine and connect")
+        row = layout.row()
         row.operator("blive.start_gameengine", text="Start Gameengine")
         row = layout.row()
         row.operator("blive.reload_gameengine", text="Reload Gameengine")
         row = layout.row()
         row.operator("blive.stop_gameengine", text="Stop Gameengine")
+        row = layout.row()
+        row.separator()
+        row = layout.row()
+        row.label("Remote connect")
 
 def register():
     print("settings.ui.register")

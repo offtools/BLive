@@ -139,20 +139,6 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
 
         return{'FINISHED'}
 
-class BLive_OT_reload_gameengine(bpy.types.Operator):
-    bl_idname = "blive.reload_gameengine"
-    bl_label = "BLive reload gameengine"
-
-    @classmethod
-    def poll(self, context):
-        pass
-
-    def execute(self, context):
-        # stop gameengine
-
-        # start gameengine
-        pass
-
 class BLive_OT_stop_gameengine(bpy.types.Operator):
     bl_idname = "blive.stop_gameengine"
     bl_label = "BLive stop gameengine"
@@ -166,14 +152,29 @@ class BLive_OT_stop_gameengine(bpy.types.Operator):
         Client().shutdown()
         return{'FINISHED'}
 
+class BLive_OT_reload_gameengine(bpy.types.Operator):
+    bl_idname = "blive.reload_gameengine"
+    bl_label = "BLive reload gameengine"
+
+    #@classmethod
+    #def poll(self, context):
+        #pass
+
+    def execute(self, context):
+        # stop gameengine
+        bpy.ops.blive.stop_gameengine()
+        # start gameengine
+        bpy.ops.blive.start_gameengine()
+        return{'FINISHED'}
+
 def register():
     print("settings.ops.register")
     bpy.utils.register_class(BLive_OT_start_gameengine)
-    bpy.utils.register_class(BLive_OT_reload_gameengine)
     bpy.utils.register_class(BLive_OT_stop_gameengine)
+    bpy.utils.register_class(BLive_OT_reload_gameengine)
 
 def unregister():
     print("settings.ops.unregister")
-    bpy.utils.unregister_class(BLive_OT_start_gameengine)
     bpy.utils.unregister_class(BLive_OT_reload_gameengine)
     bpy.utils.unregister_class(BLive_OT_stop_gameengine)
+    bpy.utils.unregister_class(BLive_OT_start_gameengine)

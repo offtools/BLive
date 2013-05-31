@@ -20,28 +20,18 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 import bpy
+from .libloclient import Client
 
 class BLiveSettings(bpy.types.PropertyGroup):
-    """
-        blender wide Settings
+    """blender wide Settings
     """
     port = bpy.props.IntProperty(default=9900)
     server = bpy.props.StringProperty(default="127.0.0.1")
     diffuse_to_obcolor = bpy.props.BoolProperty(default=False)
 
-#class BLiveSceneSettings(bpy.types.PropertyGroup):
-    #"""
-        #Settings per Scene
-    #"""
-    #server_object = bpy.props.StringProperty()
-    #has_server_object = bpy.props.BoolProperty(default=False)
-
-    #has_logic = bpy.props.BoolProperty(default=False)
-
 def register():
     print("settings.props.register")
     bpy.utils.register_class(BLiveSettings)
-    #bpy.utils.register_class(BLiveSceneSettings)
 
     bpy.types.WindowManager.blive_settings = bpy.props.PointerProperty(type=BLiveSettings)
 
@@ -53,5 +43,4 @@ def register():
 
 def unregister():
     print("settings.props.unregister")
-    #bpy.utils.unregister_class(BLiveSceneSettings)
     bpy.utils.unregister_class(BLiveSettings)
