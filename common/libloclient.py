@@ -126,11 +126,13 @@ class LibloClient(liblo.ServerThread):
 
     def start(self):
         self.stop()
+        print("CLIENT: starting libloclient thread")
         super().start()
         self.__thread_started = True
 
     def stop(self):
         if self.__thread_started:
+            print("CLIENT: stopping libloclient thread")
             super().stop()
             self.__thread_started = False
 

@@ -23,6 +23,10 @@ import sys
 import getopt
 import bge
 from gameengine import libloserver
+from gameengine import scene
+from gameengine import objects
+from gameengine import camera
+
 
 _PORT = 9901
 
@@ -33,7 +37,7 @@ def register():
     try:
         index = sys.argv.index('-')
 
-        # --- check for port argument (all args after empty '-')
+        # check for Blive opts (all args after empty '-')
         if len(sys.argv) > index:
             args = sys.argv[index+1:]
             optlist, args = getopt.getopt(args, 'p:', ['port='])
@@ -47,3 +51,9 @@ def register():
     if not hasattr(bge.logic, "server"):
         bge.logic.server = libloserver.LibloServer(_PORT)
         print(bge.logic.server.url)
+
+        scene.register()
+        objects.register()
+        camera.register()
+
+        bge.logic.server.register()
