@@ -38,6 +38,7 @@
 
 
 import bge
+import math
 from liblo import Message
 
 #
@@ -62,13 +63,21 @@ class AttributeTypeString(AttributeType):
         else:
             return ['']
 
-class AttributeNames(AttributeType):
+class AttributeName(AttributeType):
     @classmethod
     def get(cls, obj, attr):
-        try:
+        if not obj.__getattribute__(attr):
+            return [""]
+        else:
+            obj.__getattribute__(attr)
+
+class AttributeNameList(AttributeType):
+    @classmethod
+    def get(cls, obj, attr):
+        if not obj.__getattribute__(attr):
+            return [""]
+        else:
             return [", ".join([i.name for i in obj.__getattribute__(attr)])]
-        except TypeError:
-            return ['']
 
 class AttributeObject(AttributeType):
     @classmethod
@@ -99,10 +108,6 @@ class AttributeTypeVec3(AttributeType):
                 obj.__getattribute__(attr)[1],
                 obj.__getattribute__(attr)[2]]
 
-    @classmethod
-    def set(cls, obj, attr, args):
-        obj.__setattr__(attr, (args[0:3]))
-
 class AttributeTypeVec4(AttributeType):
     @classmethod
     def get(cls, obj, attr):
@@ -110,10 +115,6 @@ class AttributeTypeVec4(AttributeType):
                 obj.__getattribute__(attr)[1],
                 obj.__getattribute__(attr)[2],
                 obj.__getattribute__(attr)[3]]
-
-    @classmethod
-    def set(cls, obj, attr, args):
-        obj.__setattr__(attr, (args[0:4]))
 
 class AttributeTypeMatrix3x3(AttributeType):
     @classmethod
@@ -154,12 +155,39 @@ class AttributeTypeMatrix4x4(AttributeType):
 
     @classmethod
     def set(cls, obj, attr, args):
-        obj.__setattr__(attr, (args[0:4],args[4:8],args[8:12],args[12:16]))
+        scene = bge.logic.getCurrentScene()
+        camera =  scene.cameras['Camera']
+
+        #angle = args[0]
+        #aspect = args[1]
+        ##camera.lens = lens
+        #camera.ortho_scale = args[2]
+        #camera.near = args[3]
+        #camera.far = args[4]
+        #camera.perspective = args[5]
+
+        projection_matrix = camera.projection_matrix
+
+        #e = 1.0/math.tan(angle/2.0)
+
+        #shift_x = args[6]
+        #shift_y = args[7]
+
+        #projection_matrix[0][0] = e
+        #projection_matrix[1][1] = e/aspect
+
+        projection_matrix[0][2] = args[0]
+        projection_matrix[1][2] = args[1]
+
+        camera.projection_matrix = projection_matrix
+
+        #matr = (args[0:4],args[4:8],args[8:12],args[12:16])
+        #obj.__setattr__(attr, matr)
+
 
 #
 # OSC RequestHandler
 #
-
 class BaseRequestHandler():
     @classmethod
     def _get_instance(cls, path, args):
@@ -214,8 +242,12 @@ class BaseRequestHandler():
         cls._reply(AttributeTypeBool, path, args, types, source, user_data)
 
     @classmethod
-    def reply_names(cls, path, args, types, source, user_data):
-        cls._reply(AttributeNames, path, args, types, source, user_data)
+    def reply_name(cls, path, args, types, source, user_data):
+        cls._reply(AttributeName, path, args, types, source, user_data)
+
+    @classmethod
+    def reply_namelist(cls, path, args, types, source, user_data):
+        cls._reply(AttributeNameList, path, args, types, source, user_data)
 
     @classmethod
     def reply_string(cls, path, args, types, source, user_data):
@@ -245,7 +277,9 @@ class BaseRequestHandler():
     def reply_matrix4x4(cls, path, args, types, source, user_data):
         cls._reply(AttributeTypeMatrix4x4, path, args, types, source, user_data)
 
-# Set Value Handler
+    #
+    # Set Value Handler
+    #
     @classmethod
     def set_bool_value(cls, path, args, types, source, user_data):
         cls._setvalue(AttributeTypeBool, path, args, types, source, user_data)
@@ -277,15 +311,9 @@ class BaseRequestHandler():
     @classmethod
     def set_matrix4x4_value(cls, path, args, types, source, user_data):
         cls._setvalue(AttributeTypeMatrix4x4, path, args, types, source, user_data)
-
-# Method Handler
-# naming convention:
-# call_method => no param conversion, no return value
-# call_method_reply => no param conversion, return non iterable type (numbers)
-# call_method_reply_bool[vec3,...] => no param conversion, return type that need a conversion (e.g. vec3 to fff)
-# custom handler defined in RequestHandler classes should look like this:
-# call_method_[fmt]_reply_[return type]
-# example: call_method_sfffx_reply_none (param: sfff, sfffi, sfffii, ...; returns nothing)
+    #
+    # Method Handler
+    #
     @classmethod
     def call_method(cls, path, args, types, source, user_data):
         cls._method(path, args, types, source, user_data)
@@ -297,7 +325,7 @@ class BaseRequestHandler():
         cls._method_reply(path, source, target, [value])
 
     @classmethod
-    def call_method_reply_names(cls, path, args, types, source, user_data):
+    def call_method_reply_namelist(cls, path, args, types, source, user_data):
         value = cls._method(path, args, types, source, user_data)
         target = cls._parse_instance(args)
         if not value is None:
@@ -330,19 +358,7 @@ class BaseRequestHandler():
         cls._method_reply(path, source, target, [int(value)])
 
     @classmethod
-    def call_method_reply_vec2(cls, path, args, types, source, user_data):
-        value = cls._method(path, args, types, source, user_data)
-        target = cls._parse_instance(args)
-        cls._method_reply(path, source, target, value)
-
-    @classmethod
-    def call_method_reply_vec3(cls, path, args, types, source, user_data):
-        value = cls._method(path, args, types, source, user_data)
-        target = cls._parse_instance(args)
-        cls._method_reply(path, source, target, value)
-
-    @classmethod
-    def call_method_reply_vec4(cls, path, args, types, source, user_data):
+    def call_method_reply_vec(cls, path, args, types, source, user_data):
         value = cls._method(path, args, types, source, user_data)
         target = cls._parse_instance(args)
         cls._method_reply(path, source, target, value)

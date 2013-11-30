@@ -58,45 +58,45 @@ class BLive_PT_timeline_trigger(bpy.types.Panel):
             row.prop_search(trigger.m_markerdict[marker.name], "m_queue", trigger, "m_queues", text='', icon='VIEWZOOM')
             row.operator("blive.trigger_revoke", text="", icon="ZOOMOUT")
 
-            box = layout.box()
-
             #   add items to trigger
 
             #   get selected Trigger Queue
             qid = trigger.m_markerdict[marker.name].m_queue
-            queue = trigger.m_queues[qid]
+            if len(qid):
+                box = layout.box()
+                queue = trigger.m_queues[qid]
 
-            tbox = box.row(align=True)
-            tbox.prop(queue, "m_pause", text="pause")
-            tbox.prop(queue, "m_execute_after", text="send after")
+                tbox = box.row(align=True)
+                tbox.prop(queue, "m_pause", text="pause")
+                tbox.prop(queue, "m_execute_after", text="send after")
 
-            #    menu to choose new trigger
-            tbox = box.row()
-            tbox.operator_menu_enum("blive.trigger_append", "type", text="Add Trigger")
+                #    menu to choose new trigger
+                tbox = box.row()
+                tbox.operator_menu_enum("blive.trigger_append", "type", text="Add Trigger")
 
-            #   list Trigger items
-            for item in queue.m_slots:
-                main = layout.column(align=True)
-                head = main.box()
-                split = head.split(percentage=0.75)
-                row = split.row()
-                if item.m_hidden:
-                    row.prop(item, "m_hidden", text="", icon="TRIA_RIGHT", emboss=False)
-                else:
-                    row.prop(item, "m_hidden", text="", icon="TRIA_DOWN", emboss=False)
-                row.label( item.m_type )
-                split = split.split(percentage=1)
-                buttons = split.column_flow(columns=1, align=True)
-                buttons.operator("blive.trigger_remove", text="", icon="PANEL_CLOSE").m_slot = item.name
-
-                if not item.m_hidden:
-                    body = main.box()
-                    triggertype = getattr(queue.m_trigger, item.m_type)
-                    if hasattr(self, item.m_type):
-                        getattr(self, item.m_type)(context, triggertype[item.name], body)
+                #   list Trigger items
+                for item in queue.m_slots:
+                    main = layout.column(align=True)
+                    head = main.box()
+                    split = head.split(percentage=0.75)
+                    row = split.row()
+                    if item.m_hidden:
+                        row.prop(item, "m_hidden", text="", icon="TRIA_RIGHT", emboss=False)
                     else:
-                        row = body.row()
-                        row.label("not implemented")
+                        row.prop(item, "m_hidden", text="", icon="TRIA_DOWN", emboss=False)
+                    row.label( item.m_type )
+                    split = split.split(percentage=1)
+                    buttons = split.column_flow(columns=1, align=True)
+                    buttons.operator("blive.trigger_remove", text="", icon="PANEL_CLOSE").m_slot = item.name
+
+                    if not item.m_hidden:
+                        body = main.box()
+                        triggertype = getattr(queue.m_trigger, item.m_type)
+                        if hasattr(self, item.m_type):
+                            getattr(self, item.m_type)(context, triggertype[item.name], body)
+                        else:
+                            row = body.row()
+                            row.label("not implemented")
 
         #    we need to add a trigger first
         else:
@@ -160,10 +160,25 @@ class BLive_PT_timeline_trigger(bpy.types.Panel):
         row = ui.row()
         row.prop(context.scene.objects[trigger.m_object].game.properties[trigger.m_property], "value", text="set")
 
+class BLive_PT_timeline_tools(bpy.types.Panel):
+    bl_label = "BLive Timeline Tools"
+    bl_space_type = "NLA_EDITOR"
+    bl_region_type = "UI"
+
+    @classmethod
+    def poll(self, context):
+        return bool(len(context.scene.timeline_markers))
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label("Timeline Tools, Jump to markers ...")
+
 def register():
     print("marker.ui.register")
     bpy.utils.register_class(BLive_PT_timeline_trigger)
+    bpy.utils.register_class(BLive_PT_timeline_tools)
 
 def unregister():
     print("marker.ui.unregister")
     bpy.utils.unregister_class(BLive_PT_timeline_trigger)
+    bpy.utils.register_class(BLive_PT_timeline_tools)

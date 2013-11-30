@@ -29,9 +29,8 @@ import bpy
 #
 ###############################################
 
-# TODO: only start / reload / stop button
 class BLive_PT_network_setup(bpy.types.Panel):
-    bl_label = "BLive Network"
+    bl_label = "BLive Network Settings"
     bl_space_type = 'PROPERTIES'
     bl_region_type = 'WINDOW'
     bl_context = "render"
@@ -46,8 +45,6 @@ class BLive_PT_network_setup(bpy.types.Panel):
         server = bs.server
         port = bs.server
 
-        row = layout.row()
-        row.label("Blive Server Settings")
         row = layout.row()
 
         flow = row.column_flow(columns=2, align=False)
@@ -64,10 +61,6 @@ class BLive_PT_network_setup(bpy.types.Panel):
         row.operator("blive.reload_gameengine", text="Reload Gameengine")
         row = layout.row()
         row.operator("blive.stop_gameengine", text="Stop Gameengine")
-        row = layout.row()
-        row.separator()
-        row = layout.row()
-        row.label("Remote connect")
 
 def register():
     print("settings.ui.register")

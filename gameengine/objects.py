@@ -31,6 +31,7 @@ class GameObjectRequestHandler(BaseRequestHandler):
         elif args[0] in sc.objectsInactive:
             return (sc.objectsInactive[args[0]], attr)
         else:
+            print("raising ValueError")
             raise ValueError
 
     @classmethod
@@ -41,45 +42,34 @@ class GameObjectRequestHandler(BaseRequestHandler):
     def _parse_data(cls, args):
         return args[1:]
 
-    # custom handlers
     @classmethod
-    def call_alignAxisToVect(cls, path, args, types, source, user_data):
-        args = [args[0], (args[1],args[2],args[3]), args[4], args[5]]
-        cls._method(path, args, types, source, user_data)
-
-    @classmethod
-    def call_getAxisVect(cls, path, args, types, source, user_data):
-        nargs = [args[0], (args[1],args[2],args[3])]
-        cls.call_method_reply_vec3(path, nargs, types, source, user_data)
-
-    @classmethod
-    def call_method_sfffx_reply_none(cls, path, args, types, source, user_data):
+    def call_method_vec3x_reply_none(cls, path, args, types, source, user_data):
         nargs = [args[0], (args[1],args[2],args[3])]
         for i in args[4:]:
             nargs.append(i)
         cls.call_method(path, nargs, types, source, user_data)
 
     @classmethod
-    def call_method_sfffx_reply_vec3(cls, path, args, types, source, user_data):
+    def call_method_vec3x_reply_vec(cls, path, args, types, source, user_data):
         nargs = [args[0], (args[1],args[2],args[3])]
         for i in args[4:]:
             nargs.append(i)
-        cls.call_method_reply_vec3(path, nargs, types, source, user_data)
+        cls.call_method_reply_vec(path, nargs, types, source, user_data)
 
     @classmethod
-    def call_method_sffffff_reply_none(cls, path, args, types, source, user_data):
+    def call_method_2vec3_reply_none(cls, path, args, types, source, user_data):
         nargs = [args[0], (args[1],args[2],args[3]), (args[4],args[5],args[6])]
         cls.call_method(path, nargs, types, source, user_data)
 
     @classmethod
-    def call_method_ssx_reply_none(cls, path, args, types, source, user_data):
+    def call_method_objx_reply_none(cls, path, args, types, source, user_data):
         nargs = [ args[0], bge.logic.getCurrentScene().objects[args[1]] ]
         for i in args[2:]:
             nargs.append(i)
         cls.call_method(path, nargs, types, source, user_data)
 
     @classmethod
-    def call_method_ssx_reply_f(cls, path, args, types, source, user_data):
+    def call_method_objx_reply_f(cls, path, args, types, source, user_data):
         nargs = [ args[0], bge.logic.getCurrentScene().objects[args[1]] ]
         for i in args[2:]:
             nargs.append(i)
@@ -93,14 +83,14 @@ class GameObjectRequestHandler(BaseRequestHandler):
         cls.call_method_reply(path, nargs, types, source, user_data)
 
     @classmethod
-    def call_method_ssx_reply_vec3(cls, path, args, types, source, user_data):
+    def call_method_objx_reply_vec3(cls, path, args, types, source, user_data):
         nargs = [ args[0], bge.logic.getCurrentScene().objects[args[1]] ]
         for i in args[2:]:
             nargs.append(i)
-        cls.call_method_reply_vec3(path, nargs, types, source, user_data)
+        cls.call_method_reply_vec(path, nargs, types, source, user_data)
 
     @classmethod
-    def call_method_ssx_reply_string(cls, path, args, types, source, user_data):
+    def call_method_objx_reply_string(cls, path, args, types, source, user_data):
         nargs = [ args[0], bge.logic.getCurrentScene().objects[args[1]] ]
         for i in args[2:]:
             nargs.append(i)
@@ -115,7 +105,7 @@ class GameObjectRequestHandler(BaseRequestHandler):
 
 def register():
     try:
-        bge.logic.server.add_method("/scene/objects/name", "s", GameObjectRequestHandler.reply_string)
+        bge.logic.server.add_method("/scene/objects/name", "s", GameObjectRequestHandler.reply_name)
 
         bge.logic.server.add_method("/scene/objects/mass", "sf", GameObjectRequestHandler.set_float_value)
         bge.logic.server.add_method("/scene/objects/mass", "s", GameObjectRequestHandler.reply_float)
@@ -128,13 +118,13 @@ def register():
 
         bge.logic.server.add_method("/scene/objects/localInertia", "s", GameObjectRequestHandler.reply_vec3)
 
-        bge.logic.server.add_method("/scene/objects/parent", "s", GameObjectRequestHandler.reply_string)
+        bge.logic.server.add_method("/scene/objects/parent", "s", GameObjectRequestHandler.reply_name)
 
-        bge.logic.server.add_method("/scene/objects/groupMembers", "s", GameObjectRequestHandler.reply_names)
+        bge.logic.server.add_method("/scene/objects/groupMembers", "s", GameObjectRequestHandler.reply_namelist)
 
-        bge.logic.server.add_method("/scene/objects/groupObject", "s", GameObjectRequestHandler.reply_string)
+        bge.logic.server.add_method("/scene/objects/groupObject", "s", GameObjectRequestHandler.reply_name)
 
-        bge.logic.server.add_method("/scene/objects/scene", "s", GameObjectRequestHandler.reply_string)
+        bge.logic.server.add_method("/scene/objects/scene", "s", GameObjectRequestHandler.reply_name)
 
         bge.logic.server.add_method("/scene/objects/visible", "si", GameObjectRequestHandler.set_bool_value)
         bge.logic.server.add_method("/scene/objects/visible", "s", GameObjectRequestHandler.reply_bool)
@@ -196,20 +186,20 @@ def register():
         bge.logic.server.add_method("/scene/objects/state", "si", GameObjectRequestHandler.set_int_value)
         bge.logic.server.add_method("/scene/objects/state", "s", GameObjectRequestHandler.reply_int)
 
-        bge.logic.server.add_method("/scene/objects/meshes", "s", GameObjectRequestHandler.reply_names)
+        bge.logic.server.add_method("/scene/objects/meshes", "s", GameObjectRequestHandler.reply_namelist)
 
-        bge.logic.server.add_method("/scene/objects/sensors", "s", GameObjectRequestHandler.reply_names)
+        bge.logic.server.add_method("/scene/objects/sensors", "s", GameObjectRequestHandler.reply_namelist)
 
-        bge.logic.server.add_method("/scene/objects/controllers", "s", GameObjectRequestHandler.reply_names)
+        bge.logic.server.add_method("/scene/objects/controllers", "s", GameObjectRequestHandler.reply_namelist)
 
-        bge.logic.server.add_method("/scene/objects/actuators", "s", GameObjectRequestHandler.reply_names)
+        bge.logic.server.add_method("/scene/objects/actuators", "s", GameObjectRequestHandler.reply_namelist)
 
         #TODO
-        #bge.logic.server.add_method("/scene/objects/attrDict", "s", GameObjectRequestHandler.reply_names)
+        #bge.logic.server.add_method("/scene/objects/attrDict", "s", GameObjectRequestHandler.reply_namelist)
 
-        bge.logic.server.add_method("/scene/objects/children", "s", GameObjectRequestHandler.reply_names)
+        bge.logic.server.add_method("/scene/objects/children", "s", GameObjectRequestHandler.reply_namelist)
 
-        bge.logic.server.add_method("/scene/objects/childrenRecursive", "s", GameObjectRequestHandler.reply_names)
+        bge.logic.server.add_method("/scene/objects/childrenRecursive", "s", GameObjectRequestHandler.reply_namelist)
 
         bge.logic.server.add_method("/scene/objects/life", "sf", GameObjectRequestHandler.set_float_value)
         bge.logic.server.add_method("/scene/objects/life", "s", GameObjectRequestHandler.reply_float)
@@ -224,40 +214,40 @@ def register():
 
         bge.logic.server.add_method("/scene/objects/setVisible", "sii", GameObjectRequestHandler.call_method)
 
-        bge.logic.server.add_method("/scene/objects/alignAxisToVect", "sfffif", GameObjectRequestHandler.call_alignAxisToVect)
+        bge.logic.server.add_method("/scene/objects/alignAxisToVect", "sfffif", GameObjectRequestHandler.call_method_vec3x_reply_none)
 
-        bge.logic.server.add_method("/scene/objects/getAxisVect", "sfff", GameObjectRequestHandler.call_getAxisVect)
+        bge.logic.server.add_method("/scene/objects/getAxisVect", "sfff", GameObjectRequestHandler.call_method_vec3x_reply_vec)
 
-        bge.logic.server.add_method("/scene/objects/applyMovement", "sfffi", GameObjectRequestHandler.call_method_sfffx_reply_none)
-        bge.logic.server.add_method("/scene/objects/applyMovement", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_none)
+        bge.logic.server.add_method("/scene/objects/applyMovement", "sfffi", GameObjectRequestHandler.call_method_vec3x_reply_none)
+        bge.logic.server.add_method("/scene/objects/applyMovement", "sfff", GameObjectRequestHandler.call_method_vec3x_reply_none)
 
-        bge.logic.server.add_method("/scene/objects/applyRotation", "sfffi", GameObjectRequestHandler.call_method_sfffx_reply_none)
-        bge.logic.server.add_method("/scene/objects/applyRotation", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_none)
+        bge.logic.server.add_method("/scene/objects/applyRotation", "sfffi", GameObjectRequestHandler.call_method_vec3x_reply_none)
+        bge.logic.server.add_method("/scene/objects/applyRotation", "sfff", GameObjectRequestHandler.call_method_vec3x_reply_none)
 
-        bge.logic.server.add_method("/scene/objects/applyForce", "sfffi", GameObjectRequestHandler.call_method_sfffx_reply_none)
-        bge.logic.server.add_method("/scene/objects/applyForce", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_none)
+        bge.logic.server.add_method("/scene/objects/applyForce", "sfffi", GameObjectRequestHandler.call_method_vec3x_reply_none)
+        bge.logic.server.add_method("/scene/objects/applyForce", "sfff", GameObjectRequestHandler.call_method_vec3x_reply_none)
 
-        bge.logic.server.add_method("/scene/objects/applyTorque", "sfffi", GameObjectRequestHandler.call_method_sfffx_reply_none)
-        bge.logic.server.add_method("/scene/objects/applyTorque", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_none)
+        bge.logic.server.add_method("/scene/objects/applyTorque", "sfffi", GameObjectRequestHandler.call_method_vec3x_reply_none)
+        bge.logic.server.add_method("/scene/objects/applyTorque", "sfff", GameObjectRequestHandler.call_method_vec3x_reply_none)
 
-        bge.logic.server.add_method("/scene/objects/getLinearVelocity", "si", GameObjectRequestHandler.call_method_reply_vec3)
-        bge.logic.server.add_method("/scene/objects/getLinearVelocity", "s", GameObjectRequestHandler.call_method_reply_vec3)
+        bge.logic.server.add_method("/scene/objects/getLinearVelocity", "si", GameObjectRequestHandler.call_method_reply_vec)
+        bge.logic.server.add_method("/scene/objects/getLinearVelocity", "s", GameObjectRequestHandler.call_method_reply_vec)
 
-        bge.logic.server.add_method("/scene/objects/setLinearVelocity", "sfffi", GameObjectRequestHandler.call_method_sfffx_reply_none)
-        bge.logic.server.add_method("/scene/objects/setLinearVelocity", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_none)
+        bge.logic.server.add_method("/scene/objects/setLinearVelocity", "sfffi", GameObjectRequestHandler.call_method_vec3x_reply_none)
+        bge.logic.server.add_method("/scene/objects/setLinearVelocity", "sfff", GameObjectRequestHandler.call_method_vec3x_reply_none)
 
-        bge.logic.server.add_method("/scene/objects/getAngularVelocity", "si", GameObjectRequestHandler.call_method_reply_vec3)
-        bge.logic.server.add_method("/scene/objects/getAngularVelocity", "s", GameObjectRequestHandler.call_method_reply_vec3)
+        bge.logic.server.add_method("/scene/objects/getAngularVelocity", "si", GameObjectRequestHandler.call_method_reply_vec)
+        bge.logic.server.add_method("/scene/objects/getAngularVelocity", "s", GameObjectRequestHandler.call_method_reply_vec)
 
-        bge.logic.server.add_method("/scene/objects/setAngularVelocity", "sfffi", GameObjectRequestHandler.call_method_sfffx_reply_none)
-        bge.logic.server.add_method("/scene/objects/setAngularVelocity", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_none)
+        bge.logic.server.add_method("/scene/objects/setAngularVelocity", "sfffi", GameObjectRequestHandler.call_method_vec3x_reply_none)
+        bge.logic.server.add_method("/scene/objects/setAngularVelocity", "sfff", GameObjectRequestHandler.call_method_vec3x_reply_none)
 
-        bge.logic.server.add_method("/scene/objects/getVelocity", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_vec3)
-        bge.logic.server.add_method("/scene/objects/getVelocity", "s", GameObjectRequestHandler.call_method_reply_vec3)
+        bge.logic.server.add_method("/scene/objects/getVelocity", "sfff", GameObjectRequestHandler.call_method_vec3x_reply_vec)
+        bge.logic.server.add_method("/scene/objects/getVelocity", "s", GameObjectRequestHandler.call_method_reply_vec)
 
-        bge.logic.server.add_method("/scene/objects/getReactionForce", "s", GameObjectRequestHandler.call_method_reply_vec3)
+        bge.logic.server.add_method("/scene/objects/getReactionForce", "s", GameObjectRequestHandler.call_method_reply_vec)
 
-        bge.logic.server.add_method("/scene/objects/applyImpulse", "sffffff", GameObjectRequestHandler.call_method_sffffff_reply_none)
+        bge.logic.server.add_method("/scene/objects/applyImpulse", "sffffff", GameObjectRequestHandler.call_method_2vec3_reply_none)
 
         bge.logic.server.add_method("/scene/objects/suspendDynamics", "s", GameObjectRequestHandler.call_method)
 
@@ -267,23 +257,23 @@ def register():
 
         bge.logic.server.add_method("/scene/objects/disableRigidBody", "s", GameObjectRequestHandler.call_method)
 
-        bge.logic.server.add_method("/scene/objects/setParent", "ssii", GameObjectRequestHandler.call_method_ssx_reply_none)
-        bge.logic.server.add_method("/scene/objects/setParent", "ssi", GameObjectRequestHandler.call_method_ssx_reply_none)
-        bge.logic.server.add_method("/scene/objects/setParent", "ss", GameObjectRequestHandler.call_method_ssx_reply_none)
+        bge.logic.server.add_method("/scene/objects/setParent", "ssii", GameObjectRequestHandler.call_method_objx_reply_none)
+        bge.logic.server.add_method("/scene/objects/setParent", "ssi", GameObjectRequestHandler.call_method_objx_reply_none)
+        bge.logic.server.add_method("/scene/objects/setParent", "ss", GameObjectRequestHandler.call_method_objx_reply_none)
 
         bge.logic.server.add_method("/scene/objects/removeParent", "s", GameObjectRequestHandler.call_method)
 
         bge.logic.server.add_method("/scene/objects/getPhysicsId", "s", GameObjectRequestHandler.call_method_reply)
 
-        bge.logic.server.add_method("/scene/objects/getPropertyNames", "s", GameObjectRequestHandler.call_method_reply_names)
+        bge.logic.server.add_method("/scene/objects/getPropertyNames", "s", GameObjectRequestHandler.call_method_reply_namelist)
 
-        bge.logic.server.add_method("/scene/objects/getDistanceTo", "ss", GameObjectRequestHandler.call_method_ssx_reply_f)
+        bge.logic.server.add_method("/scene/objects/getDistanceTo", "ss", GameObjectRequestHandler.call_method_objx_reply_f)
         bge.logic.server.add_method("/scene/objects/getDistanceTo", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_f)
 
-        bge.logic.server.add_method("/scene/objects/getVectTo", "ss", GameObjectRequestHandler.call_method_ssx_reply_vec3)
-        bge.logic.server.add_method("/scene/objects/getVectTo", "sfff", GameObjectRequestHandler.call_method_sfffx_reply_vec3)
+        bge.logic.server.add_method("/scene/objects/getVectTo", "ss", GameObjectRequestHandler.call_method_objx_reply_vec3)
+        bge.logic.server.add_method("/scene/objects/getVectTo", "sfff", GameObjectRequestHandler.call_method_vec3x_reply_vec)
 
-        bge.logic.server.add_method("/scene/objects/rayCastTo", "ssfs", GameObjectRequestHandler.call_method_ssx_reply_string)
+        bge.logic.server.add_method("/scene/objects/rayCastTo", "ssfs", GameObjectRequestHandler.call_method_objx_reply_string)
         bge.logic.server.add_method("/scene/objects/rayCastTo", "sffffs", GameObjectRequestHandler.call_method_sfffx_reply_string)
 
 # TODO: /scene/objects/rayCast
@@ -317,5 +307,5 @@ def register():
         bge.logic.server.add_method("/scene/objects/isPlayingAction", "si", GameObjectRequestHandler.call_method_reply_bool)
         bge.logic.server.add_method("/scene/objects/isPlayingAction", "s", GameObjectRequestHandler.call_method_reply_bool)
 
-    except AttributeError:
-        print("SERVER: could not register /scene/objects callbacks, no server object")
+    except (AttributeError, ValueError) as err:
+        print("SERVER: could not register /scene/objects callbacks - ", err)

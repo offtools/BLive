@@ -117,7 +117,7 @@ def register():
 
         bge.logic.server.add_method("/scene/cameras/setOnTop", "s", CameraRequestHandler.call_method)
 
-        bge.logic.server.add_method("/scene/cameras/setViewport", "siiii", CameraRequestHandler.call_method_siiii_reply_none)
+        bge.logic.server.add_method("/scene/cameras/setViewport", "siiii", CameraRequestHandler.call_method_reply)
 
         bge.logic.server.add_method("/scene/cameras/getScreenPosition", "ss", CameraRequestHandler.call_method_ss_reply_vec2)
         bge.logic.server.add_method("/scene/cameras/getScreenPosition", "sfff", CameraRequestHandler.call_method_sfff_reply_vec2)
@@ -125,10 +125,8 @@ def register():
         bge.logic.server.add_method("/scene/cameras/getScreenVect", "sff", CameraRequestHandler.call_method_sff_reply_vec3)
 
         bge.logic.server.add_method("/scene/cameras/getScreenRay", "sfffs", CameraRequestHandler.call_method_reply_name)
-
-        #TODO:
-        #self.add_method("/scene/cameras/getScreenRay", "sfffs", CameraRequestHandler.call_method_reply_name)
+        bge.logic.server.add_method("/scene/cameras/getScreenRay", "sfff", CameraRequestHandler.call_method_reply_name)
 
 
-    except AttributeError:
-        print("SERVER: could not register /scene/camera callbacks, no server object")
+    except AttributeError as err:
+        print("SERVER: could not register /scene/camera reason: ", err)

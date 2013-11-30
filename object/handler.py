@@ -21,9 +21,20 @@
 
 
 import bpy
+import math
+import bmesh
 from liblo import Bundle, Message
 from bpy.app.handlers import persistent
 from ..common.libloclient import Client
+
+def update_meshdata(ob):
+    mesh = bmesh.from_edit_mesh(ob.data)
+    mesh_index = 0
+    bundle = Bundle()
+    for face in mesh.faces:
+        for vindex, vertex in enumerate(face.verts):
+            bundle.add(Message("/scene/objects/meshes/update", ob.name, mesh_index, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2]))
+    Client().send(bundle)
 
 @persistent
 def object_update_handler(scene):
@@ -45,13 +56,38 @@ def object_update_handler(scene):
         if ob.is_updated_data:
             if ob.type == 'CAMERA':
                 camera = ob.data
-                #ops.osc_object_camera(camera)
+                bundle = Bundle()
+
+                #e = 1.0/math.tan((camera.angle*math.pi)/360)
+                e = 1.0/math.tan(camera.angle/2.0)
+                a = bpy.context.scene.game_settings.resolution_y/bpy.context.scene.game_settings.resolution_x
+                n = camera.clip_start
+                f = camera.clip_end
+
+                msg_matrix = Message('/scene/cameras/projection_matrix')
+                msg_matrix.add(camera.name,
+                               e, 0, 0, 0,
+                               0, e/a, 0, 0,
+                               0, 0, 2*camera.shift_x, 2*camera.shift_y,
+                               0, 0, -1, 0
+                               )
+
+                perspective = 1
+                if camera.type == 'ORTHO':
+                    perspective = 0
+                msg_persp = Message('/scene/cameras/perspective')
+                msg_persp.add(camera.name, perspective)
+
+                bundle.add(msg_matrix)
+                bundle.add(msg_persp)
+                Client().send(bundle)
+
             elif ob.type == 'LAMP':
                 lamp = ob.data
                 #ops.osc_object_lamp(lamp)
+
             elif ob.type == 'MESH' and ob.mode == 'EDIT':
-                #ops.osc_object_meshdata(ob)
-                pass
+                update_meshdata(ob)
 
 def register():
     print("object.handler.register")

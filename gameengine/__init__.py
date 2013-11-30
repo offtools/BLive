@@ -19,13 +19,25 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
+#def scene_update_post_handler(scene):
+    ## --- check mesh updates
+
+    #for ob in scene.objects:
+        #if ob.is_updated_data and ob.type == 'MESH':
+            #if ob.data.vertices.data.is_updated:
+                #print("ob.data.vertices.data.is_updated")
+            #if ob.data.vertices.data.is_updated_data:
+                #print("ob.data.vertices.data.is_updated_data")
+
 import sys
 import getopt
 import bge
 from gameengine import libloserver
 from gameengine import scene
 from gameengine import objects
-from gameengine import camera
+from gameengine import cameras
+from gameengine import lights
+from gameengine import meshes
 
 
 _PORT = 9901
@@ -54,6 +66,10 @@ def register():
 
         scene.register()
         objects.register()
-        camera.register()
+        cameras.register()
+        lights.register()
+        meshes.register()
 
+        # register server callbacks as last,
+        # otherwise the fallback callback will catch all requests
         bge.logic.server.register()

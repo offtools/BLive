@@ -26,7 +26,7 @@
 #errors: use only BLiveError
 
 # TODO: projection matrix stored in blendfile is not used on startup
-#       it needs to be set after connecting with first client
+#       it needs to be set after connecting with first client (send / recieve init data)
 
 #OSC Paths:
 #path('/scene/attr', [args, ...])

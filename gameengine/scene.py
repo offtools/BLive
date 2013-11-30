@@ -20,6 +20,7 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 from gameengine.requesthandler import *
+from gameengine.error import BLiveError
 
 class SceneRequestHandler(BaseRequestHandler):
     @classmethod
@@ -41,11 +42,11 @@ class SceneRequestHandler(BaseRequestHandler):
 
 def register():
     try:
-        bge.logic.server.add_method("/scene/name", "", SceneRequestHandler.reply_string)
-        bge.logic.server.add_method("/scene/objects", "", SceneRequestHandler.reply_names)
-        bge.logic.server.add_method("/scene/objectsInactive", "", SceneRequestHandler.reply_names)
-        bge.logic.server.add_method("/scene/lights", "", SceneRequestHandler.reply_names)
-        bge.logic.server.add_method("/scene/cameras", "", SceneRequestHandler.reply_names)
+        bge.logic.server.add_method("/scene/name", "", SceneRequestHandler.reply_name)
+        bge.logic.server.add_method("/scene/objects", "", SceneRequestHandler.reply_namelist)
+        bge.logic.server.add_method("/scene/objectsInactive", "", SceneRequestHandler.reply_namelist)
+        bge.logic.server.add_method("/scene/lights", "", SceneRequestHandler.reply_namelist)
+        bge.logic.server.add_method("/scene/cameras", "", SceneRequestHandler.reply_namelist)
         bge.logic.server.add_method("/scene/active_camera", "", SceneRequestHandler.reply_string)
 
         bge.logic.server.add_method("/scene/suspended", "", SceneRequestHandler.reply_bool)
@@ -56,8 +57,8 @@ def register():
 
         bge.logic.server.add_method("/scene/dbvt_culling", "", SceneRequestHandler.reply_bool)
 
-        bge.logic.server.add_method("/scene/pre_draw", "", SceneRequestHandler.reply_names)
-        bge.logic.server.add_method("/scene/post_draw", "", SceneRequestHandler.reply_names)
+        bge.logic.server.add_method("/scene/pre_draw", "", SceneRequestHandler.reply_namelist)
+        bge.logic.server.add_method("/scene/post_draw", "", SceneRequestHandler.reply_namelist)
 
         bge.logic.server.add_method("/scene/gravity", "", SceneRequestHandler.reply_vec3)
         bge.logic.server.add_method("/scene/gravity", "fff", SceneRequestHandler.set_vec3_value)
@@ -72,5 +73,5 @@ def register():
         bge.logic.server.add_method("/scene/resume", "", SceneRequestHandler.call_method)
         bge.logic.server.add_method("/scene/drawObstacleSimulation", "", SceneRequestHandler.call_method)
 
-    except AttributeError:
-        print("SERVER: could not register /scene callbacks, no server object")
+    except (AttributeError, ValueError) as err:
+        print("SERVER: could not register /scene callbacks - ", err)
