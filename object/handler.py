@@ -46,34 +46,8 @@ def object_update_handler(scene):
             Client().send(bundle)
 
         if ob.is_updated_data:
-            if ob.type == 'CAMERA':
-                camera = ob.data
-                bundle = Bundle()
-
-                e = 1.0/math.tan(camera.angle/2.0)
-                a = bpy.context.scene.game_settings.resolution_y/bpy.context.scene.game_settings.resolution_x
-                n = camera.clip_start
-                f = camera.clip_end
-
-                msg_matrix = Message('/scene/cameras/projection_matrix')
-
-                msg_matrix.add(camera.name,
-                               e, 0.0, 2.0*camera.shift_x, 0.0,
-                               0.0, e/a, 2.0*camera.shift_y/a, 0.0,
-                               0.0, 0.0, (f+n)/(n-f), (2*f*n)/(n-f),
-                               0.0, 0.0, -1.0, 0.0
-                               )
-
-
-                perspective = 1
-                if camera.type == 'ORTHO':
-                    perspective = 0
-                msg_persp = Message('/scene/cameras/perspective')
-                msg_persp.add(camera.name, perspective)
-
-                bundle.add(msg_persp)
-                bundle.add(msg_matrix)
-                Client().send(bundle)
+            if ob.type == 'CAMERA' and ob == scene.camera:
+                ops.BLive_OT_osc_object_camera.update_projectionmatrix(ob.data)
 
             elif ob.type == 'LAMP':
                 lamp = ob.data

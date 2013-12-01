@@ -83,33 +83,49 @@ from ..common.libloclient import Client
         #else:
             #return{'CANCELLED'}
 
-#def osc_object_camera(camera):
-    #perspective = 1
-    #if camera.type == 'ORTHO':
-        #perspective = 0
-    #aspect = bpy.context.scene.game_settings.resolution_y/bpy.context.scene.game_settings.resolution_x
-    #BLiveClient().send("/data/object/camera",[ camera.name, camera.angle, aspect, camera.ortho_scale, camera.clip_start, camera.clip_end, perspective, camera.shift_x, camera.shift_y])
+class BLive_OT_osc_object_camera(bpy.types.Operator):
+    """
+        Operator - send camera data, projection matrix
+    """
+    bl_idname = "blive.snd_camera_projectionmatrix"
+    bl_label = "BLive - send camera projectionmatrix"
 
-#class BLive_OT_osc_object_camera(bpy.types.Operator):
-    #"""
-        #Operator - send camera data
-    #"""
-    #bl_idname = "blive.osc_object_camera"
-    #bl_label = "BLive - send camera data"
-    #obname = bpy.props.StringProperty()
+    @classmethod
+    def poll(self, context):
+        return bool(context.scene.camera)
 
-    #def execute(self, context):
-        #if self.obname in context.scene.objects and context.scene.objects[self.obname].type == 'CAMERA':
-            #camera = bpy.data.cameras[self.obname]
-            #osc_object_camera(camera)
-            ##~ perspective = 1
-            ##~ if camera.type == 'ORTHO':
-                ##~ perspective = 0
-            ##~ aspect = context.scene.game_settings.resolution_y/context.scene.game_settings.resolution_x
-            ##~ BLiveClient().send("/data/object/camera",[ self.obname, camera.angle, aspect, camera.ortho_scale, camera.clip_start, camera.clip_end, perspective, camera.shift_x, camera.shift_y])
-            #return{'FINISHED'}
-        #else:
-            #return{'CANCELLED'}
+    @classmethod
+    def update_projectionmatrix(self, camera):
+        bundle = Bundle()
+
+        e = 1.0/math.tan(camera.angle/2.0)
+        a = bpy.context.scene.game_settings.resolution_y/bpy.context.scene.game_settings.resolution_x
+        n = camera.clip_start
+        f = camera.clip_end
+
+        msg_matrix = Message('/scene/cameras/projection_matrix')
+
+        msg_matrix.add(camera.name,
+                       e, 0.0, 2.0*camera.shift_x, 0.0,
+                       0.0, e/a, 2.0*camera.shift_y/a, 0.0,
+                       0.0, 0.0, (f+n)/(n-f), (2*f*n)/(n-f),
+                       0.0, 0.0, -1.0, 0.0
+                       )
+
+        perspective = 1
+        if camera.type == 'ORTHO':
+            perspective = 0
+        msg_persp = Message('/scene/cameras/perspective')
+        msg_persp.add(camera.name, perspective)
+
+        bundle.add(msg_persp)
+        bundle.add(msg_matrix)
+        Client().send(bundle)
+
+    def execute(self, context):
+        camera = context.scene.camera.data
+        self.update_projectionmatrix(camer)
+        return{'FINISHED'}
 
 #def osc_object_lamp(lamp):
     #BLiveClient().send("/data/object/lamp", [lamp.name, lamp.energy, lamp.color[0], lamp.color[1], lamp.color[2]])
@@ -174,7 +190,7 @@ def register():
     #bpy.utils.register_class(BLive_OT_osc_object_location)
     #bpy.utils.register_class(BLive_OT_osc_object_rotation)
     #bpy.utils.register_class(BLive_OT_osc_object_scaling)
-    #bpy.utils.register_class(BLive_OT_osc_object_camera)
+    bpy.utils.register_class(BLive_OT_osc_object_camera)
     #bpy.utils.register_class(BLive_OT_osc_object_lamp)
     bpy.utils.register_class(BLive_OT_osc_object_meshdata)
 
@@ -183,6 +199,6 @@ def unregister():
     #bpy.utils.unregister_class(BLive_OT_osc_object_location)
     #bpy.utils.unregister_class(BLive_OT_osc_object_rotation)
     #bpy.utils.unregister_class(BLive_OT_osc_object_scaling)
-    #bpy.utils.unregister_class(BLive_OT_osc_object_camera)
+    bpy.utils.unregister_class(BLive_OT_osc_object_camera)
     #bpy.utils.unregister_class(BLive_OT_osc_object_lamp)
     bpy.utils.unregister_class(BLive_OT_osc_object_meshdata)
