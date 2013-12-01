@@ -155,35 +155,7 @@ class AttributeTypeMatrix4x4(AttributeType):
 
     @classmethod
     def set(cls, obj, attr, args):
-        scene = bge.logic.getCurrentScene()
-        camera =  scene.cameras['Camera']
-
-        #angle = args[0]
-        #aspect = args[1]
-        ##camera.lens = lens
-        #camera.ortho_scale = args[2]
-        #camera.near = args[3]
-        #camera.far = args[4]
-        #camera.perspective = args[5]
-
-        projection_matrix = camera.projection_matrix
-
-        #e = 1.0/math.tan(angle/2.0)
-
-        #shift_x = args[6]
-        #shift_y = args[7]
-
-        #projection_matrix[0][0] = e
-        #projection_matrix[1][1] = e/aspect
-
-        projection_matrix[0][2] = args[0]
-        projection_matrix[1][2] = args[1]
-
-        camera.projection_matrix = projection_matrix
-
-        #matr = (args[0:4],args[4:8],args[8:12],args[12:16])
-        #obj.__setattr__(attr, matr)
-
+        obj.__setattr__(attr, (args[0:4],args[4:8],args[8:12],args[12:16]) )
 
 #
 # OSC RequestHandler

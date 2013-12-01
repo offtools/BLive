@@ -34,7 +34,7 @@ INITSCRIPT = "blive_init.py"
 UPDATESCRIPT = "blive_update.py"
 
 class BLive_OT_start_gameengine(bpy.types.Operator):
-    bl_idname = "blive.start_gameengine"
+    bl_idname = "blive.gameengine_start"
     bl_label = "BLive start gameengine"
 
     def add_start_script(self):
@@ -140,7 +140,7 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
         return{'FINISHED'}
 
 class BLive_OT_stop_gameengine(bpy.types.Operator):
-    bl_idname = "blive.stop_gameengine"
+    bl_idname = "blive.gameengine_stop"
     bl_label = "BLive stop gameengine"
 
     @classmethod
@@ -153,7 +153,7 @@ class BLive_OT_stop_gameengine(bpy.types.Operator):
         return{'FINISHED'}
 
 class BLive_OT_reload_gameengine(bpy.types.Operator):
-    bl_idname = "blive.reload_gameengine"
+    bl_idname = "blive.gameengine_reload"
     bl_label = "BLive reload gameengine"
 
     #@classmethod
@@ -162,9 +162,9 @@ class BLive_OT_reload_gameengine(bpy.types.Operator):
 
     def execute(self, context):
         # stop gameengine
-        bpy.ops.blive.stop_gameengine()
+        bpy.ops.blive.gameengine_stop()
         # start gameengine
-        bpy.ops.blive.start_gameengine()
+        bpy.ops.blive.gameengine_start()
         return{'FINISHED'}
 
 def register():

@@ -19,7 +19,9 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-#TODO: stop Client Thread not from inside, stop it on, load blendfile, ...
+#TODO:
+#   stop Client Thread not from inside, stop it on, load blendfile, ...
+#   remove sleep statement by better solution
 
 import bpy
 import liblo
@@ -42,7 +44,7 @@ class LibloClient(liblo.ServerThread):
         def run(self):
             while self.client.is_connecting() == True:
                 liblo.send(self.client.target, "/connect")
-                time.sleep(1)
+                time.sleep(2)
 
     @make_method('/srvinfo', 's')
     def cb_srvinfo(self, path, args, types, source, user_data):

@@ -56,11 +56,11 @@ class BLive_PT_network_setup(bpy.types.Panel):
         row = layout.row()
         row.label("Start Gameengine and connect")
         row = layout.row()
-        row.operator("blive.start_gameengine", text="Start Gameengine")
+        row.operator("blive.gameengine_start", text="Start Gameengine")
         row = layout.row()
-        row.operator("blive.reload_gameengine", text="Reload Gameengine")
+        row.operator("blive.gameengine_reload", text="Reload Gameengine")
         row = layout.row()
-        row.operator("blive.stop_gameengine", text="Stop Gameengine")
+        row.operator("blive.gameengine_stop", text="Stop Gameengine")
 
 def register():
     print("settings.ui.register")
