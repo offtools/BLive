@@ -51,6 +51,8 @@ class LibloClient(liblo.ServerThread):
         print ("CLIENT: connected - got server reply: ", args)
         self.__await_connect = False
         self._start_apphandler()
+        #TODO: send init data, like projection matrix after connect for every viewport
+        bpy.ops.blive.osc_active_camera_projectionmatrix()
 
     @make_method('/error', 's')
     def cb_error(self, path, args, types, source, user_data):

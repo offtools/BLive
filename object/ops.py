@@ -83,11 +83,11 @@ from ..common.libloclient import Client
         #else:
             #return{'CANCELLED'}
 
-class BLive_OT_osc_object_camera(bpy.types.Operator):
+class BLive_OT_osc_object_active_camera(bpy.types.Operator):
     """
         Operator - send camera data, projection matrix
     """
-    bl_idname = "blive.snd_camera_projectionmatrix"
+    bl_idname = "blive.osc_active_camera_projectionmatrix"
     bl_label = "BLive - send camera projectionmatrix"
 
     @classmethod
@@ -96,9 +96,11 @@ class BLive_OT_osc_object_camera(bpy.types.Operator):
 
     @classmethod
     def update_projectionmatrix(self, camera):
+        # operators seems much slower, we add a classmedthod to call the code directly for internal use (see handler.py)
         bundle = Bundle()
 
         e = 1.0/math.tan(camera.angle/2.0)
+        #TODO: maybe use render settings for aspect (game settings and render settings can differ)
         a = bpy.context.scene.game_settings.resolution_y/bpy.context.scene.game_settings.resolution_x
         n = camera.clip_start
         f = camera.clip_end
@@ -124,7 +126,7 @@ class BLive_OT_osc_object_camera(bpy.types.Operator):
 
     def execute(self, context):
         camera = context.scene.camera.data
-        self.update_projectionmatrix(camer)
+        self.update_projectionmatrix(camera)
         return{'FINISHED'}
 
 #def osc_object_lamp(lamp):
@@ -163,7 +165,7 @@ class BLive_OT_osc_object_meshdata(bpy.types.Operator):
     """
         Operator - send mesh data
     """
-    bl_idname = "blive.snd_object_meshdata"
+    bl_idname = "blive.osc_object_meshdata"
     bl_label = "BLive - send meshdata"
 
     @classmethod
@@ -172,6 +174,7 @@ class BLive_OT_osc_object_meshdata(bpy.types.Operator):
 
     @classmethod
     def update_mesh(self, ob):
+        # operators seems much slower, we add a classmedthod to call the code directly for internal use (see handler.py)
         mesh = bmesh.from_edit_mesh(ob.data)
         mesh_index = 0
         bundle = Bundle()
@@ -190,7 +193,7 @@ def register():
     #bpy.utils.register_class(BLive_OT_osc_object_location)
     #bpy.utils.register_class(BLive_OT_osc_object_rotation)
     #bpy.utils.register_class(BLive_OT_osc_object_scaling)
-    bpy.utils.register_class(BLive_OT_osc_object_camera)
+    bpy.utils.register_class(BLive_OT_osc_object_active_camera)
     #bpy.utils.register_class(BLive_OT_osc_object_lamp)
     bpy.utils.register_class(BLive_OT_osc_object_meshdata)
 

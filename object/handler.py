@@ -46,7 +46,7 @@ def object_update_handler(scene):
             Client().send(bundle)
 
         if ob.is_updated_data:
-            if ob.type == 'CAMERA' and ob == scene.camera:
+            if ob.type == 'CAMERA':
                 ops.BLive_OT_osc_object_camera.update_projectionmatrix(ob.data)
 
             elif ob.type == 'LAMP':
@@ -54,8 +54,14 @@ def object_update_handler(scene):
                 #ops.osc_object_lamp(lamp)
 
             elif ob.type == 'MESH' and ob.mode == 'EDIT':
-                #operators seems much slower, we call classmedthod of Op directly
                 ops.BLive_OT_osc_object_meshdata.update_mesh(ob)
+
+
+        # workaround for object color
+        for i in ob.material_slots:
+            if ob.type == 'MESH' and bpy.data.materials[i.name].use_object_color:
+                Client().send(Message("/scene/objects/color", ob.name, ob.color[0], ob.color[1], ob.color[2], ob.color[3]))
+
 
 def register():
     print("object.handler.register")

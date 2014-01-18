@@ -47,7 +47,7 @@ def marker_handler(scene):
     if cur in markedframes and markedframes[cur].name in trigger.m_markerdict:
         markerid = markedframes[cur].name
 
-        if markerid in markerdict:
+        if markerid in markerdict and markerdict[markerid].m_queue:
             #   check pause - stop animation
             qid = markerdict[markerid].m_queue
             if trigger.m_queues[qid].m_pause and bpy.context.screen.is_animation_playing:
@@ -65,7 +65,7 @@ def marker_handler(scene):
         qid = markerdict[markerid].m_queue
 
         # send events - if execute_after
-        if trigger.m_queues[qid].m_execute_after:
+        if qid and trigger.m_queues[qid].m_execute_after:
             for slot in trigger.m_queues[qid].m_slots:
                 wrapperitem = getattr(trigger.m_queues[qid].m_trigger, slot.m_type)
                 wrapperitem[slot.name].send()
