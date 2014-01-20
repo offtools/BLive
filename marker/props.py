@@ -133,7 +133,7 @@ class TriggerChangeScene(bpy.types.PropertyGroup):
     def send(self):
         #   change scene in blender too
         bpy.context.screen.scene = bpy.data.scenes[self.m_scene]
-        Client().send(self.m_oscpath, self.m_scene)
+        Client().send(Message(self.m_oscpath, self.m_scene))
 
 class TriggerGameProperty(bpy.types.PropertyGroup):
     m_hidden = bpy.props.BoolProperty(default=True)
