@@ -167,14 +167,52 @@ class BLive_OT_reload_gameengine(bpy.types.Operator):
         bpy.ops.blive.gameengine_start()
         return{'FINISHED'}
 
+
+class BLive_OT_send_osc_message(bpy.types.Operator):
+    """
+        Operator - send osc message from a string
+    """
+    bl_idname = "blive.send_osc_message"
+    bl_label = "BLive - send OSC message"
+
+    @classmethod
+    def poll(self, context):
+        return True
+
+    def execute(self, context):
+        debug = context.window_manager.blive_debug
+
+        # test if first arg contains '/' (path)
+        if debug.message.split(' ')[0].count('/'):
+            msg = Message(debug.message.split(' ')[0])
+            for i in debug.message.split(' ')[1:]:
+                # digits are ints
+                if i.isdigit():
+                    msg.add(int(i))
+                # try convert args with '.' to float otherwise stays string
+                elif i.count('.') == 1:
+                    try:
+                        msg.add(float(i))
+                    except ValueError:
+                        msg.add(i)
+                # all other args parsed as strings
+                else:
+                    msg.add(i)
+            Client().send(msg)
+            return{'FINISHED'}
+        else:
+            return{'CANCELLED'}
+
 def register():
     print("settings.ops.register")
     bpy.utils.register_class(BLive_OT_start_gameengine)
     bpy.utils.register_class(BLive_OT_stop_gameengine)
     bpy.utils.register_class(BLive_OT_reload_gameengine)
+    bpy.utils.register_class(BLive_OT_send_osc_message)
 
 def unregister():
     print("settings.ops.unregister")
     bpy.utils.unregister_class(BLive_OT_reload_gameengine)
     bpy.utils.unregister_class(BLive_OT_stop_gameengine)
     bpy.utils.unregister_class(BLive_OT_start_gameengine)
+    bpy.utils.unregister_class(BLive_OT_send_osc_message)

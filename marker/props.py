@@ -22,6 +22,7 @@
 # TODO: user operators instead calling BLiveClient
 
 import bpy
+from liblo import Message
 from ..common.libloclient import Client
 
 TRIGGER_TYPE_ENUM = [("TriggerDummy","Dummy","Dummy Trigger"), \
@@ -30,7 +31,8 @@ TRIGGER_TYPE_ENUM = [("TriggerDummy","Dummy","Dummy Trigger"), \
                     ("TriggerVideoState","Set Video State","Set Play, Pause, Stop"), \
                     ("TriggerChangeScene","Change active Scene","Change active Scene"), \
                     ("TriggerGameProperty","Set a Game Property","Set a Game Property"), \
-                    ("TriggerScript","Run a Script","Run a script local") \
+                    ("TriggerScript","Run a Script","Run a script local"), \
+                    ("TriggerOSCMessage","Send OSC Message","Send OSC Message") \
                     ]
 
 def TRIGGER_TYPE_NAME(self, _type):
@@ -145,13 +147,33 @@ class TriggerGameProperty(bpy.types.PropertyGroup):
         Client().send(self.m_oscpath, self.m_object, self.m_property, value)
 
 class TriggerScript(bpy.types.PropertyGroup):
-    #m_hidden = bpy.props.BoolProperty(default=True)
-    #m_oscpath = bpy.props.StringProperty(default="")
     m_script = bpy.props.StringProperty()
 
     def send(self):
         if self.m_script in bpy.data.texts:
             exec(bpy.data.texts[self.m_script].as_string())
+
+class TriggerOSCMessage(bpy.types.PropertyGroup):
+    m_msg = bpy.props.StringProperty()
+
+    def send(self):
+        # test if first arg contains '/' (path)
+        if self.m_msg.split(' ')[0].count('/'):
+            msg = Message(self.m_msg.split(' ')[0])
+            for i in self.m_msg.split(' ')[1:]:
+                # digits are ints
+                if i.isdigit():
+                    msg.add(int(i))
+                # try convert args with '.' to float otherwise stays string
+                elif i.count('.') == 1:
+                    try:
+                        msg.add(float(i))
+                    except ValueError:
+                        msg.add(i)
+                # all other args parsed as strings
+                else:
+                    msg.add(i)
+            Client().send(msg)
 
 class TriggerWrapper(bpy.types.PropertyGroup):
     '''
@@ -164,6 +186,7 @@ class TriggerWrapper(bpy.types.PropertyGroup):
     TriggerChangeScene = bpy.props.CollectionProperty(type=TriggerChangeScene)
     TriggerGameProperty = bpy.props.CollectionProperty(type=TriggerGameProperty)
     TriggerScript = bpy.props.CollectionProperty(type=TriggerScript)
+    TriggerOSCMessage = bpy.props.CollectionProperty(type=TriggerOSCMessage)
 
 class TriggerSlot(bpy.types.PropertyGroup):
     m_type = bpy.props.StringProperty()
@@ -188,6 +211,7 @@ def register():
     print("marker.props.register")
 
     bpy.utils.register_class(TriggerScript)
+    bpy.utils.register_class(TriggerOSCMessage)
     bpy.utils.register_class(TriggerDummy)
     bpy.utils.register_class(TriggerVideoOpen)
     bpy.utils.register_class(TriggerCameraOpen)
@@ -208,6 +232,7 @@ def unregister():
     del bpy.types.Scene.timeline_trigger
 
     bpy.utils.unregister_class(TriggerScript)
+    bpy.utils.unregister_class(TriggerOSCMessage)
     bpy.utils.unregister_class(TriggerDummy)
     bpy.utils.unregister_class(TriggerVideoOpen)
     bpy.utils.unregister_class(TriggerCameraOpen)

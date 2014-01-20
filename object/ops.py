@@ -25,41 +25,6 @@ import bmesh
 from liblo import Bundle, Message
 from ..common.libloclient import Client
 
-class BLive_OT_osc_send_message(bpy.types.Operator):
-    """
-        Operator - send mesh data
-    """
-    bl_idname = "blive.osc_send_message"
-    bl_label = "BLive - send message"
-
-    @classmethod
-    def poll(self, context):
-        return True
-
-    def execute(self, context):
-        debug = context.window_manager.blive_debug
-
-        # test if first arg contains '/' (path)
-        if debug.message.split(' ')[0].count('/'):
-            msg = Message(debug.message.split(' ')[0])
-            for i in debug.message.split(' ')[1:]:
-                # digits are ints
-                if i.isdigit():
-                    msg.add(int(i))
-                # try convert args with '.' to float otherwise stays string
-                elif i.count('.') == 1:
-                    try:
-                        msg.add(float(i))
-                    except ValueError:
-                        msg.add(i)
-                # all other args parsed as strings
-                else:
-                    msg.add(i)
-            Client().send(msg)
-            return{'FINISHED'}
-        else:
-            return{'CANCELLED'}
-
 #from ..client import BLiveClient
 
 # TODO: all calls defined as def outside the Operator to avoid the RuntimeError recursion
@@ -225,7 +190,6 @@ class BLive_OT_osc_object_meshdata(bpy.types.Operator):
 
 def register():
     print("object.ops.register")
-    bpy.utils.register_class(BLive_OT_osc_send_message)
     #bpy.utils.register_class(BLive_OT_osc_object_location)
     #bpy.utils.register_class(BLive_OT_osc_object_rotation)
     #bpy.utils.register_class(BLive_OT_osc_object_scaling)
@@ -235,7 +199,6 @@ def register():
 
 def unregister():
     print("object.ops.unregister")
-    bpy.utils.unregister_class(BLive_OT_osc_send_message)
     #bpy.utils.unregister_class(BLive_OT_osc_object_location)
     #bpy.utils.unregister_class(BLive_OT_osc_object_rotation)
     #bpy.utils.unregister_class(BLive_OT_osc_object_scaling)
