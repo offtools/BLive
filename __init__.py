@@ -41,6 +41,7 @@ bl_info = {
 if "bpy" in locals():
     import imp
     imp.reload(common)
+    imp.reload(viewport)
     #imp.reload(client)
     #imp.reload(texture)
     imp.reload(marker)
@@ -48,6 +49,7 @@ if "bpy" in locals():
     #imp.reload(material)
 else:
     from . import common
+    from . import viewport
     #from . import client
     #from . import texture
     from . import marker
@@ -59,6 +61,7 @@ import bpy
 def register():
     print("__init__.register")
     common.register()
+    viewport.register()
     #client.register()
     #texture.register()
     marker.register()
@@ -72,6 +75,7 @@ def unregister():
     marker.unregister()
     #texture.unregister()
     #client.unregister()
+    viewport.unregister()
     common.unregister()
 
 if __name__ == "__main__":
