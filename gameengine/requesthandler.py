@@ -27,13 +27,13 @@
 
 
 #OSC Paths:
-#path('/scene/attr', [args, ...])
+#path('/bge/scene/attr', [args, ...])
 #scene: obj=None
-#path('/scene/objects/attr', 'Object', [args, ...])
+#path('/bge/scene/objects/attr', 'Object', [args, ...])
 #object: obj=bge.logic.getCurrentScene().objects[args[0]]
-#path('/scene/objects/meshes/attr', 'Object', 0, [args, ...])
+#path('/bge/scene/objects/meshes/attr', 'Object', 0, [args, ...])
 #mesh: obj=bge.logic.getCurrentScene().objects[args[0]].meshes[args[1]]
-#path('/scene/objects/meshes/material/attr', 'Object', 0, 0, [args, ...])
+#path('/bge/scene/objects/meshes/material/attr', 'Object', 0, 0, [args, ...])
 #material: obj=bge.logic.getCurrentScene().objects[args[0]].meshes[args[1]].materials[args[2]]
 
 

@@ -29,11 +29,18 @@ class BLiveSettings(bpy.types.PropertyGroup):
     server = bpy.props.StringProperty(default="127.0.0.1")
     diffuse_to_obcolor = bpy.props.BoolProperty(default=False)
 
+class BLiveDebug(bpy.types.PropertyGroup):
+    """Blive Send OSC Debug Messages
+    """
+    message = bpy.props.StringProperty(default="")
+
 def register():
     print("settings.props.register")
     bpy.utils.register_class(BLiveSettings)
+    bpy.utils.register_class(BLiveDebug)
 
     bpy.types.WindowManager.blive_settings = bpy.props.PointerProperty(type=BLiveSettings)
+    bpy.types.WindowManager.blive_debug = bpy.props.PointerProperty(type=BLiveDebug)
 
     #   initial settings
     #   game engine and GLSL mode
@@ -43,4 +50,5 @@ def register():
 
 def unregister():
     print("settings.props.unregister")
+    bpy.utils.unregister_class(BLiveDebug)
     bpy.utils.unregister_class(BLiveSettings)

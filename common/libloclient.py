@@ -43,10 +43,10 @@ class LibloClient(liblo.ServerThread):
 
         def run(self):
             while self.client.is_connecting() == True:
-                liblo.send(self.client.target, "/connect")
+                liblo.send(self.client.target, "/bge/connect")
                 time.sleep(2)
 
-    @make_method('/srvinfo', 's')
+    @make_method('/bge/srvinfo', 's')
     def cb_srvinfo(self, path, args, types, source, user_data):
         print ("CLIENT: connected - got server reply: ", args)
         self.__await_connect = False
@@ -54,11 +54,11 @@ class LibloClient(liblo.ServerThread):
         #TODO: send init data, like projection matrix after connect for every viewport
         bpy.ops.blive.osc_active_camera_projectionmatrix()
 
-    @make_method('/error', 's')
+    @make_method('/bge/error', 's')
     def cb_error(self, path, args, types, source, user_data):
         print ("CLIENT: received error message: ", args)
 
-    @make_method('/shutdown', 's')
+    @make_method('/bge/shutdown', 's')
     def cb_shutdown(self, path, args, types, source, user_data):
         print ("CLIENT: received shutdown - closing client", args)
         #self.close() #TODO: dont close thread from inside thread, just notify blender
@@ -118,13 +118,13 @@ class LibloClient(liblo.ServerThread):
     def disconnect(self):
         try:
             self.close()
-            liblo.send(self.target, "/disconnect")
+            liblo.send(self.target, "/bge/disconnect")
         except AttributeError:
             pass
 
     def shutdown(self):
         try:
-            liblo.send(self.target, "/shutdown")
+            liblo.send(self.target, "/bge/shutdown")
         except AttributeError:
             pass
 

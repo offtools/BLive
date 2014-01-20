@@ -62,10 +62,30 @@ class BLive_PT_network_setup(bpy.types.Panel):
         row = layout.row()
         row.operator("blive.gameengine_stop", text="Stop Gameengine")
 
+class BLive_PT_debug(bpy.types.Panel):
+    bl_label = "BLive Debug"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "render"
+
+    #TODO: test if connect
+    #@classmethod
+    #def poll(self, context):
+        #pass
+
+    def draw(self, context):
+        layout = self.layout
+        row = layout.row()
+        row.prop(context.window_manager.blive_debug, "message", text="msg")
+        row = layout.row()
+        row.operator("blive.osc_send_message", text="send")
+
 def register():
     print("settings.ui.register")
     bpy.utils.register_class(BLive_PT_network_setup)
+    bpy.utils.register_class(BLive_PT_debug)
 
 def unregister():
     print("settings.ui.unregister")
     bpy.utils.unregister_class(BLive_PT_network_setup)
+    bpy.utils.unregister_class(BLive_PT_debug)

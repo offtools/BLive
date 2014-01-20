@@ -75,58 +75,58 @@ class CameraRequestHandler(BaseRequestHandler):
 
 def register():
     try:
-        bge.logic.server.add_method("/scene/cameras/lens", "sf", CameraRequestHandler.set_float_value)
-        bge.logic.server.add_method("/scene/cameras/lens", "s", CameraRequestHandler.reply_float)
+        bge.logic.server.add_method("/bge/scene/cameras/lens", "sf", CameraRequestHandler.set_float_value)
+        bge.logic.server.add_method("/bge/scene/cameras/lens", "s", CameraRequestHandler.reply_float)
 
-        bge.logic.server.add_method("/scene/cameras/ortho_scale", "sf", CameraRequestHandler.set_float_value)
-        bge.logic.server.add_method("/scene/cameras/ortho_scale", "s", CameraRequestHandler.reply_float)
+        bge.logic.server.add_method("/bge/scene/cameras/ortho_scale", "sf", CameraRequestHandler.set_float_value)
+        bge.logic.server.add_method("/bge/scene/cameras/ortho_scale", "s", CameraRequestHandler.reply_float)
 
-        bge.logic.server.add_method("/scene/cameras/near", "sf", CameraRequestHandler.set_float_value)
-        bge.logic.server.add_method("/scene/cameras/near", "s", CameraRequestHandler.reply_float)
+        bge.logic.server.add_method("/bge/scene/cameras/near", "sf", CameraRequestHandler.set_float_value)
+        bge.logic.server.add_method("/bge/scene/cameras/near", "s", CameraRequestHandler.reply_float)
 
-        bge.logic.server.add_method("/scene/cameras/far", "sf", CameraRequestHandler.set_float_value)
-        bge.logic.server.add_method("/scene/cameras/far", "s", CameraRequestHandler.reply_float)
+        bge.logic.server.add_method("/bge/scene/cameras/far", "sf", CameraRequestHandler.set_float_value)
+        bge.logic.server.add_method("/bge/scene/cameras/far", "s", CameraRequestHandler.reply_float)
 
-        bge.logic.server.add_method("/scene/cameras/perspective", "si", CameraRequestHandler.set_bool_value)
-        bge.logic.server.add_method("/scene/cameras/perspective", "s", CameraRequestHandler.reply_bool)
+        bge.logic.server.add_method("/bge/scene/cameras/perspective", "si", CameraRequestHandler.set_bool_value)
+        bge.logic.server.add_method("/bge/scene/cameras/perspective", "s", CameraRequestHandler.reply_bool)
 
-        bge.logic.server.add_method("/scene/cameras/frustum_culling", "si", CameraRequestHandler.set_bool_value)
-        bge.logic.server.add_method("/scene/cameras/frustum_culling", "s", CameraRequestHandler.reply_bool)
+        bge.logic.server.add_method("/bge/scene/cameras/frustum_culling", "si", CameraRequestHandler.set_bool_value)
+        bge.logic.server.add_method("/bge/scene/cameras/frustum_culling", "s", CameraRequestHandler.reply_bool)
 
-        bge.logic.server.add_method("/scene/cameras/projection_matrix", "sffffffffffffffff", CameraRequestHandler.set_matrix4x4_value)
-        bge.logic.server.add_method("/scene/cameras/projection_matrix", "s", CameraRequestHandler.reply_matrix4x4)
+        bge.logic.server.add_method("/bge/scene/cameras/projection_matrix", "sffffffffffffffff", CameraRequestHandler.set_matrix4x4_value)
+        bge.logic.server.add_method("/bge/scene/cameras/projection_matrix", "s", CameraRequestHandler.reply_matrix4x4)
 
-        bge.logic.server.add_method("/scene/cameras/model_matrix", "s", CameraRequestHandler.reply_matrix4x4)
+        bge.logic.server.add_method("/bge/scene/cameras/model_matrix", "s", CameraRequestHandler.reply_matrix4x4)
 
-        bge.logic.server.add_method("/scene/cameras/camera_to_world", "s", CameraRequestHandler.reply_matrix4x4)
+        bge.logic.server.add_method("/bge/scene/cameras/camera_to_world", "s", CameraRequestHandler.reply_matrix4x4)
 
-        bge.logic.server.add_method("/scene/cameras/world_to_camera", "s", CameraRequestHandler.reply_matrix4x4)
+        bge.logic.server.add_method("/bge/scene/cameras/world_to_camera", "s", CameraRequestHandler.reply_matrix4x4)
 
-        bge.logic.server.add_method("/scene/cameras/use_viewport", "si", CameraRequestHandler.set_bool_value)
-        bge.logic.server.add_method("/scene/cameras/use_viewport", "s", CameraRequestHandler.reply_bool)
+        bge.logic.server.add_method("/bge/scene/cameras/use_viewport", "si", CameraRequestHandler.set_bool_value)
+        bge.logic.server.add_method("/bge/scene/cameras/use_viewport", "s", CameraRequestHandler.reply_bool)
 
-        bge.logic.server.add_method("/scene/cameras/sphereInsideFrustum", "sffff", CameraRequestHandler.call_method_sfffx_reply)
+        bge.logic.server.add_method("/bge/scene/cameras/sphereInsideFrustum", "sffff", CameraRequestHandler.call_method_sfffx_reply)
 
-        bge.logic.server.add_method("/scene/cameras/boxInsideFrustum", "sffffffffffffffffffffffff", CameraRequestHandler.call_method_s24f_reply)
+        bge.logic.server.add_method("/bge/scene/cameras/boxInsideFrustum", "sffffffffffffffffffffffff", CameraRequestHandler.call_method_s24f_reply)
 
-        bge.logic.server.add_method("/scene/cameras/pointInsideFrustum", "sfff", CameraRequestHandler.call_method_sfffx_reply)
+        bge.logic.server.add_method("/bge/scene/cameras/pointInsideFrustum", "sfff", CameraRequestHandler.call_method_sfffx_reply)
 
-        bge.logic.server.add_method("/scene/cameras/getCameraToWorld", "s", CameraRequestHandler.call_method_reply_matrix4x4)
+        bge.logic.server.add_method("/bge/scene/cameras/getCameraToWorld", "s", CameraRequestHandler.call_method_reply_matrix4x4)
 
-        bge.logic.server.add_method("/scene/cameras/getWorldToCamera", "s", CameraRequestHandler.call_method_reply_matrix4x4)
+        bge.logic.server.add_method("/bge/scene/cameras/getWorldToCamera", "s", CameraRequestHandler.call_method_reply_matrix4x4)
 
-        bge.logic.server.add_method("/scene/cameras/setOnTop", "s", CameraRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/cameras/setOnTop", "s", CameraRequestHandler.call_method)
 
-        bge.logic.server.add_method("/scene/cameras/setViewport", "siiii", CameraRequestHandler.call_method_reply)
+        bge.logic.server.add_method("/bge/scene/cameras/setViewport", "siiii", CameraRequestHandler.call_method_reply)
 
-        bge.logic.server.add_method("/scene/cameras/getScreenPosition", "ss", CameraRequestHandler.call_method_ss_reply_vec2)
-        bge.logic.server.add_method("/scene/cameras/getScreenPosition", "sfff", CameraRequestHandler.call_method_sfff_reply_vec2)
+        bge.logic.server.add_method("/bge/scene/cameras/getScreenPosition", "ss", CameraRequestHandler.call_method_ss_reply_vec2)
+        bge.logic.server.add_method("/bge/scene/cameras/getScreenPosition", "sfff", CameraRequestHandler.call_method_sfff_reply_vec2)
 
-        bge.logic.server.add_method("/scene/cameras/getScreenVect", "sff", CameraRequestHandler.call_method_sff_reply_vec3)
+        bge.logic.server.add_method("/bge/scene/cameras/getScreenVect", "sff", CameraRequestHandler.call_method_sff_reply_vec3)
 
-        bge.logic.server.add_method("/scene/cameras/getScreenRay", "sfffs", CameraRequestHandler.call_method_reply_name)
-        bge.logic.server.add_method("/scene/cameras/getScreenRay", "sfff", CameraRequestHandler.call_method_reply_name)
+        bge.logic.server.add_method("/bge/scene/cameras/getScreenRay", "sfffs", CameraRequestHandler.call_method_reply_name)
+        bge.logic.server.add_method("/bge/scene/cameras/getScreenRay", "sfff", CameraRequestHandler.call_method_reply_name)
 
 
     except AttributeError as err:
-        print("SERVER: could not register /scene/camera reason: ", err)
+        print("SERVER: could not register /bge/scene/cameras reason: ", err)

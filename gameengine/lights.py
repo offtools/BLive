@@ -41,29 +41,29 @@ class LightRequestHandler(BaseRequestHandler):
 
 def register():
     try:
-        bge.logic.server.add_method("/scene/lights/layer", "si", LightRequestHandler.set_int_value)
-        bge.logic.server.add_method("/scene/lights/layer", "s", LightRequestHandler.reply_int)
+        bge.logic.server.add_method("/bge/scene/lights/layer", "si", LightRequestHandler.set_int_value)
+        bge.logic.server.add_method("/bge/scene/lights/layer", "s", LightRequestHandler.reply_int)
 
-        bge.logic.server.add_method("/scene/lights/energy", "sf", LightRequestHandler.set_float_value)
-        bge.logic.server.add_method("/scene/lights/energy", "s", LightRequestHandler.reply_float)
+        bge.logic.server.add_method("/bge/scene/lights/energy", "sf", LightRequestHandler.set_float_value)
+        bge.logic.server.add_method("/bge/scene/lights/energy", "s", LightRequestHandler.reply_float)
 
-        bge.logic.server.add_method("/scene/lights/distance", "sf", LightRequestHandler.set_float_value)
-        bge.logic.server.add_method("/scene/lights/distance", "s", LightRequestHandler.reply_float)
+        bge.logic.server.add_method("/bge/scene/lights/distance", "sf", LightRequestHandler.set_float_value)
+        bge.logic.server.add_method("/bge/scene/lights/distance", "s", LightRequestHandler.reply_float)
 
-        bge.logic.server.add_method("/scene/lights/color", "sfff", LightRequestHandler.set_vec3_value)
-        bge.logic.server.add_method("/scene/lights/color", "s", LightRequestHandler.reply_vec3)
+        bge.logic.server.add_method("/bge/scene/lights/color", "sfff", LightRequestHandler.set_vec3_value)
+        bge.logic.server.add_method("/bge/scene/lights/color", "s", LightRequestHandler.reply_vec3)
 
-        bge.logic.server.add_method("/scene/lights/lin_attenuation", "sf", LightRequestHandler.set_float_value)
-        bge.logic.server.add_method("/scene/lights/lin_attenuation", "s", LightRequestHandler.reply_float)
+        bge.logic.server.add_method("/bge/scene/lights/lin_attenuation", "sf", LightRequestHandler.set_float_value)
+        bge.logic.server.add_method("/bge/scene/lights/lin_attenuation", "s", LightRequestHandler.reply_float)
 
-        bge.logic.server.add_method("/scene/lights/quad_attenuation", "sf", LightRequestHandler.set_float_value)
-        bge.logic.server.add_method("/scene/lights/quad_attenuation", "s", LightRequestHandler.reply_float)
+        bge.logic.server.add_method("/bge/scene/lights/quad_attenuation", "sf", LightRequestHandler.set_float_value)
+        bge.logic.server.add_method("/bge/scene/lights/quad_attenuation", "s", LightRequestHandler.reply_float)
 
-        bge.logic.server.add_method("/scene/lights/spotsize", "sf", LightRequestHandler.set_float_value)
-        bge.logic.server.add_method("/scene/lights/spotsize", "s", LightRequestHandler.reply_float)
+        bge.logic.server.add_method("/bge/scene/lights/spotsize", "sf", LightRequestHandler.set_float_value)
+        bge.logic.server.add_method("/bge/scene/lights/spotsize", "s", LightRequestHandler.reply_float)
 
-        bge.logic.server.add_method("/scene/lights/spotblend", "sf", LightRequestHandler.set_float_value)
-        bge.logic.server.add_method("/scene/lights/spotblend", "s", LightRequestHandler.reply_float)
+        bge.logic.server.add_method("/bge/scene/lights/spotblend", "sf", LightRequestHandler.set_float_value)
+        bge.logic.server.add_method("/bge/scene/lights/spotblend", "s", LightRequestHandler.reply_float)
 
     except (AttributeError, ValueError) as err:
-        print("SERVER: could not register /scene/lights callbacks - ", err)
+        print("SERVER: could not register /bge/scene/lights callbacks - ", err)

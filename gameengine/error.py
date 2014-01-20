@@ -22,9 +22,9 @@
 import bge
 
 class BLiveError(Exception):
-	def __init__(self):
-		super().__init__(self)
+    def __init__(self):
+        super().__init__(self)
 
-	def notify(self, source, message):
-		if hasattr(bge.logic, "server"):
-			bge.logic.server.send(source.url, "/error", message)
+    def notify(self, source, message):
+        if hasattr(bge.logic, "server"):
+            bge.logic.server.send(source.url, "/bge/error", message)

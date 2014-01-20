@@ -72,20 +72,20 @@ class MeshRequestHandler(BaseRequestHandler):
 
 def register():
     try:
-        #bge.logic.server.add_method("/scene/objects/meshes/materials", "si", MeshRequestHandler.reply_)
-        bge.logic.server.add_method("/scene/objects/meshes/numPolygons", "si", MeshRequestHandler.reply_int)
-        bge.logic.server.add_method("/scene/objects/meshes/numMaterials", "si", MeshRequestHandler.reply_int)
-        #bge.logic.server.add_method("/scene/objects/meshes/getNumMaterials", "si", MeshRequestHandler.reply_)
-        #bge.logic.server.add_method("/scene/objects/meshes/getMaterialName", "sii", MeshRequestHandler.reply_)
-        #bge.logic.server.add_method("/scene/objects/meshes/getTextureName", "sii", MeshRequestHandler.reply_)
-        #bge.logic.server.add_method("/scene/objects/meshes/getVertexArrayLength", "sii", MeshRequestHandler.reply_)
-        #bge.logic.server.add_method("/scene/objects/meshes/getVertexArrayLength", "sii", MeshRequestHandler.reply_)
-        #bge.logic.server.add_method("/scene/objects/meshes/getVertex", "siii", MeshRequestHandler.reply_)
-        #bge.logic.server.add_method("/scene/objects/meshes/getNumPolygons", "si", MeshRequestHandler.reply_)
-        #bge.logic.server.add_method("/scene/objects/meshes/getPolygon", "sii", MeshRequestHandler.reply_)
+        #bge.logic.server.add_method("/bge/scene/objects/meshes/materials", "si", MeshRequestHandler.reply_)
+        bge.logic.server.add_method("/bge/scene/objects/meshes/numPolygons", "si", MeshRequestHandler.reply_int)
+        bge.logic.server.add_method("/bge/scene/objects/meshes/numMaterials", "si", MeshRequestHandler.reply_int)
+        #bge.logic.server.add_method("/bge/scene/objects/meshes/getNumMaterials", "si", MeshRequestHandler.reply_)
+        #bge.logic.server.add_method("/bge/scene/objects/meshes/getMaterialName", "sii", MeshRequestHandler.reply_)
+        #bge.logic.server.add_method("/bge/scene/objects/meshes/getTextureName", "sii", MeshRequestHandler.reply_)
+        #bge.logic.server.add_method("/bge/scene/objects/meshes/getVertexArrayLength", "sii", MeshRequestHandler.reply_)
+        #bge.logic.server.add_method("/bge/scene/objects/meshes/getVertexArrayLength", "sii", MeshRequestHandler.reply_)
+        #bge.logic.server.add_method("/bge/scene/objects/meshes/getVertex", "siii", MeshRequestHandler.reply_)
+        #bge.logic.server.add_method("/bge/scene/objects/meshes/getNumPolygons", "si", MeshRequestHandler.reply_)
+        #bge.logic.server.add_method("/bge/scene/objects/meshes/getPolygon", "sii", MeshRequestHandler.reply_)
 
         #extra update method (using bmesh in blender)
-        bge.logic.server.add_method("/scene/objects/meshes/update", "siiifff", MeshRequestHandler.call_method_update)
+        bge.logic.server.add_method("/bge/scene/objects/meshes/update", "siiifff", MeshRequestHandler.call_method_update)
 
     except (AttributeError, ValueError) as err:
-        print("SERVER: could not register /scene/objects/meshes callbacks - ", err)
+        print("SERVER: could not register /bge/scene/objects/meshes callbacks - ", err)

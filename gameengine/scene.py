@@ -42,36 +42,36 @@ class SceneRequestHandler(BaseRequestHandler):
 
 def register():
     try:
-        bge.logic.server.add_method("/scene/name", "", SceneRequestHandler.reply_name)
-        bge.logic.server.add_method("/scene/objects", "", SceneRequestHandler.reply_namelist)
-        bge.logic.server.add_method("/scene/objectsInactive", "", SceneRequestHandler.reply_namelist)
-        bge.logic.server.add_method("/scene/lights", "", SceneRequestHandler.reply_namelist)
-        bge.logic.server.add_method("/scene/cameras", "", SceneRequestHandler.reply_namelist)
-        bge.logic.server.add_method("/scene/active_camera", "", SceneRequestHandler.reply_string)
+        bge.logic.server.add_method("/bge/scene/name", "", SceneRequestHandler.reply_name)
+        bge.logic.server.add_method("/bge/scene/objects", "", SceneRequestHandler.reply_namelist)
+        bge.logic.server.add_method("/bge/scene/objectsInactive", "", SceneRequestHandler.reply_namelist)
+        bge.logic.server.add_method("/bge/scene/lights", "", SceneRequestHandler.reply_namelist)
+        bge.logic.server.add_method("/bge/scene/cameras", "", SceneRequestHandler.reply_namelist)
+        bge.logic.server.add_method("/bge/scene/active_camera", "", SceneRequestHandler.reply_string)
 
-        bge.logic.server.add_method("/scene/suspended", "", SceneRequestHandler.reply_bool)
-        bge.logic.server.add_method("/scene/activity_culling", "", SceneRequestHandler.reply_bool)
+        bge.logic.server.add_method("/bge/scene/suspended", "", SceneRequestHandler.reply_bool)
+        bge.logic.server.add_method("/bge/scene/activity_culling", "", SceneRequestHandler.reply_bool)
 
-        bge.logic.server.add_method("/scene/activity_culling_radius", "", SceneRequestHandler.reply_float)
-        bge.logic.server.add_method("/scene/activity_culling_radius", "f", SceneRequestHandler.set_float_value)
+        bge.logic.server.add_method("/bge/scene/activity_culling_radius", "", SceneRequestHandler.reply_float)
+        bge.logic.server.add_method("/bge/scene/activity_culling_radius", "f", SceneRequestHandler.set_float_value)
 
-        bge.logic.server.add_method("/scene/dbvt_culling", "", SceneRequestHandler.reply_bool)
+        bge.logic.server.add_method("/bge/scene/dbvt_culling", "", SceneRequestHandler.reply_bool)
 
-        bge.logic.server.add_method("/scene/pre_draw", "", SceneRequestHandler.reply_namelist)
-        bge.logic.server.add_method("/scene/post_draw", "", SceneRequestHandler.reply_namelist)
+        bge.logic.server.add_method("/bge/scene/pre_draw", "", SceneRequestHandler.reply_namelist)
+        bge.logic.server.add_method("/bge/scene/post_draw", "", SceneRequestHandler.reply_namelist)
 
-        bge.logic.server.add_method("/scene/gravity", "", SceneRequestHandler.reply_vec3)
-        bge.logic.server.add_method("/scene/gravity", "fff", SceneRequestHandler.set_vec3_value)
+        bge.logic.server.add_method("/bge/scene/gravity", "", SceneRequestHandler.reply_vec3)
+        bge.logic.server.add_method("/bge/scene/gravity", "fff", SceneRequestHandler.set_vec3_value)
 
-        bge.logic.server.add_method("/scene/addObject", "ss", SceneRequestHandler.call_method)
-        bge.logic.server.add_method("/scene/addObject", "ssi", SceneRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/addObject", "ss", SceneRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/addObject", "ssi", SceneRequestHandler.call_method)
 
-        bge.logic.server.add_method("/scene/end", "", SceneRequestHandler.call_method)
-        bge.logic.server.add_method("/scene/restart", "", SceneRequestHandler.call_method)
-        bge.logic.server.add_method("/scene/replace", "s", SceneRequestHandler.call_method)
-        bge.logic.server.add_method("/scene/suspend", "", SceneRequestHandler.call_method)
-        bge.logic.server.add_method("/scene/resume", "", SceneRequestHandler.call_method)
-        bge.logic.server.add_method("/scene/drawObstacleSimulation", "", SceneRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/end", "", SceneRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/restart", "", SceneRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/replace", "s", SceneRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/suspend", "", SceneRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/resume", "", SceneRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/drawObstacleSimulation", "", SceneRequestHandler.call_method)
 
     except (AttributeError, ValueError) as err:
         print("SERVER: could not register /scene callbacks - ", err)

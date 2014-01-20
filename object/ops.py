@@ -25,6 +25,41 @@ import bmesh
 from liblo import Bundle, Message
 from ..common.libloclient import Client
 
+class BLive_OT_osc_send_message(bpy.types.Operator):
+    """
+        Operator - send mesh data
+    """
+    bl_idname = "blive.osc_send_message"
+    bl_label = "BLive - send message"
+
+    @classmethod
+    def poll(self, context):
+        return True
+
+    def execute(self, context):
+        debug = context.window_manager.blive_debug
+
+        # test if first arg contains '/' (path)
+        if debug.message.split(' ')[0].count('/'):
+            msg = Message(debug.message.split(' ')[0])
+            for i in debug.message.split(' ')[1:]:
+                # digits are ints
+                if i.isdigit():
+                    msg.add(int(i))
+                # try convert args with '.' to float otherwise stays string
+                elif i.count('.') == 1:
+                    try:
+                        msg.add(float(i))
+                    except ValueError:
+                        msg.add(i)
+                # all other args parsed as strings
+                else:
+                    msg.add(i)
+            Client().send(msg)
+            return{'FINISHED'}
+        else:
+            return{'CANCELLED'}
+
 #from ..client import BLiveClient
 
 # TODO: all calls defined as def outside the Operator to avoid the RuntimeError recursion
@@ -105,7 +140,7 @@ class BLive_OT_osc_object_active_camera(bpy.types.Operator):
         n = camera.clip_start
         f = camera.clip_end
 
-        msg_matrix = Message('/scene/cameras/projection_matrix')
+        msg_matrix = Message('/bge/scene/cameras/projection_matrix')
 
         msg_matrix.add(camera.name,
                        e, 0.0, 2.0*camera.shift_x, 0.0,
@@ -117,7 +152,7 @@ class BLive_OT_osc_object_active_camera(bpy.types.Operator):
         perspective = 1
         if camera.type == 'ORTHO':
             perspective = 0
-        msg_persp = Message('/scene/cameras/perspective')
+        msg_persp = Message('/bge/scene/cameras/perspective')
         msg_persp.add(camera.name, perspective)
 
         bundle.add(msg_persp)
@@ -180,7 +215,7 @@ class BLive_OT_osc_object_meshdata(bpy.types.Operator):
         bundle = Bundle()
         for face in mesh.faces:
             for vindex, vertex in enumerate(face.verts):
-                bundle.add(Message("/scene/objects/meshes/update", ob.name, mesh_index, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2]))
+                bundle.add(Message("/bge/scene/objects/meshes/update", ob.name, mesh_index, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2]))
         Client().send(bundle)
 
     def execute(self, context):
@@ -190,6 +225,7 @@ class BLive_OT_osc_object_meshdata(bpy.types.Operator):
 
 def register():
     print("object.ops.register")
+    bpy.utils.register_class(BLive_OT_osc_send_message)
     #bpy.utils.register_class(BLive_OT_osc_object_location)
     #bpy.utils.register_class(BLive_OT_osc_object_rotation)
     #bpy.utils.register_class(BLive_OT_osc_object_scaling)
@@ -199,6 +235,7 @@ def register():
 
 def unregister():
     print("object.ops.unregister")
+    bpy.utils.unregister_class(BLive_OT_osc_send_message)
     #bpy.utils.unregister_class(BLive_OT_osc_object_location)
     #bpy.utils.unregister_class(BLive_OT_osc_object_rotation)
     #bpy.utils.unregister_class(BLive_OT_osc_object_scaling)

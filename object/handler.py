@@ -37,11 +37,11 @@ def object_update_handler(scene):
     for ob in scene.objects:
         if ob.is_updated:
             bundle = Bundle()
-            bundle.add(Message("/scene/objects/position", ob.name, ob.location[0], ob.location[1], ob.location[2]))
-            bundle.add(Message("/scene/objects/orientation", ob.name, ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2]))
+            bundle.add(Message("/bge/scene/objects/position", ob.name, ob.location[0], ob.location[1], ob.location[2]))
+            bundle.add(Message("/bge/scene/objects/orientation", ob.name, ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2]))
 
             if ob.type == 'MESH':
-                bundle.add(Message("/scene/objects/scaling", ob.name, ob.scale[0], ob.scale[1], ob.scale[2]))
+                bundle.add(Message("/bge/scene/objects/scaling", ob.name, ob.scale[0], ob.scale[1], ob.scale[2]))
 
             Client().send(bundle)
 
@@ -57,10 +57,11 @@ def object_update_handler(scene):
                 ops.BLive_OT_osc_object_meshdata.update_mesh(ob)
 
 
+        # TODO: replace /material code
         # workaround for object color
         for i in ob.material_slots:
             if ob.type == 'MESH' and bpy.data.materials[i.name].use_object_color:
-                Client().send(Message("/scene/objects/color", ob.name, ob.color[0], ob.color[1], ob.color[2], ob.color[3]))
+                Client().send(Message("/bge/scene/objects/color", ob.name, ob.color[0], ob.color[1], ob.color[2], ob.color[3]))
 
 
 def register():
