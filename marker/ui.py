@@ -160,6 +160,10 @@ class BLive_PT_timeline_trigger(bpy.types.Panel):
         row = ui.row()
         row.prop(context.scene.objects[trigger.m_object].game.properties[trigger.m_property], "value", text="set")
 
+    def TriggerScript(self, context, trigger, ui):
+        row = ui.row()
+        row.prop_search(trigger, "m_script", bpy.data, "texts", text="Script")
+
 class BLive_PT_timeline_tools(bpy.types.Panel):
     bl_label = "BLive Timeline Tools"
     bl_space_type = "NLA_EDITOR"

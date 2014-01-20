@@ -29,7 +29,9 @@ TRIGGER_TYPE_ENUM = [("TriggerDummy","Dummy","Dummy Trigger"), \
                     ("TriggerCameraOpen","Connect Camera","Connect a Camera"), \
                     ("TriggerVideoState","Set Video State","Set Play, Pause, Stop"), \
                     ("TriggerChangeScene","Change active Scene","Change active Scene"), \
-                    ("TriggerGameProperty","Set a Game Property","Set a Game Property")]
+                    ("TriggerGameProperty","Set a Game Property","Set a Game Property"), \
+                    ("TriggerScript","Run a Script","Run a script local") \
+                    ]
 
 def TRIGGER_TYPE_NAME(self, _type):
     types = [ i[0] for i in TRIGGER_TYPE_ENUM ]
@@ -123,7 +125,7 @@ class TriggerVideoState(bpy.types.PropertyGroup):
 
 class TriggerChangeScene(bpy.types.PropertyGroup):
     m_hidden = bpy.props.BoolProperty(default=True)
-    m_oscpath = bpy.props.StringProperty(default="/scene/active")
+    m_oscpath = bpy.props.StringProperty(default="/bge/scene/replace")
     m_scene = bpy.props.StringProperty()
 
     def send(self):
@@ -142,6 +144,15 @@ class TriggerGameProperty(bpy.types.PropertyGroup):
         value = bpy.context.scene.objects[self.m_object].game.properties[self.m_property].value
         Client().send(self.m_oscpath, self.m_object, self.m_property, value)
 
+class TriggerScript(bpy.types.PropertyGroup):
+    #m_hidden = bpy.props.BoolProperty(default=True)
+    #m_oscpath = bpy.props.StringProperty(default="")
+    m_script = bpy.props.StringProperty()
+
+    def send(self):
+        if self.m_script in bpy.data.texts:
+            exec(bpy.data.texts[self.m_script].as_string())
+
 class TriggerWrapper(bpy.types.PropertyGroup):
     '''
         Property Group for OscTrigger
@@ -152,6 +163,7 @@ class TriggerWrapper(bpy.types.PropertyGroup):
     TriggerVideoState = bpy.props.CollectionProperty(type=TriggerVideoState)
     TriggerChangeScene = bpy.props.CollectionProperty(type=TriggerChangeScene)
     TriggerGameProperty = bpy.props.CollectionProperty(type=TriggerGameProperty)
+    TriggerScript = bpy.props.CollectionProperty(type=TriggerScript)
 
 class TriggerSlot(bpy.types.PropertyGroup):
     m_type = bpy.props.StringProperty()
@@ -175,6 +187,7 @@ class TimelineTrigger(bpy.types.PropertyGroup):
 def register():
     print("marker.props.register")
 
+    bpy.utils.register_class(TriggerScript)
     bpy.utils.register_class(TriggerDummy)
     bpy.utils.register_class(TriggerVideoOpen)
     bpy.utils.register_class(TriggerCameraOpen)
@@ -194,6 +207,7 @@ def unregister():
 
     del bpy.types.Scene.timeline_trigger
 
+    bpy.utils.unregister_class(TriggerScript)
     bpy.utils.unregister_class(TriggerDummy)
     bpy.utils.unregister_class(TriggerVideoOpen)
     bpy.utils.unregister_class(TriggerCameraOpen)
