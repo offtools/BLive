@@ -78,7 +78,7 @@ class BLive_PT_debug(bpy.types.Panel):
         row = layout.row()
         row.prop(context.window_manager.blive_debug, "message", text="msg")
         row = layout.row()
-        row.operator("blive.osc_send_message", text="send")
+        row.operator("blive.send_osc_message", text="send")
 
 def register():
     print("settings.ui.register")
