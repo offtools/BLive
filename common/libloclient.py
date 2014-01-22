@@ -46,13 +46,22 @@ class LibloClient(liblo.ServerThread):
                 liblo.send(self.client.target, "/bge/connect")
                 time.sleep(2)
 
-    @make_method('/bge/srvinfo', 's')
+    @make_method('/bge/srvinfo', 'sii')
     def cb_srvinfo(self, path, args, types, source, user_data):
-        print ("CLIENT: connected - got server reply: ", args)
+        print ("CLIENT: connected - got server reply: ", args[0])
         self.__await_connect = False
+
+        # save bge Window size
+        settings = bpy.context.window_manager.blive_settings
+        settings.bge_window_width = args[1]
+        settings.bge_window_height = args[2]
+
         self._start_apphandler()
+
         #TODO: send init data, like projection matrix after connect for every viewport
         bpy.ops.blive.osc_active_camera_projectionmatrix()
+        # Update Viewports
+        bpy.ops.blive.osc_update_viewports()
 
     @make_method('/bge/error', 's')
     def cb_error(self, path, args, types, source, user_data):

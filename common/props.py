@@ -27,7 +27,9 @@ class BLiveSettings(bpy.types.PropertyGroup):
     """
     port = bpy.props.IntProperty(default=9900)
     server = bpy.props.StringProperty(default="127.0.0.1")
-    diffuse_to_obcolor = bpy.props.BoolProperty(default=False)
+    bge_window_width = bpy.props.IntProperty(default=640)
+    bge_window_height = bpy.props.IntProperty(default=480)
+    numviewports = bpy.props.IntProperty(default=1)
 
 class BLiveDebug(bpy.types.PropertyGroup):
     """Blive Send OSC Debug Messages

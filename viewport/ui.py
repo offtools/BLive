@@ -21,8 +21,38 @@
 
 import bpy
 
+class BLive_PT_viewport(bpy.types.Panel):
+    bl_label = "BLive Viewport"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "data"
+
+    @classmethod
+    def poll(self, context):
+        return context.active_object.type  == 'CAMERA'
+
+    def draw(self, context):
+        layout = self.layout
+
+        cam = context.active_object.data
+
+        row = layout.row()
+        row.prop(cam.viewport, "active", text="use Camera as viewport")
+        row = layout.row()
+        row.prop(cam.viewport, "left", text="left")
+        row = layout.row()
+        row.prop(cam.viewport, "right", text="right")
+        row = layout.row()
+        row.prop(cam.viewport, "top", text="top")
+        row = layout.row()
+        row.prop(cam.viewport, "bottom", text="bottom")
+        row = layout.row()
+        row.operator("blive.osc_update_viewports", text="Stop Gameengine")
+
 def register():
     print("viewport.ui.register")
+    bpy.utils.register_class(BLive_PT_viewport)
 
 def unregister():
     print("viewport.ui.unregister")
+    bpy.utils.unregister_class(BLive_PT_viewport)

@@ -24,19 +24,18 @@
 import bpy
 
 class BLiveViewport(bpy.types.PropertyGroup):
-    m_active = bpy.props.BoolProperty(default=False)
-    m_left = bpy.props.IntProperty(default=0)
-    m_right = bpy.props.IntProperty(default=0)
-    m_top = bpy.props.IntProperty(default=0)
-    m_bottom = bpy.props.IntProperty(default=0)
+    active = bpy.props.BoolProperty(default=False)
+    left = bpy.props.IntProperty(default=0)
+    right = bpy.props.IntProperty(default=0)
+    top = bpy.props.IntProperty(default=0)
+    bottom = bpy.props.IntProperty(default=0)
 
 def register():
     print("viewport.props.register")
-
-    #bpy.types.Camera.viewport = bpy.props.PointerProperty(type=BLiveViewport, options={"HIDDEN"})
+    bpy.utils.register_class(BLiveViewport)
+    bpy.types.Camera.viewport = bpy.props.PointerProperty(type=BLiveViewport, options={"HIDDEN"})
 
 def unregister():
     print("viewport.props.unregister")
-
     del bpy.types.Camera.viewport
-    #bpy.utils.unregister_class(BLiveViewport)
+    bpy.utils.unregister_class(BLiveViewport)

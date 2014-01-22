@@ -56,7 +56,7 @@ class LibloServer(Server):
     def cb_connect(self, path, args, types, source, user_data):
         print("SERVER: received client connect: ", source.url)
         self.clients.add(source.url)
-        self.send(source.url, "/bge/srvinfo", self.url)
+        self.send(source.url, "/bge/srvinfo", self.url, bge.render.getWindowWidth(), bge.render.getWindowHeight())
 
     def cb_fallback(self, path, args, types, source, user_data):
         print ("SERVER_ received message: ", path, args, types, source.url, user_data)
