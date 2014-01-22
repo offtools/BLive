@@ -27,6 +27,7 @@ import os
 import sys
 import time
 import subprocess
+from liblo import Bundle, Message
 from .libloclient import Client
 from ..utils.utils import import_path
 
@@ -113,10 +114,14 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
         curscene = bpy.context.screen.scene #save current active scene
 
         for sc in bpy.data.scenes:
-            bpy.context.screen.scene=sc #change active scene
+            # fix render resolution
+            context.scene.render.resolution_x = context.scene.game_settings.resolution_x
+            context.scene.render.resolution_y = context.scene.game_settings.resolution_y
+            # change active scene and add logic
+            context.screen.scene=sc
             self.add_logic(sc)
 
-        bpy.context.screen.scene = curscene #restore scene
+        context.screen.scene = curscene #restore scene
 
         # save snapshot into tmp
         filepath = os.path.join(context.user_preferences.filepaths.temporary_directory, "blive-{0}".format(int(time.time())))
@@ -129,7 +134,7 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
         port = bc.port
 
         app = "blenderplayer"
-        blendfile = bpy.data.filepath
+        blendfile = filepath
         sep = '-'
         portarg = "-p {0}".format(port)
         cmd = [app,  blendfile, sep, portarg]

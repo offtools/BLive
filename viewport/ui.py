@@ -47,7 +47,7 @@ class BLive_PT_viewport(bpy.types.Panel):
         row = layout.row()
         row.prop(cam.viewport, "bottom", text="bottom")
         row = layout.row()
-        row.operator("blive.osc_update_viewports", text="Stop Gameengine")
+        row.operator("blive.osc_update_viewports", text="Update Viewport")
 
 def register():
     print("viewport.ui.register")

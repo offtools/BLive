@@ -42,13 +42,19 @@ class BLive_OT_osc_update_viewports(bpy.types.Operator):
         n = len([i for i in context.scene.objects if i.type == 'CAMERA' and i.data.viewport.active])
         if n == 0:
             active_camera.data.viewport.active = True
+            # set one basic viewport based on window size
+            active_camera.data.viewport.left = 0
+            active_camera.data.viewport.right = settings.bge_window_width
+            active_camera.data.viewport.top = 0
+            active_camera.data.viewport.bottom = settings.bge_window_height
             settings.numviewports = 1
         else:
             settings.numviewports = n
 
-        vpcam = [i for i in context.scene.objects if i.type == 'CAMERA' and i.data.viewport.active]
+        vpcam = [i for i in context.scene.objects if i.type == 'CAMERA']
         bundle = Bundle()
         for cam in vpcam:
+            print (cam)
             vp = cam.data.viewport
             bundle.add(Message("/bge/scene/cameras/setViewport", cam.name, vp.left, vp.bottom, vp.right, vp.top))
             bundle.add(Message("/bge/scene/cameras/useViewport", cam.name, int(vp.active)))
