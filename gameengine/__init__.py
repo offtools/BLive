@@ -33,6 +33,7 @@ import sys
 import getopt
 import bge
 from gameengine import libloserver
+from gameengine import render
 from gameengine import scene
 from gameengine import objects
 from gameengine import cameras
@@ -64,6 +65,7 @@ def register():
         bge.logic.server = libloserver.LibloServer(_PORT)
         print(bge.logic.server.url)
 
+        render.register()
         scene.register()
         objects.register()
         cameras.register()

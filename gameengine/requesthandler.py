@@ -203,8 +203,10 @@ class BaseRequestHandler():
     @classmethod
     def _method_reply(cls, path, source, target, data):
         msg = Message(path)
-        msg.add(*target)
-        msg.add(*data)
+        if target:
+            msg.add(*target)
+        if data:
+            msg.add(*data)
         bge.logic.server.send(source.url, msg)
 
 # Reply Handler
