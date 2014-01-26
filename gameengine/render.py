@@ -19,8 +19,6 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-#TODO: drawLine
-
 from gameengine.requesthandler import *
 from gameengine.error import BLiveError
 
@@ -78,6 +76,7 @@ def register():
         bge.logic.server.add_method("/bge/render/getAnisotropicFiltering", "", SceneRequestHandler.call_method_reply)
         bge.logic.server.add_method("/bge/render/setMipmapping", "i", SceneRequestHandler.call_method)
         bge.logic.server.add_method("/bge/render/getMipmapping", "", SceneRequestHandler.call_method_reply)
+        # drawLine needs to be called every frame (KXScene.postdraw)
         #bge.logic.server.add_method("/bge/render/drawLine", "fffffffff", SceneRequestHandler.call_method_3vec3)
         bge.logic.server.add_method("/bge/render/enableMotionBlur", "f", SceneRequestHandler.call_method)
         bge.logic.server.add_method("/bge/render/disableMotionBlur", "", SceneRequestHandler.call_method)
