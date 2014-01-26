@@ -54,7 +54,6 @@ class BLive_OT_osc_update_viewports(bpy.types.Operator):
         vpcam = [i for i in context.scene.objects if i.type == 'CAMERA']
         bundle = Bundle()
         for cam in vpcam:
-            print (cam)
             vp = cam.data.viewport
             bundle.add(Message("/bge/scene/cameras/setViewport", cam.name, vp.left, vp.bottom, vp.right, vp.top))
             bundle.add(Message("/bge/scene/cameras/useViewport", cam.name, int(vp.active)))

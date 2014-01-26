@@ -41,6 +41,8 @@ class LightRequestHandler(BaseRequestHandler):
 
 def register():
     try:
+        bge.logic.server.add_method("/bge/scene/lights/type", "s", LightRequestHandler.reply_int)
+
         bge.logic.server.add_method("/bge/scene/lights/layer", "si", LightRequestHandler.set_int_value)
         bge.logic.server.add_method("/bge/scene/lights/layer", "s", LightRequestHandler.reply_int)
 
