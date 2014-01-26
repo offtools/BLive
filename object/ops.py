@@ -98,7 +98,6 @@ class BLive_OT_osc_object_lamp(bpy.types.Operator):
             bundle.add(Message("/bge/scene/lights/distance", lamp.name, data.distance))
             bundle.add(Message("/bge/scene/lights/lin_attenuation", lamp.name, data.linear_attenuation))
             bundle.add(Message("/bge/scene/lights/quad_attenuation", lamp.name, data.quadratic_attenuation))
-            print("spotsize:", data.spot_size, math.degrees(data.spot_size))
             bundle.add(Message("/bge/scene/lights/spotsize", lamp.name, math.degrees(data.spot_size)))
             bundle.add(Message("/bge/scene/lights/spotblend", lamp.name, data.spot_blend))
         Client().send(bundle)
