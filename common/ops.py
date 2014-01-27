@@ -38,25 +38,35 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
     bl_idname = "blive.gameengine_start"
     bl_label = "BLive start gameengine"
 
+    filepath = bpy.props.StringProperty(subtype="FILE_PATH")
+    filename = bpy.props.StringProperty()
+    files = bpy.props.CollectionProperty(name="File Path",type=bpy.types.OperatorFileListElement)
+    directory = bpy.props.StringProperty(subtype='DIR_PATH')
+
     def add_start_script(self):
         '''create startup script
         '''
 
-        bpy.data.texts.new(name=INITSCRIPT)
-        textblock = bpy.data.texts[INITSCRIPT]
+        if not INITSCRIPT in bpy.data.texts:
+            bpy.data.texts.new(name=INITSCRIPT)
+        else:
+            bpy.data.texts['Text'].clear()
 
+        textblock = bpy.data.texts[INITSCRIPT]
         textblock.write("import sys\n")
         textblock.write("sys.path.append(r'{0}')\n".format(import_path()))
         textblock.write("import gameengine\n")
-        textblock.write("gameengine.register()\n")
+        textblock.write("port=%s\n"%(bpy.context.window_manager.blive_settings.port))
+        textblock.write("gameengine.register(port)\n")
 
     def add_update_script(self):
         '''create update script
         '''
 
-        bpy.data.texts.new(name=UPDATESCRIPT)
-        textblock = bpy.data.texts[UPDATESCRIPT]
+        if not UPDATESCRIPT in bpy.data.texts:
+            bpy.data.texts.new(name=UPDATESCRIPT)
 
+        textblock = bpy.data.texts[UPDATESCRIPT]
         textblock.write('import bge\n')
         textblock.write('if hasattr(bge.logic, "server"):\n')
         textblock.write('\twhile bge.logic.server.recv(0): pass\n')
@@ -99,16 +109,30 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
         sc.camera.game.sensors['s.init'].link(sc.camera.game.controllers['c.init'])
         sc.camera.game.sensors['s.update'].link(sc.camera.game.controllers['c.update'])
 
+    def fork(self, context):
+        # fork blenderplayer
+        sc = context.scene
+        bc = context.window_manager.blive_settings
+        server = bc.server
+        port = bc.port
+
+        app = "blenderplayer"
+        blendfile = context.blend_data.filepath
+        sep = '-'
+        portarg = "-p {0}".format(port)
+        cmd = [app,  blendfile, sep, portarg]
+        blendprocess = subprocess.Popen(cmd)
+
+        Client().connect(server, port)
+
     @classmethod
     def poll(self, context):
         return True
 
     def execute(self, context):
-        # check for logic bricks and server object in all scenes
-        if not INITSCRIPT in bpy.data.texts:
-            self.add_start_script()
-        if not UPDATESCRIPT in bpy.data.texts:
-            self.add_update_script()
+        # add scripts
+        self.add_start_script()
+        self.add_update_script()
 
         # add logic to every scene
         curscene = bpy.context.screen.scene #save current active scene
@@ -124,25 +148,20 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
         context.screen.scene = curscene #restore scene
 
         # save snapshot into tmp
-        filepath = os.path.join(context.user_preferences.filepaths.temporary_directory, "blive-{0}".format(int(time.time())))
-        bpy.ops.wm.save_as_mainfile(filepath=filepath, copy=True)
+        #filepath = os.path.join(context.user_preferences.filepaths.temporary_directory, "blive-{0}".format(int(time.time())))
+        bpy.ops.wm.save_as_mainfile(filepath=self.filepath)
 
-        # fork blenderplayer
-        sc = context.scene
-        bc = context.window_manager.blive_settings
-        server = bc.server
-        port = bc.port
-
-        app = "blenderplayer"
-        blendfile = filepath
-        sep = '-'
-        portarg = "-p {0}".format(port)
-        cmd = [app,  blendfile, sep, portarg]
-        blendprocess = subprocess.Popen(cmd)
-
-        Client().connect(server, port)
+        self.fork(context)
 
         return{'FINISHED'}
+
+    def invoke(self, context, event):
+        if not context.blend_data.filepath:
+            context.window_manager.fileselect_add(self)
+            return {'RUNNING_MODAL'}
+        else:
+            self.fork(context)
+            return {'FINISHED'}
 
 class BLive_OT_stop_gameengine(bpy.types.Operator):
     bl_idname = "blive.gameengine_stop"

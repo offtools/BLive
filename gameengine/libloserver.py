@@ -48,6 +48,9 @@ class LibloServer(Server):
         super().__init__(port, proto)
         self.clients = set()
 
+    def __del__(self):
+        print("SERVER: removed")
+
     def register(self):
         self.add_method("/bge/connect", '', self.cb_connect)
         self.add_method("/bge/shutdown", '', self.cb_shutdown)

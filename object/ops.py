@@ -45,7 +45,6 @@ class BLive_OT_osc_object_active_camera(bpy.types.Operator):
         bundle = Bundle()
 
         e = 1.0/math.tan(data.angle/2.0)
-        #TODO: maybe use render settings for aspect (game settings and render settings can differ)
         a = bpy.context.scene.game_settings.resolution_y/bpy.context.scene.game_settings.resolution_x
         n = data.clip_start
         f = data.clip_end
