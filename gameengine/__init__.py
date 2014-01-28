@@ -39,7 +39,6 @@ from gameengine import meshes
 def register(port):
     '''registers and starts a osc server inside bge
     '''
-
     if hasattr(sys, "argv"):
         try:
             index = sys.argv.index('-')
@@ -56,16 +55,16 @@ def register(port):
 
     if not hasattr(bge.logic, "server"):
         bge.logic.server = libloserver.LibloServer(port)
-        print(bge.logic.server.url)
+        print("SERVER: ", bge.logic.server.url)
 
-        logic.register()
-        render.register()
-        scene.register()
-        objects.register()
-        cameras.register()
-        lights.register()
-        meshes.register()
+    logic.register()
+    render.register()
+    scene.register()
+    objects.register()
+    cameras.register()
+    lights.register()
+    meshes.register()
 
-        # register server callbacks as last,
-        # otherwise the fallback callback will catch all requests
-        bge.logic.server.register()
+    # register server callbacks as last,
+    # otherwise the fallback callback will catch all requests
+    bge.logic.server.register()

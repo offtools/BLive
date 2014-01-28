@@ -68,8 +68,11 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
 
         textblock = bpy.data.texts[UPDATESCRIPT]
         textblock.write('import bge\n')
-        textblock.write('if hasattr(bge.logic, "server"):\n')
-        textblock.write('\twhile bge.logic.server.recv(0): pass\n')
+        textblock.write('try:\n')
+        textblock.write('\tif hasattr(bge.logic, "server"):\n')
+        textblock.write('\t\twhile bge.logic.server.recv(0): pass\n')
+        textblock.write('except AttributeError:\n')
+        textblock.write('\tpass\n')
 
     def add_logic(self, sc):
         '''create gamelogic bricks
@@ -173,7 +176,7 @@ class BLive_OT_stop_gameengine(bpy.types.Operator):
 
     def execute(self, context):
         # send disconnect to quit gameengine
-        Client().shutdown()
+        Client().send(Message("/bge/logic/endGame"))
         return{'FINISHED'}
 
 class BLive_OT_reload_gameengine(bpy.types.Operator):

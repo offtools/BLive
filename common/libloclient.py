@@ -67,7 +67,7 @@ class LibloClient(liblo.ServerThread):
     def cb_error(self, path, args, types, source, user_data):
         print ("CLIENT: received error message: ", args)
 
-    @make_method('/bge/shutdown', 's')
+    @make_method('/bge/logic/endGame', 's')
     def cb_shutdown(self, path, args, types, source, user_data):
         print ("CLIENT: received shutdown - closing client", args)
         #self.close() #TODO: dont close thread from inside thread, just notify blender

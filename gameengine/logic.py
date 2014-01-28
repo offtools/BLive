@@ -19,6 +19,7 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
+import bge
 from gameengine.requesthandler import *
 from gameengine.error import BLiveError
 
@@ -40,15 +41,28 @@ class SceneRequestHandler(BaseRequestHandler):
             return None
 
     @classmethod
+    def call_endGame(cls, path, args, types, source, user_data):
+        print("SERVER: Shutting down")
+        bge.logic.server.shutdown(source)
+        bge.logic.endGame()
+        #cls.call_method(path, args, types, source, user_data)
+
+    @classmethod
+    def call_restartGame(cls, path, args, types, source, user_data):
+        bge.logic.server.free()
+        del bge.logic.server
+        cls.call_method(path, args, types, source, user_data)
+
+    @classmethod
     def call_LibLoad(cls, path, args, types, source, user_data):
         cls.call_method(path, [args[0], args[1], None, args[2], args[3], args[4], args[5]], types, source, user_data)
 
 def register():
     try:
-        bge.logic.server.add_method("/bge/logic/startGame", "s", SceneRequestHandler.call_method)
-        bge.logic.server.add_method("/bge/logic/endGame", "", SceneRequestHandler.call_method)
-        bge.logic.server.add_method("/bge/logic/restartGame", "", SceneRequestHandler.call_method)
-        bge.logic.server.add_method("/bge/logic/LibLoad", "sssiii", SceneRequestHandler.call_method)
+        #bge.logic.server.add_method("/bge/logic/startGame", "s", SceneRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/logic/endGame", "", SceneRequestHandler.call_endGame)
+        bge.logic.server.add_method("/bge/logic/restartGame", "", SceneRequestHandler.call_restartGame)
+        #bge.logic.server.add_method("/bge/logic/LibLoad", "sssiii", SceneRequestHandler.call_LibLoad)
 
     except (AttributeError, ValueError) as err:
         print("SERVER: could not register /bge/logic callbacks - ", err)

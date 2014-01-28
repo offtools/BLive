@@ -53,8 +53,13 @@ class LibloServer(Server):
 
     def register(self):
         self.add_method("/bge/connect", '', self.cb_connect)
-        self.add_method("/bge/shutdown", '', self.cb_shutdown)
         self.add_method(None, None, self.cb_fallback)
+
+    def shutdown(self, source):
+        print("SERVER: Shutting down")
+        for i in self.clients:
+            self.send(i, "/bge/logic/endGame", source.url)
+        self.free()
 
     def cb_connect(self, path, args, types, source, user_data):
         print("SERVER: received client connect: ", source.url)
@@ -64,9 +69,3 @@ class LibloServer(Server):
     def cb_fallback(self, path, args, types, source, user_data):
         print ("SERVER_ received message: ", path, args, types, source.url, user_data)
         self.send(source.url, "/bge/error", "unknown message")
-
-    def cb_shutdown(self, path, args, types, source, user_data):
-        print("SERVER: Shutting down")
-        for i in self.clients:
-            self.send(i, "/bge/shutdown", source.url)
-        bge.logic.endGame()
