@@ -21,10 +21,10 @@
 
 import bge
 
-class BLiveError(Exception):
-    def __init__(self):
-        super().__init__(self)
+UNKNOWN_MESSAGE = 0
+BLENDDATA_OUTOF_SYNC = 1
 
-    def notify(self, source, message):
-        if hasattr(bge.logic, "server"):
-            bge.logic.server.send(source.url, "/bge/error", message)
+class BLiveError(Exception):
+    def __init__(self, reason):
+        super().__init__(self)
+        self.reason = reason

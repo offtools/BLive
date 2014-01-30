@@ -44,12 +44,13 @@ class LibloClient(liblo.ServerThread):
         def run(self):
             while self.client.is_connecting() == True:
                 liblo.send(self.client.target, "/bge/connect")
-                time.sleep(2)
+                time.sleep(1)
 
     @make_method('/bge/srvinfo', 'sii')
     def cb_srvinfo(self, path, args, types, source, user_data):
         print ("CLIENT: connected - got server reply: ", args[0])
         self.__await_connect = False
+        del self.__conreq
 
         # save bge Window size
         settings = bpy.context.window_manager.blive_settings
@@ -63,9 +64,15 @@ class LibloClient(liblo.ServerThread):
         # Update Viewports
         bpy.ops.blive.osc_update_viewports()
 
-    @make_method('/bge/error', 's')
+    @make_method('/bge/error', 'is')
     def cb_error(self, path, args, types, source, user_data):
-        print ("CLIENT: received error message: ", args)
+        if args[0] == 0:
+            print ("CLIENT: received unknown message: ", args)
+        elif args[0] == 1:
+            print ("CLIENT: out of sync: ", args)
+            # TOOD: caution may crash the gameengine
+            #bpy.ops.wm.save_as_mainfile(filepath=bpy.context.blend_data.filepath)
+            #bpy.ops.blive.gameengine_reload()
 
     @make_method('/bge/logic/endGame', 's')
     def cb_shutdown(self, path, args, types, source, user_data):
@@ -126,8 +133,8 @@ class LibloClient(liblo.ServerThread):
 
     def disconnect(self):
         try:
-            self.close()
             liblo.send(self.target, "/bge/disconnect")
+            self.close()
         except AttributeError:
             pass
 
@@ -139,15 +146,15 @@ class LibloClient(liblo.ServerThread):
 
     def start(self):
         self.stop()
-        print("CLIENT: starting libloclient thread")
         super().start()
         self.__thread_started = True
+        print("CLIENT: libloclient thread started")
 
     def stop(self):
         if self.__thread_started:
-            print("CLIENT: stopping libloclient thread")
             super().stop()
             self.__thread_started = False
+            print("CLIENT: libloclient thread stopped")
 
     def close(self):
         self._stop_apphandler()

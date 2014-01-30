@@ -20,6 +20,7 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 from gameengine.requesthandler import *
+from gameengine.error import *
 
 class MeshRequestHandler(BaseRequestHandler):
     @classmethod
@@ -33,7 +34,7 @@ class MeshRequestHandler(BaseRequestHandler):
             else:
                 raise ValueError
         else:
-            raise ValueError
+            raise BLiveError(BLENDDATA_OUTOF_SYNC)
 
     @classmethod
     def _parse_instance(cls, args):

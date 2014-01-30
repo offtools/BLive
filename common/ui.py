@@ -58,7 +58,9 @@ class BLive_PT_network_setup(bpy.types.Panel):
         row = layout.row()
         row.operator("blive.gameengine_start", text="Start Gameengine")
         row = layout.row()
-        row.operator("blive.gameengine_reload", text="Reload Gameengine")
+        row.operator("blive.gameengine_reload", text="Reload (sync) Gameengine")
+        row = layout.row()
+        row.operator("blive.gameengine_restart", text="Restart Gameengine")
         row = layout.row()
         row.operator("blive.gameengine_stop", text="Stop Gameengine")
 

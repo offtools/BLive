@@ -42,6 +42,7 @@
 import bge
 from liblo import Server, UDP
 from gameengine.requesthandler import *
+from gameengine.error import *
 
 class LibloServer(Server):
     def __init__(self, port, proto=UDP):
@@ -53,6 +54,7 @@ class LibloServer(Server):
 
     def register(self):
         self.add_method("/bge/connect", '', self.cb_connect)
+        self.add_method("/bge/disconnect", '', self.cb_disconnect)
         self.add_method(None, None, self.cb_fallback)
 
     def shutdown(self, source):
@@ -66,6 +68,9 @@ class LibloServer(Server):
         self.clients.add(source.url)
         self.send(source.url, "/bge/srvinfo", self.url, bge.render.getWindowWidth(), bge.render.getWindowHeight())
 
+    def cb_disconnect(self, path, args, types, source, user_data):
+        print("SERVER: client disconnecting: ", source.url)
+        self.clients.remove(source.url)
+
     def cb_fallback(self, path, args, types, source, user_data):
-        print ("SERVER_ received message: ", path, args, types, source.url, user_data)
-        self.send(source.url, "/bge/error", "unknown message")
+        self.send(source.url, "/bge/error", UNKNOWN_MESSAGE, source.url)

@@ -21,7 +21,6 @@
 
 import bge
 from gameengine.requesthandler import *
-from gameengine.error import BLiveError
 
 class SceneRequestHandler(BaseRequestHandler):
     @classmethod
@@ -42,13 +41,12 @@ class SceneRequestHandler(BaseRequestHandler):
 
     @classmethod
     def call_endGame(cls, path, args, types, source, user_data):
-        print("SERVER: Shutting down")
         bge.logic.server.shutdown(source)
-        bge.logic.endGame()
-        #cls.call_method(path, args, types, source, user_data)
+        cls.call_method(path, args, types, source, user_data)
 
     @classmethod
     def call_restartGame(cls, path, args, types, source, user_data):
+        #TODO: implement restart into server, with notification
         bge.logic.server.free()
         del bge.logic.server
         cls.call_method(path, args, types, source, user_data)

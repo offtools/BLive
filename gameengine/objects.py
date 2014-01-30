@@ -20,6 +20,7 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 from gameengine.requesthandler import *
+from gameengine.error import *
 
 class GameObjectRequestHandler(BaseRequestHandler):
     @classmethod
@@ -31,8 +32,7 @@ class GameObjectRequestHandler(BaseRequestHandler):
         elif args[0] in sc.objectsInactive:
             return (sc.objectsInactive[args[0]], attr)
         else:
-            print("raising ValueError")
-            raise ValueError
+            raise BLiveError(BLENDDATA_OUTOF_SYNC)
 
     @classmethod
     def _parse_instance(cls, args):

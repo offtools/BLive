@@ -19,6 +19,7 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
+from gameengine import error
 from gameengine.requesthandler import *
 
 class CameraRequestHandler(BaseRequestHandler):
@@ -29,7 +30,7 @@ class CameraRequestHandler(BaseRequestHandler):
         if args[0] in sc.cameras:
             return (sc.cameras[args[0]], attr)
         else:
-            raise ValueError
+            raise BLiveError(BLENDDATA_OUTOF_SYNC)
 
     @classmethod
     def _parse_instance(cls, args):

@@ -179,9 +179,25 @@ class BLive_OT_stop_gameengine(bpy.types.Operator):
         Client().send(Message("/bge/logic/endGame"))
         return{'FINISHED'}
 
+
 class BLive_OT_reload_gameengine(bpy.types.Operator):
     bl_idname = "blive.gameengine_reload"
     bl_label = "BLive reload gameengine"
+
+    #@classmethod
+    #def poll(self, context):
+        #pass
+
+    def execute(self, context):
+        # reload gameengine by sending restartGame(), without closing
+        # get updates, if Objects are added or removed in a scene
+        Client().send(Message("/bge/logic/restartGame"))
+        return{'FINISHED'}
+
+
+class BLive_OT_restart_gameengine(bpy.types.Operator):
+    bl_idname = "blive.gameengine_restart"
+    bl_label = "BLive restart gameengine"
 
     #@classmethod
     #def poll(self, context):
@@ -230,16 +246,50 @@ class BLive_OT_send_osc_message(bpy.types.Operator):
         else:
             return{'CANCELLED'}
 
+class BLive_OT_connect(bpy.types.Operator):
+    bl_idname = "blive.connect"
+    bl_label = "BLive connect to gameengine"
+
+    #@classmethod
+    #def poll(self, context):
+        #pass
+
+    def execute(self, context):
+        sc = context.scene
+        bc = context.window_manager.blive_settings
+        server = bc.server
+        port = bc.port
+        Client().connect(server, port)
+        return{'FINISHED'}
+
+class BLive_OT_disconnect(bpy.types.Operator):
+    bl_idname = "blive.disconnect"
+    bl_label = "BLive disconnect from gameengine"
+
+    #@classmethod
+    #def poll(self, context):
+        #pass
+
+    def execute(self, context):
+        Client().disconnect()
+        return{'FINISHED'}
+
 def register():
     print("settings.ops.register")
     bpy.utils.register_class(BLive_OT_start_gameengine)
     bpy.utils.register_class(BLive_OT_stop_gameengine)
     bpy.utils.register_class(BLive_OT_reload_gameengine)
+    bpy.utils.register_class(BLive_OT_restart_gameengine)
     bpy.utils.register_class(BLive_OT_send_osc_message)
+    bpy.utils.register_class(BLive_OT_connect)
+    bpy.utils.register_class(BLive_OT_disconnect)
 
 def unregister():
     print("settings.ops.unregister")
     bpy.utils.unregister_class(BLive_OT_reload_gameengine)
+    bpy.utils.unregister_class(BLive_OT_restart_gameengine)
     bpy.utils.unregister_class(BLive_OT_stop_gameengine)
     bpy.utils.unregister_class(BLive_OT_start_gameengine)
     bpy.utils.unregister_class(BLive_OT_send_osc_message)
+    bpy.utils.unregister_class(BLive_OT_connect)
+    bpy.utils.unregister_class(BLive_OT_disconnect)

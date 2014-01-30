@@ -40,6 +40,7 @@
 import bge
 import math
 from liblo import Message
+from gameengine.error import BLiveError
 
 #
 # Default Attribute Handler
@@ -175,30 +176,39 @@ class BaseRequestHandler():
 
     @classmethod
     def _reply(cls, typehandler, path, args, types, source, user_data):
-        obj, attr = cls._get_instance(path, args)
-        data = typehandler.get(obj, attr)
-        target = cls._parse_instance(args)
-        msg = Message(path)
-        if target:
-            msg.add(*target)
-        if data:
-            msg.add(*data)
-        bge.logic.server.send(source.url, msg)
+        try:
+            obj, attr = cls._get_instance(path, args)
+            data = typehandler.get(obj, attr)
+            target = cls._parse_instance(args)
+            msg = Message(path)
+            if target:
+                msg.add(*target)
+            if data:
+                msg.add(*data)
+            bge.logic.server.send(source.url, msg)
+        except BLiveError as err:
+            bge.logic.server.send(source.url, "/bge/error", err.reason, source.url)
 
     @classmethod
     def _setvalue(cls, typehandler, path, args, types, source, user_data):
-        obj, attr = cls._get_instance(path, args)
-        data = cls._parse_data(args)
-        typehandler.set(obj, attr, data)
+        try:
+            obj, attr = cls._get_instance(path, args)
+            data = cls._parse_data(args)
+            typehandler.set(obj, attr, data)
+        except BLiveError as err:
+            bge.logic.server.send(source.url, "/bge/error", err.reason, source.url)
 
     @classmethod
     def _method(cls, path, args, types, source, user_data):
-        obj, attr = cls._get_instance(path, args)
-        data = cls._parse_data(args)
-        if data:
-            return obj.__getattribute__(attr)(*data)
-        else:
-            return obj.__getattribute__(attr)()
+        try:
+            obj, attr = cls._get_instance(path, args)
+            data = cls._parse_data(args)
+            if data:
+                return obj.__getattribute__(attr)(*data)
+            else:
+                return obj.__getattribute__(attr)()
+        except BLiveError:
+            bge.logic.server.send(source.url, "/bge/error", err.reason, source.url)
 
     @classmethod
     def _method_reply(cls, path, source, target, data):

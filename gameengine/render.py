@@ -20,7 +20,6 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 from gameengine.requesthandler import *
-from gameengine.error import BLiveError
 
 class SceneRequestHandler(BaseRequestHandler):
     @classmethod

@@ -20,6 +20,7 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 from gameengine.requesthandler import *
+from gameengine.error import *
 
 class LightRequestHandler(BaseRequestHandler):
     @classmethod
@@ -29,7 +30,8 @@ class LightRequestHandler(BaseRequestHandler):
         if args[0] in sc.lights:
             return (sc.lights[args[0]], attr)
         else:
-            raise ValueError
+            raise BLiveError(BLENDDATA_OUTOF_SYNC)
+
 
     @classmethod
     def _parse_instance(cls, args):
