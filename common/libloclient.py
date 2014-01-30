@@ -59,10 +59,13 @@ class LibloClient(liblo.ServerThread):
 
         self._start_apphandler()
 
-        #TODO: send init data, like projection matrix after connect for every viewport
-        bpy.ops.blive.osc_active_camera_projectionmatrix()
         # Update Viewports
         bpy.ops.blive.osc_update_viewports()
+
+        #send init data, like projection matrix after connect for every viewport
+        for ob in bpy.context.scene.objects:
+            if ob.type == 'CAMERA' and ob.data.viewport.active:
+                bpy.ops.blive.osc_camera_projectionmatrix().camera = ob.name
 
     @make_method('/bge/error', 'is')
     def cb_error(self, path, args, types, source, user_data):

@@ -194,6 +194,11 @@ class BLive_OT_reload_gameengine(bpy.types.Operator):
         if self.save:
             bpy.ops.wm.save_as_mainfile(filepath=bpy.context.blend_data.filepath)
         Client().send(Message("/bge/logic/restartGame"))
+
+        server = context.window_manager.blive_settings.server
+        port = context.window_manager.blive_settings.port
+
+        Client().connect(server, port)
         return{'FINISHED'}
 
 class BLive_OT_restart_gameengine(bpy.types.Operator):

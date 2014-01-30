@@ -27,12 +27,13 @@ import bmesh
 from liblo import Bundle, Message
 from ..common.libloclient import Client
 
-class BLive_OT_osc_object_active_camera(bpy.types.Operator):
+class BLive_OT_osc_camera_projectionmatrix(bpy.types.Operator):
     """
         Operator - send camera data, projection matrix
     """
-    bl_idname = "blive.osc_active_camera_projectionmatrix"
+    bl_idname = "blive.osc_camera_projectionmatrix"
     bl_label = "BLive - send camera projectionmatrix"
+    camera = bpy.props.StringProperty(default='')
 
     @classmethod
     def poll(self, context):
@@ -69,8 +70,15 @@ class BLive_OT_osc_object_active_camera(bpy.types.Operator):
         Client().send(bundle)
 
     def execute(self, context):
-        self.update_projectionmatrix(context.scene.camera)
-        return{'FINISHED'}
+        try:
+            if self.camera:
+                self.update_projectionmatrix(context.scene.objects[self.camera])
+            else:
+                self.update_projectionmatrix(context.scene.camera)
+            return{'FINISHED'}
+        except KeyError:
+            print("ERROR: Camera: %s not found"%self.camera)
+            return{'CANCELED'}
 
 class BLive_OT_osc_object_lamp(bpy.types.Operator):
     """
@@ -135,12 +143,12 @@ class BLive_OT_osc_object_meshdata(bpy.types.Operator):
 
 def register():
     print("object.ops.register")
-    bpy.utils.register_class(BLive_OT_osc_object_active_camera)
+    bpy.utils.register_class(BLive_OT_osc_camera_projectionmatrix)
     bpy.utils.register_class(BLive_OT_osc_object_lamp)
     bpy.utils.register_class(BLive_OT_osc_object_meshdata)
 
 def unregister():
     print("object.ops.unregister")
-    bpy.utils.unregister_class(BLive_OT_osc_object_camera)
+    bpy.utils.unregister_class(BLive_OT_osc_camera_projectionmatrix)
     bpy.utils.unregister_class(BLive_OT_osc_object_lamp)
     bpy.utils.unregister_class(BLive_OT_osc_object_meshdata)
