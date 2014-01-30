@@ -183,6 +183,7 @@ class BLive_OT_stop_gameengine(bpy.types.Operator):
 class BLive_OT_reload_gameengine(bpy.types.Operator):
     bl_idname = "blive.gameengine_reload"
     bl_label = "BLive reload gameengine"
+    save = bpy.props.BoolProperty(default=False)
 
     #@classmethod
     #def poll(self, context):
@@ -190,21 +191,8 @@ class BLive_OT_reload_gameengine(bpy.types.Operator):
 
     def execute(self, context):
         # reload gameengine by sending restartGame(), without closing
-        Client().send(Message("/bge/logic/restartGame"))
-        return{'FINISHED'}
-
-class BLive_OT_save_reload_gameengine(bpy.types.Operator):
-    bl_idname = "blive.gameengine_save_reload"
-    bl_label = "BLive save and reload gameengine"
-
-    @classmethod
-    def poll(self, context):
-        return bool(context.blend_data.filepath)
-
-    def execute(self, context):
-        # reload gameengine by sending restartGame(), without closing
-        # get updates, if Objects are added or removed in a scene
-        bpy.ops.wm.save_as_mainfile(filepath=bpy.context.blend_data.filepath)
+        if self.save:
+            bpy.ops.wm.save_as_mainfile(filepath=bpy.context.blend_data.filepath)
         Client().send(Message("/bge/logic/restartGame"))
         return{'FINISHED'}
 
@@ -292,7 +280,6 @@ def register():
     bpy.utils.register_class(BLive_OT_start_gameengine)
     bpy.utils.register_class(BLive_OT_stop_gameengine)
     bpy.utils.register_class(BLive_OT_reload_gameengine)
-    bpy.utils.register_class(BLive_OT_save_reload_gameengine)
     bpy.utils.register_class(BLive_OT_restart_gameengine)
     bpy.utils.register_class(BLive_OT_send_osc_message)
     bpy.utils.register_class(BLive_OT_connect)
@@ -300,7 +287,6 @@ def register():
 
 def unregister():
     print("settings.ops.unregister")
-    bpy.utils.unregister_class(BLive_OT_save_reload_gameengine)
     bpy.utils.unregister_class(BLive_OT_reload_gameengine)
     bpy.utils.unregister_class(BLive_OT_restart_gameengine)
     bpy.utils.unregister_class(BLive_OT_stop_gameengine)
