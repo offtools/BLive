@@ -40,13 +40,18 @@ class SceneRequestHandler(BaseRequestHandler):
             return None
 
     @classmethod
+    def call_startGame(cls, path, args, types, source, user_data):
+        bge.logic.server.free()
+        del bge.logic.server
+        cls.call_method(path, args, types, source, user_data)
+
+    @classmethod
     def call_endGame(cls, path, args, types, source, user_data):
         bge.logic.server.shutdown(source)
         cls.call_method(path, args, types, source, user_data)
 
     @classmethod
     def call_restartGame(cls, path, args, types, source, user_data):
-        #TODO: implement restart into server, with notification
         bge.logic.server.free()
         del bge.logic.server
         cls.call_method(path, args, types, source, user_data)
@@ -57,7 +62,7 @@ class SceneRequestHandler(BaseRequestHandler):
 
 def register():
     try:
-        #bge.logic.server.add_method("/bge/logic/startGame", "s", SceneRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/logic/startGame", "s", SceneRequestHandler.call_startGame)
         bge.logic.server.add_method("/bge/logic/endGame", "", SceneRequestHandler.call_endGame)
         bge.logic.server.add_method("/bge/logic/restartGame", "", SceneRequestHandler.call_restartGame)
         #bge.logic.server.add_method("/bge/logic/LibLoad", "sssiii", SceneRequestHandler.call_LibLoad)

@@ -216,6 +216,28 @@ class BLive_OT_restart_gameengine(bpy.types.Operator):
         bpy.ops.blive.gameengine_start()
         return{'FINISHED'}
 
+class BLive_OT_open_gameengine(bpy.types.Operator):
+    bl_idname = "blive.gameengine_open"
+    bl_label = "BLive open blendfile"
+    filepath = bpy.props.StringProperty(subtype="FILE_PATH")
+    filename = bpy.props.StringProperty()
+    files = bpy.props.CollectionProperty(name="File Path",type=bpy.types.OperatorFileListElement)
+    directory = bpy.props.StringProperty(subtype='DIR_PATH')
+
+    def execute(self, context):
+        # open new blendfinle in blender and the the gameengine
+        bpy.ops.wm.open_mainfile(filepath=self.filepath)
+        Client().send(Message("/bge/logic/startGame", self.filepath))
+
+        # reconnect
+        server = context.window_manager.blive_settings.server
+        port = context.window_manager.blive_settings.port
+        Client().connect(server, port)
+        return{'FINISHED'}
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
 
 class BLive_OT_send_osc_message(bpy.types.Operator):
     """
@@ -285,6 +307,7 @@ def register():
     bpy.utils.register_class(BLive_OT_start_gameengine)
     bpy.utils.register_class(BLive_OT_stop_gameengine)
     bpy.utils.register_class(BLive_OT_reload_gameengine)
+    bpy.utils.register_class(BLive_OT_open_gameengine)
     bpy.utils.register_class(BLive_OT_restart_gameengine)
     bpy.utils.register_class(BLive_OT_send_osc_message)
     bpy.utils.register_class(BLive_OT_connect)
@@ -292,6 +315,7 @@ def register():
 
 def unregister():
     print("settings.ops.unregister")
+    bpy.utils.unregister_class(BLive_OT_open_gameengine)
     bpy.utils.unregister_class(BLive_OT_reload_gameengine)
     bpy.utils.unregister_class(BLive_OT_restart_gameengine)
     bpy.utils.unregister_class(BLive_OT_stop_gameengine)
