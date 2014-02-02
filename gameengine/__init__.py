@@ -34,6 +34,7 @@ from gameengine import objects
 from gameengine import cameras
 from gameengine import lights
 from gameengine import meshes
+from gameengine import media
 
 
 def register(port):
@@ -64,6 +65,7 @@ def register(port):
     cameras.register()
     lights.register()
     meshes.register()
+    media.register()
 
     # register server callbacks as last,
     # otherwise the fallback callback will catch all requests

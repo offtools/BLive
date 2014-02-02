@@ -48,6 +48,7 @@ class LibloServer(Server):
     def __init__(self, port, proto=UDP):
         super().__init__(port, proto)
         self.clients = set()
+        self.handler = list()
 
     def __del__(self):
         print("SERVER: removed")
@@ -56,6 +57,11 @@ class LibloServer(Server):
         self.add_method("/bge/connect", '', self.cb_connect)
         self.add_method("/bge/disconnect", '', self.cb_disconnect)
         self.add_method(None, None, self.cb_fallback)
+
+    def update(self):
+        while bge.logic.server.recv(0): pass
+        for func in self.handler:
+            func()
 
     def shutdown(self, source):
         print("SERVER: Shutting down")
