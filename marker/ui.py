@@ -56,7 +56,7 @@ class BLive_PT_timeline_trigger(bpy.types.Panel):
             row.label('assign Trigger to Timeline Marker')
             row = layout.row(align=True)
             row.prop_search(trigger.m_markerdict[marker.name], "m_queue", trigger, "m_queues", text='', icon='VIEWZOOM')
-            row.operator("blive.trigger_revoke", text="", icon="ZOOMOUT")
+            #row.operator("blive.trigger_revoke", text="", icon="ZOOMOUT")
 
             #   add items to trigger
 
