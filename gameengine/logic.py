@@ -58,14 +58,16 @@ class SceneRequestHandler(BaseRequestHandler):
 
     @classmethod
     def call_LibLoad(cls, path, args, types, source, user_data):
-        cls.call_method(path, [args[0], args[1], None, args[2], args[3], args[4], args[5]], types, source, user_data)
+        bge.logic.LibLoad(path=args[0], group=args[1], load_actions=args[2], verbose=args[3], load_scripts=args[4], async=args[5])
 
 def register():
     try:
+        bge.logic.server.add_method("/bge/logic/getSceneList", "", SceneRequestHandler.call_method_reply_namelist)
         bge.logic.server.add_method("/bge/logic/startGame", "s", SceneRequestHandler.call_startGame)
         bge.logic.server.add_method("/bge/logic/endGame", "", SceneRequestHandler.call_endGame)
         bge.logic.server.add_method("/bge/logic/restartGame", "", SceneRequestHandler.call_restartGame)
-        #bge.logic.server.add_method("/bge/logic/LibLoad", "sssiii", SceneRequestHandler.call_LibLoad)
+        bge.logic.server.add_method("/bge/logic/LibLoad", "ssiiii", SceneRequestHandler.call_LibLoad)
+        bge.logic.server.add_method("/bge/logic/addScene", "si", SceneRequestHandler.call_method)
 
     except (AttributeError, ValueError) as err:
         print("SERVER: could not register /bge/logic callbacks - ", err)
