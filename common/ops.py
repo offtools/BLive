@@ -50,7 +50,7 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
         if not INITSCRIPT in bpy.data.texts:
             bpy.data.texts.new(name=INITSCRIPT)
         else:
-            bpy.data.texts['Text'].clear()
+            bpy.data.texts[INITSCRIPT].clear()
 
         textblock = bpy.data.texts[INITSCRIPT]
         textblock.write("import sys\n")
@@ -70,7 +70,7 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
         textblock.write('import bge\n')
         textblock.write('try:\n')
         textblock.write('\tif hasattr(bge.logic, "server"):\n')
-        textblock.write('\t\twhile bge.logic.server.recv(0): pass\n')
+        textblock.write('\t\tbge.logic.server.update()\n')
         textblock.write('except AttributeError:\n')
         textblock.write('\tpass\n')
 
@@ -150,8 +150,6 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
 
         context.screen.scene = curscene #restore scene
 
-        # save snapshot into tmp
-        #filepath = os.path.join(context.user_preferences.filepaths.temporary_directory, "blive-{0}".format(int(time.time())))
         bpy.ops.wm.save_as_mainfile(filepath=self.filepath)
 
         self.fork(context)
@@ -159,12 +157,8 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
         return{'FINISHED'}
 
     def invoke(self, context, event):
-        if not context.blend_data.filepath:
-            context.window_manager.fileselect_add(self)
-            return {'RUNNING_MODAL'}
-        else:
-            self.fork(context)
-            return {'FINISHED'}
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
 
 class BLive_OT_stop_gameengine(bpy.types.Operator):
     bl_idname = "blive.gameengine_stop"
