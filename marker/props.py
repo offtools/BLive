@@ -24,6 +24,7 @@
 import bpy
 from liblo import Message
 from ..common.libloclient import Client
+from liblo import Message
 
 TRIGGER_TYPE_ENUM = [("TriggerDummy","Dummy","Dummy Trigger"), \
                     ("TriggerVideoOpen","Open Video","Open a Video"), \
@@ -68,16 +69,19 @@ class TriggerVideoOpen(bpy.types.PropertyGroup):
 
     def send(self):
         filepath = bpy.path.abspath(self.m_filepath)
-        print("send: ", self.m_object, self.m_image, filepath)
-        #bpy.ops.blive.osc_movie_open(obname=self.m_object,
-                                    #imgname=self.m_image,
-                                    #filepath=filepath,
-                                    #audio=self.m_audio,
-                                    #inpoint=self.m_inp,
-                                    #outpoint=self.m_outp,
-                                    #loop=self.m_loop,
-                                    #preseek=self.m_preseek,
-                                    #deinterlace=self.m_deinterlace)
+        m = Message("/bge/logic/media/openMovie",
+                    self.m_object,
+                    self.m_image,
+                    filepath,
+                    int(self.m_audio),
+                    self.m_inp,
+                    self.m_outp,
+                    int(self.m_loop),
+                    self.m_preseek,
+                    int(self.m_deinterlace)
+                    )
+
+        Client().send(m)
 
 class TriggerCameraOpen(bpy.types.PropertyGroup):
     m_hidden = bpy.props.BoolProperty(default=True)
@@ -93,14 +97,16 @@ class TriggerCameraOpen(bpy.types.PropertyGroup):
     m_rate = bpy.props.FloatProperty(default=0.0)
 
     def send(self):
-        #bpy.ops.blive.osc_camera_open(obname=self.m_object,
-                                        #imgname=self.m_image,
-                                        #filepath=self.m_filepath,
-                                        #width=self.m_width,
-                                        #height=self.m_height,
-                                        #rate=self.m_rate,
-                                        #deinterlace=self.m_deinterlace)
-        pass
+        m = Message("/bge/logic/media/openCamera",
+                            self.m_object,
+                            self.m_image,
+                            self.m_filepath,
+                            self.m_width,
+                            self.m_height,
+                            self.m_deinterlace,
+                            self.m_rate
+                            )
+        Client().send(m)
 
 class TriggerVideoState(bpy.types.PropertyGroup):
     m_hidden = bpy.props.BoolProperty(default=True)
@@ -115,14 +121,14 @@ class TriggerVideoState(bpy.types.PropertyGroup):
             name = "state")
 
     def send(self):
-        #if self.m_state == "PLAY":
-            #bpy.ops.blive.osc_videotexture_play(imgname=self.m_image)
-        #elif self.m_state == "PAUSE":
-            #bpy.ops.blive.osc_videotexture_pause(imgname=self.m_image)
-        #elif self.m_state == "STOP":
-            #bpy.ops.blive.osc_videotexture_stop(imgname=self.m_image)
-        #elif self.m_state == "CLOSE":
-            #bpy.ops.blive.osc_videotexture_close(imgname=self.m_image)
+        if self.m_state == "PLAY":
+            Client().send(Message("/bge/logic/media/play", self.m_image))
+        elif self.m_state == "PAUSE":
+            Client().send(Message("/bge/logic/media/pause", self.m_image))
+        elif self.m_state == "STOP":
+            Client().send(Message("/bge/logic/media/stop", self.m_image))
+        elif self.m_state == "CLOSE":
+            Client().send(Message("/bge/logic/media/close", self.m_image))
         pass
 
 class TriggerChangeScene(bpy.types.PropertyGroup):
@@ -137,7 +143,7 @@ class TriggerChangeScene(bpy.types.PropertyGroup):
 
 class TriggerGameProperty(bpy.types.PropertyGroup):
     m_hidden = bpy.props.BoolProperty(default=True)
-    m_oscpath = bpy.props.StringProperty(default="/data/object/gameproperty")
+    m_oscpath = bpy.props.StringProperty(default="/bge/scene/objects/gameproperty")
 
     m_object = bpy.props.StringProperty()
     m_property = bpy.props.StringProperty()
