@@ -43,18 +43,20 @@ if "bpy" in locals():
     imp.reload(common)
     imp.reload(viewport)
     #imp.reload(client)
-    #imp.reload(texture)
+    imp.reload(texture)
     imp.reload(marker)
     imp.reload(object)
     #imp.reload(material)
+    imp.reload(oscdmx)
 else:
     from . import common
     from . import viewport
     #from . import client
-    #from . import texture
+    from . import texture
     from . import marker
     from . import object
     #from . import material
+    from . import oscdmx
 
 import bpy
 
@@ -63,17 +65,19 @@ def register():
     common.register()
     viewport.register()
     #client.register()
-    #texture.register()
+    texture.register()
     marker.register()
     object.register()
     #material.register()
+    oscdmx.register()
 
 def unregister():
     print("__init__.unregister")
+    oscdmx.unregister()
     #material.unregister()
     object.unregister()
     marker.unregister()
-    #texture.unregister()
+    texture.unregister()
     #client.unregister()
     viewport.unregister()
     common.unregister()

@@ -20,6 +20,7 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 #TODO:
+#   stop client on load new file
 #   stop Client Thread not from inside, stop it on, load blendfile, ...
 #   remove sleep statement by better solution
 
@@ -59,13 +60,18 @@ class LibloClient(liblo.ServerThread):
 
         self._start_apphandler()
 
+        # TODO: encapsulate this in an own onConnect handler for Client
+
         # Update Viewports
         bpy.ops.blive.osc_update_viewports()
 
-        #send init data, like projection matrix after connect for every viewport
+        # send init data, like projection matrix after connect for every viewport
         for ob in bpy.context.scene.objects:
             if ob.type == 'CAMERA' and ob.data.viewport.active:
                 bpy.ops.blive.osc_camera_projectionmatrix(camera=ob.name)
+
+        # register dmx channels
+        bpy.ops.blive.oscdmx_register_channels()
 
     @make_method('/bge/error', 'is')
     def cb_error(self, path, args, types, source, user_data):
@@ -82,7 +88,7 @@ class LibloClient(liblo.ServerThread):
         print ("CLIENT: received shutdown - closing client", args)
         #self.close() #TODO: dont close thread from inside thread, just notify blender
 
-    @make_method(None, None)
+    @make_method('/bge/*', None)
     def cb_fallback(self, path, args, types, source, user_data):
         print ("CLIENT: received unhandled message: ", path, args, types, source.url, user_data)
 

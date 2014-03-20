@@ -22,6 +22,7 @@
 # FIXME: max. Port number in game property is 10000
 
 import bpy
+from ..common.libloclient import Client
 
 ###############################################
 #
@@ -52,6 +53,9 @@ class BLive_PT_network_setup(bpy.types.Panel):
         flow.label("Port:")
         flow.prop(bs, "server", text="")
         flow.prop(bs, "port", text="")
+
+        row = layout.row()
+        row.label("local port: {0}".format(Client().port))
 
         row = layout.row()
         row.label("Start Gameengine and connect")
