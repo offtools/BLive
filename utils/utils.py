@@ -26,7 +26,7 @@ def import_path():
     for i in paths:
         path = os.path.join(i, "addons")
         for j in bpy.path.module_names(path, True):
-            if bpy.context.user_preferences.addons['BLive'].module in j[0]:
+            if bpy.context.user_preferences.addons['blive'].module in j[0]:
                 return os.path.dirname(j[1])
 
 def unique_name(collection, name):

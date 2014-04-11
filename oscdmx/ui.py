@@ -22,6 +22,7 @@
 # FIXME: max. Port number in game property is 10000
 
 import bpy
+from ..common.libloclient import Client
 
 ###############################################
 #
@@ -31,9 +32,9 @@ import bpy
 
 class BLive_PT_OscDmx_Patch(bpy.types.Panel):
     bl_label = "Osc DMX Patch"
-    bl_space_type = 'GRAPH_EDITOR'
-    bl_region_type = 'UI'
-    bl_context = 'DRIVERS'
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "scene"
 
     #@classmethod
     #def poll(self, context):
@@ -43,37 +44,64 @@ class BLive_PT_OscDmx_Patch(bpy.types.Panel):
         dmx = context.scene.oscdmx
 
         layout = self.layout
-        row = layout.row()
-        row.prop(dmx, "path_prefix", text='OSC Path Prefix')
-        row = layout.row()
-        row.prop(dmx, "sel_method", expand=True)
-        if dmx.sel_method == 'properties':
-            row = layout.row()
-            row.prop(dmx, "sel_type", text='Object')
-            row.prop_search(dmx, "sel_item", bpy.data, dmx.sel_type, text='', icon='VIEWZOOM')
-            row = layout.row()
-            row.prop(dmx, "sel_dpath", text='Custom Property')
-            row = layout.row()
-            row.prop(dmx, "sel_chan", text='Channel')
-            row = layout.row()
-            row.operator('blive.oscdmx_add_channel_property', text='add')
-        elif dmx.sel_method == 'script':
-            row = layout.row()
-            row.label("Choose a module from the Texteditor,")
-            row = layout.row()
-            row.label("if myscript.py exists there, insert myscript")
-            row = layout.row()
-            row.prop(dmx, "sel_module", text='Module')
-            row = layout.row()
-            row.label("add a function name from myscript,")
-            row = layout.row()
-            row.label("it should contain one parameter for the dmx value")
-            row = layout.row()
-            row.prop(dmx, "sel_function", text='Function')
-            row = layout.row()
-            row.prop(dmx, "sel_chan", text='Channel')
-            row = layout.row()
-            row.operator('blive.oscdmx_add_channel_script', text='add')
+        box = layout.box()
+        box.label("OSC Port for qlcplus: {0}".format(Client().port))
+        row = box.row()
+        row.prop(dmx, "path_prefix", text='OSC Prefix')
+        row = box.row()
+        row.template_list("UI_UL_list", "channels", dmx, "channels", dmx, "active_channel", rows=2, maxrows=4)
+        row = box.row()
+        row.prop(dmx, "active_channel_by_name", text='Channel')
+        row.operator('blive.oscdmx_add_channel', text='', icon='ZOOMIN')
+
+        if str(dmx.active_channel_by_name) in dmx.channels:
+            row = box.row()
+            row.prop(dmx, "sel_method", expand=True)
+            channel = dmx.channels[dmx.active_channel]
+
+            if dmx.sel_method == 'properties':
+                row = box.row()
+                row.template_list("UI_UL_list", "properties", channel, "properties", dmx, "active_prop_handler", rows=2, maxrows=8)
+                col = row.column(align=True)
+                col.operator('blive.oscdmx_add_channel_handler', text='', icon='ZOOMIN')
+                col.operator('blive.oscdmx_del_channel_handler', text='', icon='ZOOMOUT')
+
+                if len(channel.properties) > dmx.active_prop_handler:
+                    handler = channel.properties[dmx.active_prop_handler]
+
+                    row = box.row(align=True)
+                    row.prop(handler, "type_enum", text='ID Data')
+                    row.prop_search(handler, "id_data", bpy.data, handler.type_enum, text='', icon='VIEWZOOM')
+                    row = box.row()
+                    row.prop(handler, "data_path", text='Property')
+                    if handler.index > -1:
+                        row = box.row()
+                        row.prop(handler, "index", text='Index')
+                    row = box.row()
+                    row.prop(handler, "min", text='min')
+                    row = box.row()
+                    row.prop(handler, "max", text='max')
+
+
+            elif dmx.sel_method == 'script':
+                row = box.row()
+                row.template_list("UI_UL_list", "scripts", channel, "scripts", dmx, "active_script_handler", rows=2, maxrows=8)
+                col = row.column(align=True)
+                col.operator('blive.oscdmx_add_channel_handler', text='', icon='ZOOMIN')
+                col.operator('blive.oscdmx_del_channel_handler', text='', icon='ZOOMOUT')
+
+                if len(channel.scripts) > dmx.active_script_handler:
+                    handler = channel.scripts[dmx.active_script_handler]
+
+                    row = box.row()
+                    row.prop_search(handler, "module", bpy.data, 'texts', text='Script', icon='VIEWZOOM')
+                    if not handler.module[-3:] == '.py':
+                        row = box.row()
+                        row.label('(script name should contain .py suffix!)')
+                    else:
+                        row = box.row()
+                        row.prop(handler, "function", text='Function')
+
 
 def register():
     print("oscdmx.ui.register")
