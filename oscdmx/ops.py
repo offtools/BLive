@@ -19,8 +19,6 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-#TODO: make popup operators for adding new handlers (reduce doubles properties in props)
-
 import bpy
 import re
 from .props import type_enum
@@ -44,95 +42,6 @@ class BLive_OT_OscDmx_register_channels(bpy.types.Operator):
         for ch in oscdmx.channels:
             Client().add_method("{0}/{1}".format(oscdmx.path_prefix, int(ch.name)), "f", dmx_callback, int(ch.name))
             ch.registered = True
-        return{'FINISHED'}
-
-class BLive_OT_OscDmx_add_channel_property(bpy.types.Operator):
-    '''OSC dmx - add property to channel'''
-    bl_idname = "blive.oscdmx_add_channel_property"
-    bl_label = "OscDmx add channel property"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    channel = bpy.props.IntProperty(default=0, min=0, max=254)
-    type_enum = bpy.props.EnumProperty(name='ID Type', items=type_enum)
-    id_data = bpy.props.StringProperty()
-    data_path = bpy.props.StringProperty()
-    index = bpy.props.IntProperty(default=-1)
-    min = bpy.props.FloatProperty(default=0.0)
-    max = bpy.props.FloatProperty(default=1.0)
-
-
-    #@classmethod
-    #def poll(self, context):
-        #return not len(context.scene.oscdmx.universe)
-
-    def execute(self, context):
-        self.report({'INFO'}, 'EXECUTE')
-        oscdmx = context.scene.oscdmx
-        if not str(oscdmx.sel_chan) in oscdmx.channels:
-            ch = oscdmx.channels.add()
-            ch.name = str(oscdmx.sel_chan)
-            Client().add_method("{0}/{1}".format(oscdmx.path_prefix, oscdmx.sel_chan), "f", dmx_callback, oscdmx.sel_chan)
-            ch.registered = True
-
-        channel = oscdmx.channels[str(oscdmx.sel_chan)]
-        prop = channel.properties.add()
-        prop.name = unique_name(channel.properties, 'prop')
-        prop.type_enum = oscdmx.sel_type
-        prop.id_data = oscdmx.sel_item
-        if hasattr(oscdmx.sel_dpath, '__len__') and '[' in oscdmx.sel_dpath:
-            pattern=re.compile(r"[\[\]]")
-            sp = pattern.split(oscdmx.sel_dpath)
-            prop.data_path = sp[0]
-            prop.index = int(sp[1])
-        else:
-            prop.data_path = oscdmx.sel_dpath
-        return{'FINISHED'}
-
-class BLive_OT_OscDmx_delete_channel_property(bpy.types.Operator):
-    '''OSC dmx - delete channel property handler'''
-    bl_idname = "blive.oscdmx_delete_channel_property"
-    bl_label = "OscDmx delete channel property handler"
-
-    def execute(self, context):
-        dmx = context.scene.oscdmx
-        dmx.channels[dmx.sel_search_channel].properties.remove(dmx.sel_prop_idx)
-        return{'FINISHED'}
-
-class BLive_OT_OscDmx_add_channel_script(bpy.types.Operator):
-    '''OSC dmx - add script to channel'''
-    bl_idname = "blive.oscdmx_add_channel_script"
-    bl_label = "OscDmx add channel script"
-
-    #@classmethod
-    #def poll(self, context):
-        #return not len(context.scene.oscdmx.universe)
-
-    def execute(self, context):
-        oscdmx = context.scene.oscdmx
-        if not str(oscdmx.sel_chan) in oscdmx.channels:
-            ch = oscdmx.channels.add()
-            ch.name = str(oscdmx.sel_chan)
-            Client().add_method("{0}/{1}".format(oscdmx.path_prefix, oscdmx.sel_chan), "f", dmx_callback, oscdmx.sel_chan)
-            ch.registered = True
-
-        channel = oscdmx.channels[str(oscdmx.sel_chan)]
-        script = channel.scripts.add()
-        script.name = unique_name(channel.properties, 'script')
-        if oscdmx.sel_module[-3:] == '.py':
-            script.module = oscdmx.sel_module[:-3]
-        else:
-            script.module = oscdmx.sel_module
-        script.function = oscdmx.sel_function
-        return{'FINISHED'}
-
-class BLive_OT_OscDmx_delete_channel_script(bpy.types.Operator):
-    '''OSC dmx - delete channel script handler'''
-    bl_idname = "blive.oscdmx_delete_channel_script"
-    bl_label = "OscDmx delete channel script handler"
-
-    def execute(self, context):
-        dmx = context.scene.oscdmx
-        dmx.channels[dmx.sel_search_channel].scripts.remove(dmx.sel_script_idx)
         return{'FINISHED'}
 
 class BLive_OT_OscDmx_add_channel(bpy.types.Operator):
@@ -196,7 +105,7 @@ def register():
     #bpy.utils.register_class(BLive_OT_OscDmx_delete_channel_property)
     #bpy.utils.register_class(BLive_OT_OscDmx_add_channel_script)
     #bpy.utils.register_class(BLive_OT_OscDmx_delete_channel_script)
-    #bpy.utils.register_class(BLive_OT_OscDmx_register_channels)
+    bpy.utils.register_class(BLive_OT_OscDmx_register_channels)
 
     bpy.utils.register_class(BLive_OT_OscDmx_add_channel)
     bpy.utils.register_class(BLive_OT_OscDmx_add_channel_handler)
@@ -208,7 +117,7 @@ def unregister():
     bpy.utils.unregister_class(BLive_OT_OscDmx_add_channel_handler)
     bpy.utils.unregister_class(BLive_OT_OscDmx_add_channel)
 
-    #bpy.utils.unregister_class(BLive_OT_OscDmx_register_channels)
+    bpy.utils.unregister_class(BLive_OT_OscDmx_register_channels)
     #bpy.utils.unregister_class(BLive_OT_OscDmx_delete_channel_script)
     #bpy.utils.register_class(BLive_OT_OscDmx_add_channel_script)
     #bpy.utils.unregister_class(BLive_OT_OscDmx_delete_channel_property)

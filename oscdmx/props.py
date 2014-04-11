@@ -19,7 +19,6 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-#TODO: cleanup OSCDMX by moving most of the sel_* properties into popup operator
 #TODO: possibilty to reimport scripts (ui)
 
 import bpy
