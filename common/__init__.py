@@ -19,33 +19,32 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-# Settings holds all common data for the addon. 
+# Settings holds all common data for the addon.
 # They are added to bpy.data.windowmanger[...], because its
 # a unique stucture in the BlendData
 
 # import modules
 if "bpy" in locals():
-	print("imp.reload")
-	import imp
-	imp.reload(props)
-	imp.reload(ops)
-	imp.reload(ui)
+    print("imp.reload")
+    import imp
+    imp.reload(props)
+    imp.reload(ops)
+    imp.reload(ui)
 else:
-	print("import")
-	from . import props
-	from . import ops
-	from . import ui
-	pass
+    from . import props
+    from . import ops
+    from . import ui
+    pass
 
 
 def register():
-	print("common.register")
-	props.register()
-	ops.register()
-	ui.register()
+    print("common.register")
+    props.register()
+    ops.register()
+    ui.register()
 
 def unregister():
-	print("common.unregister")
-	ui.unregister()
-	ops.unregister()
-	props.unregister()
+    print("common.unregister")
+    ui.unregister()
+    ops.unregister()
+    props.unregister()

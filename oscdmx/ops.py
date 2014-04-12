@@ -101,12 +101,7 @@ class BLive_OT_OscDmx_del_channel_handler(bpy.types.Operator):
 
 def register():
     print("oscdmx.ops.register")
-    #bpy.utils.register_class(BLive_OT_OscDmx_add_channel_property)
-    #bpy.utils.register_class(BLive_OT_OscDmx_delete_channel_property)
-    #bpy.utils.register_class(BLive_OT_OscDmx_add_channel_script)
-    #bpy.utils.register_class(BLive_OT_OscDmx_delete_channel_script)
     bpy.utils.register_class(BLive_OT_OscDmx_register_channels)
-
     bpy.utils.register_class(BLive_OT_OscDmx_add_channel)
     bpy.utils.register_class(BLive_OT_OscDmx_add_channel_handler)
     bpy.utils.register_class(BLive_OT_OscDmx_del_channel_handler)
@@ -116,9 +111,5 @@ def unregister():
     bpy.utils.unregister_class(BLive_OT_OscDmx_del_channel_handler)
     bpy.utils.unregister_class(BLive_OT_OscDmx_add_channel_handler)
     bpy.utils.unregister_class(BLive_OT_OscDmx_add_channel)
-
     bpy.utils.unregister_class(BLive_OT_OscDmx_register_channels)
-    #bpy.utils.unregister_class(BLive_OT_OscDmx_delete_channel_script)
-    #bpy.utils.register_class(BLive_OT_OscDmx_add_channel_script)
-    #bpy.utils.unregister_class(BLive_OT_OscDmx_delete_channel_property)
-    #bpy.utils.unregister_class(BLive_OT_OscDmx_add_channel_property)
+

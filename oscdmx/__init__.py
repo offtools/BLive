@@ -27,7 +27,6 @@ if "bpy" in locals():
     imp.reload(ops)
     imp.reload(ui)
 else:
-    print("import")
     from . import props
     from . import ops
     from . import ui

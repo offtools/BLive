@@ -21,23 +21,22 @@
 
 # import modules
 if "bpy" in locals():
-	print("imp.reload")
-	import imp
-	imp.reload(ops)
-	imp.reload(handler)
+    print("imp.reload")
+    import imp
+    imp.reload(ops)
+    imp.reload(handler)
 else:
-	print("import")
-	from . import ops
-	from . import handler
-	pass
+    from . import ops
+    from . import handler
+    pass
 
 
 def register():
-	print("object.register")
-	ops.register()
-	handler.register()
+    print("object.register")
+    ops.register()
+    handler.register()
 
 def unregister():
-	print("object.unregister")
-	handler.unregister()
-	ops.unregister()
+    print("object.unregister")
+    handler.unregister()
+    ops.unregister()
