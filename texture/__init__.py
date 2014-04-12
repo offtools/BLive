@@ -22,33 +22,32 @@
 #
 #   BLive: Timeline Marker / Trigger Panel located in NLA Editor UI region
 #
-#	The Panel is used to add extra functions to timeline and timeline markers,
-#	Like pause playback when reaching a timeline marker and send OSC Messages to
-#	the BGE instance (start/stop movies, change Scene, ...)
+#   The Panel is used to add extra functions to timeline and timeline markers,
+#   Like pause playback when reaching a timeline marker and send OSC Messages to
+#   the BGE instance (start/stop movies, change Scene, ...)
 #
 
 # import modules
 if "bpy" in locals():
-	print("imp.reload")
-	import imp
-	imp.reload(props)
-	imp.reload(ops)
-	imp.reload(ui)
+    print("imp.reload")
+    import imp
+    imp.reload(props)
+    imp.reload(ops)
+    imp.reload(ui)
 else:
-	print("import")
-	from . import props
-	from . import ops
-	from . import ui
-	pass
+    from . import props
+    from . import ops
+    from . import ui
+    pass
 
 def register():
-	print("texture.register")
-	props.register()
-	ops.register()
-	ui.register()
-	
+    print("texture.register")
+    props.register()
+    ops.register()
+    ui.register()
+
 def unregister():
-	print("texture.unregister")
-	ui.unregister()
-	ops.unregister()
-	props.unregister()
+    print("texture.unregister")
+    ui.unregister()
+    ops.unregister()
+    props.unregister()

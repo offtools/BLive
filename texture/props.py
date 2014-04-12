@@ -59,6 +59,12 @@ def ImagePlayer_entry_changed(self, context):
     player.source.height = source.height
     player.source.rate = source.rate
 
+state_enum =   (('PLAYING', 'Playing', 'Playing'),
+                ('PAUSED', 'Paused', 'Paused'),
+                ('STOPPED', 'Stopped', 'Stopped'),
+                ('CLOSED', 'Closed', 'Closed')
+                )
+
 class ImagePlayer(bpy.types.PropertyGroup):
     '''
     Class: ImagePlayer
@@ -88,6 +94,7 @@ class ImagePlayer(bpy.types.PropertyGroup):
     playlist = bpy.props.CollectionProperty(type=ImageSource)
     source = bpy.props.PointerProperty(type=ImageSource)
     source_changed = bpy.props.BoolProperty(default=False)
+    state = bpy.props.EnumProperty(name='ID Type', items=state_enum, default='CLOSED')
     playlist_entry = bpy.props.IntProperty(default=0, update=ImagePlayer_entry_changed)
 
 def register():

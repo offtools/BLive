@@ -41,16 +41,23 @@ class BLive_PT_texture_player(bpy.types.Panel):
         row.prop(player.source, "sourcetype", expand=True)
 
     def draw_controls(self, context):
+        image = context.active_object.active_material.active_texture.image
+
         layout = self.layout
-        layout.row().label("Controls")
         row = layout.row(align=True)
         row.scale_x = 2
         row.scale_y = 2
         row.alignment = 'CENTER'
-        row.operator("blive.osc_videotexture_play", text="", icon="PLAY")
-        row.operator("blive.osc_videotexture_pause", text="", icon="PAUSE")
-        row.operator("blive.osc_videotexture_stop", text="", icon="MESH_PLANE")
-        row.operator("blive.osc_videotexture_close", text="", icon="PANEL_CLOSE")
+
+        row.operator("blive.videotexture_source_from_filebrwoser", text="", icon="FILE_MOVIE")
+
+        if image.player.state == 'PLAYING':
+            row.operator("blive.videotexture_pause", text="", icon="PAUSE")
+        else:
+            row.operator("blive.videotexture_play", text="", icon="PLAY")
+
+        row.operator("blive.videotexture_stop", text="", icon="MESH_PLANE")
+        row.operator("blive.videotexture_close", text="", icon="PANEL_CLOSE")
 
     def draw(self, context):
         ob = context.active_object
@@ -70,7 +77,6 @@ class BLive_PT_texture_player(bpy.types.Panel):
                 col = row.column(align=True)
                 col.enabled = False
                 col.prop(space.params, "filename", text="", expand=True)
-                row.operator("blive.videotexture_source_from_filebrwoser", text="", icon="FILE_MOVIE")
 
                 self.draw_controls(context)
 

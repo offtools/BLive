@@ -400,10 +400,10 @@ def register():
         # --- deinterlace (bool)
         bge.logic.server.add_method("/bge/logic/media/openMovie", "sssiffiii", openMovie)
 
-        ## --- Videotexture - set playback range:
-        ## --- image name (string)
-        ## --- inpoint (float)
-        ## --- outpoint (float)
+        # --- Videotexture - set playback range:
+        # --- image name (string)
+        # --- inpoint (float)
+        # --- outpoint (float)
         bge.logic.server.add_method("/bge/logic/media/setRange", "sff", setRange)
 
         # --- Videotexture - enable audio:
@@ -411,51 +411,51 @@ def register():
         # --- audio (bool)
         bge.logic.server.add_method("/bge/logic/media/enableAudio", "si", enableAudio)
 
-        ## --- Videotexture - loop playback:
-        ## --- image name (string)
-        ## --- loop (bool)
+        # --- Videotexture - loop playback:
+        # --- image name (string)
+        # --- loop (bool)
         bge.logic.server.add_method("/bge/logic/media/enableLoop", "si", enableLoop)
 
-        ## --- VideoTexture Camera:
-        ## --- path "/texture/camera/open"
-        ##
-        ## --- Videotexture - open a camera device:
-        ## --- object name (string)
-        ## --- image name (string)
-        ## --- device (string)
-        ## --- width (int)
-        ## --- height (int)
-        ## --- rate (float)
-        ## --- deinterlace (bool)
+        # --- VideoTexture Camera:
+        # --- path "/texture/camera/open"
+        #
+        # --- Videotexture - open a camera device:
+        # --- object name (string)
+        # --- image name (string)
+        # --- device (string)
+        # --- width (int)
+        # --- height (int)
+        # --- rate (float)
+        # --- deinterlace (bool)
         bge.logic.server.add_method("/bge/logic/media/openCamera", "sssiifi", openCamera)
 
-        ##
-        ## --- Videotexture - Status ---
-        ##
-        ## --- Videotexture - close and reset texture:
-        ## --- image name (string)
+        #
+        # --- Videotexture - Status ---
+        #
+        # --- Videotexture - close and reset texture:
+        # --- image name (string)
         bge.logic.server.add_method("/bge/logic/media/close", "s", close)
 
-        ## --- Videotexture - state is play:
-        ## --- image name (string)
+        # --- Videotexture - state is play:
+        # --- image name (string)
         bge.logic.server.add_method("/bge/logic/media/play", "s", play)
 
-        ## --- Videotexture - state is pause:
-        ## --- image name (string)
+        # --- Videotexture - state is pause:
+        # --- image name (string)
         bge.logic.server.add_method("/bge/logic/media/pause", "s", pause)
 
-        ## --- Videotexture - state is stop:
-        ## --- image name (string)
+        # --- Videotexture - state is stop:
+        # --- image name (string)
         bge.logic.server.add_method("/bge/logic/media/stop", "s", stop)
 
-        ##
-        ## --- Filter ---
-        ##
-        ## --- Videotexture - deinterlace texture:
-        ## --- image name (string)
+        #
+        # --- Filter ---
+        #
+        # --- Videotexture - deinterlace texture:
+        # --- image name (string)
         bge.logic.server.add_method("/bge/logic/media/deinterlace", "s", deinterlace)
 
-        ## add update method to server loop
+        # add update method to server loop
         bge.logic.server.handler.append(update)
 
     except (AttributeError, ValueError) as err:
