@@ -150,7 +150,7 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
 
         context.screen.scene = curscene #restore scene
 
-        bpy.ops.wm.save_as_mainfile(filepath=self.filepath)
+        bpy.ops.wm.save_as_mainfile(filepath=context.blend_data.filepath)
 
         self.fork(context)
 
@@ -186,7 +186,7 @@ class BLive_OT_reload_gameengine(bpy.types.Operator):
     def execute(self, context):
         # reload gameengine by sending restartGame(), without closing
         if self.save:
-            bpy.ops.wm.save_as_mainfile(filepath=bpy.context.blend_data.filepath)
+            bpy.ops.wm.save_as_mainfile(filepath=context.blend_data.filepath)
         Client().send(Message("/bge/logic/restartGame"))
 
         server = context.window_manager.blive_settings.server
