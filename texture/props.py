@@ -80,12 +80,6 @@ class ImagePlayer(bpy.types.PropertyGroup):
 
     volume = bpy.props.FloatProperty(default=1.0, min=0.0, max=1.0, update=controls_volume)
 
-    def controls_alpha(self, context):
-        ob = context.active_object
-        ob.color[3] = self.alpha
-
-    alpha = bpy.props.FloatProperty(default=1.0, min=0.0, max=1.0, update=controls_alpha)
-
 
 def register():
     print("texture.props.register")

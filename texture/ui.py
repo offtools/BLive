@@ -64,7 +64,8 @@ class BLive_PT_texture_player(bpy.types.Panel):
         row = box.row()
         row.prop(player, "volume", slider=True)
         row = box.row()
-        row.prop(player, "alpha", slider=True)
+        ob = bpy.context.active_object
+        row.prop(ob, "color", text='Alpha', slider=True, index=3)
         row = box.row()
         row.prop(player, "loop", toggle=True)
 
