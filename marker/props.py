@@ -19,7 +19,10 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-# TODO: user operators instead calling BLiveClient
+# TODO: use operators instead calling BLiveClient
+#       TriggerScript, use import (module/function) instead of reading script everytime
+#       reenable videotexture controls
+#       remove dummy
 
 import bpy
 from liblo import Message

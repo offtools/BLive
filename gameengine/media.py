@@ -25,6 +25,8 @@ from bge import logic
 import aud
 from gameengine import error
 
+# FIX: loop and in/outpoints
+
 TEXTURE_STATES = {'PLAY', 'PAUSE', 'STOP'}
 
 class _BasePlayer(object):
@@ -106,6 +108,28 @@ class FFmpegPlayer(_BasePlayer):
     def get_source(self):
         return self.__file
 
+    def setup_audio(self):
+        if self.__audio:
+            try:
+                if self.__hassound is True:
+                    self.__handle.stop()
+                self.__sound = aud.Factory(self.__file)
+                device = aud.device()
+                self.__handle = device.play(self.__sound)
+                self.__handle.loop_count = -1
+                self.__hassound = True
+            except aud.error as err:
+                print('Error: MoviePlayer.load - no sound available\n', err)
+                self.__hassound = None
+                self.__sound = None
+                self.__audio = False
+        else:
+            if self.__handle:
+                self.__handle.stop()
+            self.__hassound = None
+            self.__sound = None
+
+
     def set_source(self, _file):
         self.__file = _file
         if self.state != 'STOP':
@@ -118,20 +142,8 @@ class FFmpegPlayer(_BasePlayer):
             self.__audio = None
             return
 
-        # --- play audio stream
-        if self.__audio:
-            try:
-                if self.__hassound is True:
-                    self.__handle.stop()
-                self.__sound = aud.Factory(_file)
-                device = aud.device()
-                self.__handle = device.play(self.__sound)
-                self.__handle.loop_count = -1
-                self.__hassound = True
-            except aud.error as err:
-                print('Error: MoviePlayer.load - no sound available\n', err)
-                self.__hassound = None
-                self.__sound = None
+        # --- configure and play audio stream
+        self.setup_audio()
 
         # -- scale the video
         self._texture.source.scale = True
@@ -204,11 +216,24 @@ class FFmpegPlayer(_BasePlayer):
 
     def set_audio(self, audio):
         self.__audio = bool(audio)
+        self.setup_audio()
+
+    def get_volume(self):
+        if self.__hassound:
+            return self.__sound.volume
+        else:
+            return -1.0
+
+    def set_volume(self, volume):
+        if self.__hassound:
+            self.__handle.volume = volume
 
     source = property(get_source, set_source)
     range = property(get_range, set_range)
     state = property(get_state, set_state)
     loop = property(get_loop, set_loop)
+    audio = property(get_audio, set_audio)
+    volume = property(get_volume, set_volume)
 
 class CameraPlayer(_BasePlayer):
     def __init__(self, obname=None, imgname=None, device="/dev/video0", width=720, height=576, rate=0.0, deinterlace=True):
@@ -330,6 +355,16 @@ def setRange(path, args, types, source, user_data):
         if isinstance(pl, FFmpegPlayer):
             pl.range = (inp, outp)
 
+
+def audioVolume(path, args, types, source, user_data):
+    imgname = args[0]
+    volume = args[1]
+
+    if imgname in bge.logic.media:
+        pl =  bge.logic.media[imgname]
+        if isinstance(pl, FFmpegPlayer):
+            pl.volume = volume
+
 def openCamera(path, args, types, source, user_data):
     obname = args[0]
     imgname = args[1]
@@ -415,6 +450,11 @@ def register():
         # --- image name (string)
         # --- loop (bool)
         bge.logic.server.add_method("/bge/logic/media/enableLoop", "si", enableLoop)
+
+        # --- Videotexture - audio volume:
+        # --- image name (string)
+        # --- volume (float)
+        bge.logic.server.add_method("/bge/logic/media/audioVolume", "sf", audioVolume)
 
         # --- VideoTexture Camera:
         # --- path "/texture/camera/open"

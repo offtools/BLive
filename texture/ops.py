@@ -20,10 +20,6 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 # TODO: *add proper poll methods
-# every input is written to source in playlist mode source is copied to an new playlistentry and
-# source is reset
-
-# button [filename] ](open)(plus)(delete)
 
 import os
 import bpy
@@ -31,49 +27,7 @@ from liblo import Bundle, Message
 from ..common.libloclient import Client
 from .props import ImageSource
 
-class BLive_OT_videotexture_source_from_filebrowser(bpy.types.Operator):
-    '''select source media file from a filebrowser'''
 
-    bl_idname = "blive.videotexture_source_from_filebrwoser"
-    bl_label = "BLive Source from Filebrowser"
-
-    @classmethod
-    def poll(self, context):
-        try:
-            return bool(context.active_object.active_material.active_texture.image)
-        except AttributeError:
-            return False
-
-    def execute(self, context):
-        ob = context.active_object
-        image = ob.active_material.active_texture.image
-        source = image.player.source
-        if 'FILE_BROWSER' in [i.type for i in context.screen.areas]:
-            narea = [i.type for i in context.screen.areas].index('FILE_BROWSER')
-            nspace = [i.type for i in context.screen.areas[narea].spaces].index('FILE_BROWSER')
-            space = context.screen.areas[narea].spaces[nspace]
-            filename = space.params.filename
-            directory = space.params.directory
-            if filename:
-                source.filepath = "{0}/{1}".format(directory, filename)
-                bpy.ops.blive.osc_videotexture_open_movie(obname=ob.name,
-                            imgname=image.name,
-                            filepath=source.filepath,
-                            audio=source.audio,
-                            inpoint=source.inpoint,
-                            outpoint=source.outpoint,
-                            loop=source.loop,
-                            preseek=source.preseek,
-                            deinterlace=source.deinterlace
-                            )
-                image.player.state = 'PLAYING'
-                return{'FINISHED'}
-        return{'CANCELED'}
-
-#
-# --- Operators used by gui (works on active object)
-# --- Wrapper for osc Operators
-#
 #class BLive_OT_videotexture_filebrowser(bpy.types.Operator):
     #bl_idname = "blive.videotexture_filebrowser"
     #bl_label = "BLive open Video Filebrowser"
@@ -159,6 +113,12 @@ class BLive_OT_videotexture_source_from_filebrowser(bpy.types.Operator):
 
         #return {'FINISHED'}
 
+
+#
+# --- Operators used by gui (works on active object)
+# --- Wrapper for osc Operators
+#
+
 class BLive_OT_videotexture_play(bpy.types.Operator):
     '''Videotexture play'''
 
@@ -173,8 +133,44 @@ class BLive_OT_videotexture_play(bpy.types.Operator):
             return False
 
     def execute(self, context):
-        image = context.active_object.active_material.active_texture.image
-        bpy.ops.blive.osc_videotexture_play(imgname=image.name)
+        ob = context.active_object
+        image = ob.active_material.active_texture.image
+        player = image.player
+
+        if not len(player.playlist):
+            return{'CANCELLED'}
+
+        if not player.state == 'CLOSED' or player.state == 'CHANGED':
+            # open new media
+            entry = player.playlist[player.active_playlist_entry]
+            if entry.sourcetype == 'Movie':
+                bpy.ops.blive.osc_videotexture_open_movie(  obname=ob.name,
+                                                            imgname=image.name,
+                                                            filepath=entry.filepath,
+                                                            audio=entry.audio,
+                                                            inpoint=entry.inpoint,
+                                                            outpoint=entry.outpoint,
+                                                            loop=entry.loop,
+                                                            preseek=entry.preseek,
+                                                            deinterlace=entry.deinterlace
+                                                         )
+            elif entry.sourcetype == 'Camera':
+                pass
+            elif entry.sourcetype == 'Stream':
+                bpy.ops.blive.osc_videotexture_open_movie(  obname=ob.name,
+                                                            imgname=image.name,
+                                                            filepath=entry.filepath,
+                                                            audio=entry.audio,
+                                                            inpoint=0.0,
+                                                            outpoint=0.0,
+                                                            loop=False,
+                                                            preseek=0,
+                                                            deinterlace=False
+                                                         )
+
+        else:
+            bpy.ops.blive.osc_videotexture_play(imgname=image.name)
+
         image.player.state = 'PLAYING'
         return {'FINISHED'}
 
@@ -230,61 +226,130 @@ class BLive_OT_videotexture_close(bpy.types.Operator):
         image.player.state = 'CLOSED'
         return {'FINISHED'}
 
-#class BLive_OT_videotexture_playlist_add(bpy.types.Operator):
-    #'''
-    #copy source properties into playlist
-    #'''
-    #bl_idname = "blive.videotexture_playlist_add"
-    #bl_label = "BLive add Playlist Entry"
+class BLive_OT_videotexture_playlist_add_entry(bpy.types.Operator):
+    '''Videotexture add playlist entry'''
+    bl_idname = "blive.videotexture_playlist_add_entry"
+    bl_label = "BLive add playlist entry"
+    uri = bpy.props.StringProperty()
 
-    #@classmethod
-    #def poll(self, context):
-        #try:
-            #return bool(context.active_object.active_material.active_texture.image)
-        #except AttributeError:
-            #return False
+    @classmethod
+    def poll(self, context):
+        try:
+            return bool(context.active_object.active_material.active_texture.image)
+        except AttributeError:
+            return False
 
-    #def execute(self, context):
-        #image = context.active_object.active_material.active_texture.image
-        #player = image.player
-        #source = player.source
+    def execute(self, context):
+        ob = context.active_object
+        image = ob.active_material.active_texture.image
+        player = image.player
 
-        #entry = image.player.playlist.add()
-        #entry.name = source.filepath
-        #entry.sourcetype = source.sourcetype
-        #entry.filepath = source.filepath
-        #entry.audio = source.audio
-        #entry.inpoint = source.inpoint
-        #entry.outpoint = source.outpoint
-        #entry.preseek = source.preseek
-        #entry.loop = source.loop
-        #entry.deinterlace = source.deinterlace
-        #entry.width = source.width
-        #entry.height = source.height
-        #entry.rate = source.rate
+        if player.sourcetype == 'Movie':
+            if 'FILE_BROWSER' in [i.type for i in context.screen.areas]:
+                narea = [i.type for i in context.screen.areas].index('FILE_BROWSER')
+                nspace = [i.type for i in context.screen.areas[narea].spaces].index('FILE_BROWSER')
+                space = context.screen.areas[narea].spaces[nspace]
+                filename = space.params.filename
+                directory = space.params.directory
+                if filename:
+                    filepath = "{0}/{1}".format(directory, filename)
+                    entry = player.playlist.add()
+                    entry.name = filename
+                    entry.filepath = filepath
+                    entry.sourcetype = player.sourcetype
+                    player.active_playlist_entry = len(player.playlist) - 1
+            else:
+                return{'CANCELED'}
+        elif player.sourcetype == 'Camera' or player.sourcetype == 'Stream':
+            entry = player.playlist.add()
+            entry.name = self.uri
+            entry.filepath = self.uri
+            entry.sourcetype = player.sourcetype
+            player.active_playlist_entry = len(player.playlist) - 1
 
-        #player.playlist_entry = len(player.playlist)-1
+        return {'FINISHED'}
 
-        #return {'FINISHED'}
+    def invoke(self, context, event):
+        image = context.active_object.active_material.active_texture.image
+        player = image.player
+        if not player.sourcetype == 'Movie':
+            return context.window_manager.invoke_props_dialog(self)
 
-#class BLive_OT_videotexture_playlist_remove(bpy.types.Operator):
-    #bl_idname = "blive.videotexture_playlist_remove"
-    #bl_label = "BLive Remove Playlist Entry"
+    def draw(self, context):
+        player = context.active_object.active_material.active_texture.image.player
 
-    #@classmethod
-    #def poll(self, context):
-        #try:
-            #return bool(context.active_object.active_material.active_texture.image)
-        #except AttributeError:
-            #return False
+        if player.sourcetype == 'Camera':
+            self.layout.label("Camera Device Path")
+            row = self.layout.row()
+            row.prop(self, "uri", text='')
+        elif player.sourcetype == 'Stream':
+            self.layout.label("Stream URI")
+            row = self.layout.row()
+            row.prop(self, "uri", text='')
 
-    #def execute(self, context):
-        #ob = bpy.context.object
-        #image = ob.active_material.active_texture.image
-        #player = image.player
-        #player.playlist.remove(player.playlist_entry)
 
-        #return {'FINISHED'}
+class BLive_OT_videotexture_playlist_delete_entry(bpy.types.Operator):
+    '''Videotexture delete playlist entry'''
+    bl_idname = "blive.videotexture_playlist_delete_entry"
+    bl_label = "BLive delete playlist entry"
+
+    @classmethod
+    def poll(self, context):
+        try:
+            return bool(context.active_object.active_material.active_texture.image)
+        except AttributeError:
+            return False
+
+    def execute(self, context):
+        player = context.active_object.active_material.active_texture.image.player
+
+        if player.active_playlist_entry < len(player.playlist):
+            player.playlist.remove(player.active_playlist_entry)
+            return{'FINISHED'}
+        else:
+            return{'CANCELLED'}
+
+class BLive_OT_videotexture_playlist_next_entry(bpy.types.Operator):
+    '''Videotexture goto next playlist entry'''
+    bl_idname = "blive.videotexture_playlist_next_entry"
+    bl_label = "BLive next playlist entry"
+
+    @classmethod
+    def poll(self, context):
+        try:
+            return bool(context.active_object.active_material.active_texture.image)
+        except AttributeError:
+            return False
+
+    def execute(self, context):
+        player = context.active_object.active_material.active_texture.image.player
+
+        if player.active_playlist_entry < len(player.playlist) - 1:
+            player.active_playlist_entry = player.active_playlist_entry + 1
+            return{'FINISHED'}
+        else:
+            return{'CANCELLED'}
+
+class BLive_OT_videotexture_playlist_prev_entry(bpy.types.Operator):
+    '''Videotexture goto prev playlist entry'''
+    bl_idname = "blive.videotexture_playlist_prev_entry"
+    bl_label = "BLive prev playlist entry"
+
+    @classmethod
+    def poll(self, context):
+        try:
+            return bool(context.active_object.active_material.active_texture.image)
+        except AttributeError:
+            return False
+
+    def execute(self, context):
+        player = context.active_object.active_material.active_texture.image.player
+
+        if player.active_playlist_entry > 0:
+            player.active_playlist_entry = player.active_playlist_entry - 1
+            return{'FINISHED'}
+        else:
+            return{'CANCELLED'}
 
 #
 # --- Client OSC Operators
@@ -358,9 +423,24 @@ class BLive_OT_osc_videotexture_set_range(bpy.types.Operator):
                             ))
         return {'FINISHED'}
 
+class BLive_OT_osc_videotexture_set_volume(bpy.types.Operator):
+    '''set volume for movie file'''
+    bl_idname = "blive.osc_videotexture_set_volume"
+    bl_label = "BLive set Volume"
+
+    imgname = bpy.props.StringProperty()
+    volume = bpy.props.FloatProperty(default=1.0)
+
+    def execute(self, context):
+        Client().send(Message("/bge/logic/media/audioVolume",
+                            self.imgname,
+                            self.volume
+                            ))
+        return {'FINISHED'}
+
 class BLive_OT_osc_videotexture_enable_loop(bpy.types.Operator):
     '''loop videotexture movie playback'''
-    bl_idname = "blive.osc_movie_loop"
+    bl_idname = "blive.osc_videotexture_enable_loop"
     bl_label = "BLive Loop Movie"
 
     imgname = bpy.props.StringProperty()
@@ -469,69 +549,24 @@ class BLive_OT_osc_videotexture_deinterlace(bpy.types.Operator):
                             ))
         return {'FINISHED'}
 
-##
-## --- Videotexture Main Operators
-##
-#class BLive_OT_videotexture_add(bpy.types.Operator):
-    #'''
-        #Command: Videotexture Add
-        #blive.osc_videotexture_add()
-    #'''
-    #bl_idname = "blive.videotexture_add"
-    #bl_label = "BLive add current source to playlist"
-
-    #@classmethod
-    #def poll(self, context):
-        #try:
-            #return bool(context.active_object.active_material.active_texture.image)
-        #except AttributeError:
-            #return False
-
-    #def execute(self, context):
-        #ob = bpy.context.object
-        #image = ob.active_material.active_texture.image
-        #player = image.player
-
-        #return {'FINISHED'}
-
-#class BLive_OT_videotexture_start(bpy.types.Operator):
-    #'''
-        #Command: Videotexture Start
-        #blive.osc_videotexture_start()
-    #'''
-    #bl_idname = "blive.videotexture_start"
-    #bl_label = "BLive start current source"
-
-    #@classmethod
-    #def poll(self, context):
-        #try:
-            #return bool(context.active_object.active_material.active_texture.image)
-        #except AttributeError:
-            #return False
-
-    #def execute(self, context):
-        #ob = bpy.context.object
-        #image = ob.active_material.active_texture.image
-        #player = image.player
-
-        #return {'FINISHED'}
 
 def register():
     print("texture.ops.register")
-    bpy.utils.register_class(BLive_OT_videotexture_source_from_filebrowser)
     #bpy.utils.register_class(BLive_OT_videotexture_filebrowser)
     #bpy.utils.register_class(BLive_OT_videotexture_open)
     bpy.utils.register_class(BLive_OT_videotexture_pause)
     bpy.utils.register_class(BLive_OT_videotexture_play)
     bpy.utils.register_class(BLive_OT_videotexture_stop)
     bpy.utils.register_class(BLive_OT_videotexture_close)
-    #bpy.utils.register_class(BLive_OT_videotexture_playlist_add)
-    #bpy.utils.register_class(BLive_OT_videotexture_playlist_remove)
-    #bpy.utils.register_class(BLive_OT_videotexture_add)
-    #bpy.utils.register_class(BLive_OT_videotexture_start)
+
+    bpy.utils.register_class(BLive_OT_videotexture_playlist_add_entry)
+    bpy.utils.register_class(BLive_OT_videotexture_playlist_delete_entry)
+    bpy.utils.register_class(BLive_OT_videotexture_playlist_next_entry)
+    bpy.utils.register_class(BLive_OT_videotexture_playlist_prev_entry)
 
     bpy.utils.register_class(BLive_OT_osc_videotexture_open_movie)
     bpy.utils.register_class(BLive_OT_osc_videotexture_enable_audio)
+    bpy.utils.register_class(BLive_OT_osc_videotexture_set_volume)
     bpy.utils.register_class(BLive_OT_osc_videotexture_set_range)
     bpy.utils.register_class(BLive_OT_osc_videotexture_enable_loop)
 
@@ -551,15 +586,17 @@ def unregister():
     bpy.utils.unregister_class(BLive_OT_videotexture_play)
     bpy.utils.unregister_class(BLive_OT_videotexture_stop)
     bpy.utils.unregister_class(BLive_OT_videotexture_close)
-    #bpy.utils.unregister_class(BLive_OT_videotexture_playlist_add)
-    #bpy.utils.unregister_class(BLive_OT_videotexture_playlist_remove)
-    #bpy.utils.unregister_class(BLive_OT_videotexture_add)
-    #bpy.utils.unregister_class(BLive_OT_videotexture_start)
+
+    bpy.utils.unregister_class(BLive_OT_videotexture_playlist_add_entry)
+    bpy.utils.unregister_class(BLive_OT_videotexture_playlist_delete_entry)
+    bpy.utils.unregister_class(BLive_OT_videotexture_playlist_next_entry)
+    bpy.utils.unregister_class(BLive_OT_videotexture_playlist_prev_entry)
 
     #bpy.utils.unregister_class(BLive_OT_osc_camera_open)
 
     bpy.utils.unregister_class(BLive_OT_osc_videotexture_open_movie)
     bpy.utils.unregister_class(BLive_OT_osc_videotexture_enable_audio)
+    bpy.utils.unregister_class(BLive_OT_osc_videotexture_set_volume)
     bpy.utils.unregister_class(BLive_OT_osc_videotexture_set_range)
     bpy.utils.unregister_class(BLive_OT_osc_videotexture_enable_loop)
 
@@ -568,5 +605,3 @@ def unregister():
     bpy.utils.unregister_class(BLive_OT_osc_videotexture_pause)
     bpy.utils.unregister_class(BLive_OT_osc_videotexture_stop)
     bpy.utils.unregister_class(BLive_OT_osc_videotexture_deinterlace)
-
-    bpy.utils.unregister_class(BLive_OT_videotexture_source_from_filebrowser)

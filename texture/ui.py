@@ -19,6 +19,8 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
+# TODO: use only playlist, current title is automatic appended to playlist
+
 import bpy
 
 class BLive_PT_texture_player(bpy.types.Panel):
@@ -38,37 +40,77 @@ class BLive_PT_texture_player(bpy.types.Panel):
         layout = self.layout
         layout.row().label("Choose Source Type")
         row = layout.row(align=True)
-        row.prop(player.source, "sourcetype", expand=True)
+        row.prop(player, "sourcetype", expand=True)
 
-    def draw_controls(self, context):
-        image = context.active_object.active_material.active_texture.image
-
+    def draw_controls(self, player):
         layout = self.layout
-        row = layout.row(align=True)
+        row = layout.row()
+
+        box = row.box()
+        box.label('Controls')
+        row = box.row(align=True)
         row.scale_x = 2
         row.scale_y = 2
         row.alignment = 'CENTER'
 
-        row.operator("blive.videotexture_source_from_filebrwoser", text="", icon="FILE_MOVIE")
-
-        if image.player.state == 'PLAYING':
-            row.operator("blive.videotexture_pause", text="", icon="PAUSE")
-        else:
-            row.operator("blive.videotexture_play", text="", icon="PLAY")
+        row.operator("blive.videotexture_playlist_next_entry", text="", icon="REW")
+        row.operator("blive.videotexture_pause", text="", icon="PAUSE")
+        row.operator("blive.videotexture_play", text="", icon="PLAY")
 
         row.operator("blive.videotexture_stop", text="", icon="MESH_PLANE")
+        row.operator("blive.videotexture_playlist_prev_entry", text="", icon="FF")
         row.operator("blive.videotexture_close", text="", icon="PANEL_CLOSE")
+
+        row = box.row()
+        row.prop(player, "volume", slider=True)
+        row = box.row()
+        row.prop(player, "alpha", slider=True)
+        row = box.row()
+        row.prop(player, "loop", toggle=True)
+
+    def draw_playlist(self, player):
+        layout = self.layout
+        row = layout.row()
+        row.template_list("UI_UL_list", "playlist", player, "playlist", player, "active_playlist_entry", rows=4, maxrows=8)
+
+        col = row.column(align=True)
+        col.operator('blive.videotexture_playlist_add_entry', icon='ZOOMIN', text='')
+        col.operator('blive.videotexture_playlist_delete_entry', icon='ZOOMOUT', text='')
+
+    def draw_playlist_entry(self, player):
+        entry = player.playlist[player.active_playlist_entry]
+        box = self.layout.box()
+        box.label('Current Playlist Entry')
+        if entry.sourcetype == 'Movie':
+            row = box.row(align=True)
+            row.prop(entry, "inpoint", text="in")
+            row.prop(entry, "outpoint", text="out")
+            row = box.row(align=True)
+            row.prop(entry, "preseek", text="preseek")
+            row = box.row(align=True)
+            row.prop(entry, "audio", text="sound")
+            row.prop(entry, "loop", text="loop")
+
+        elif entry.sourcetype == 'Camera':
+            row = box.row()
+            row.prop(entry, "filepath", text="Device")
+        elif entry.sourcetype == 'Stream':
+            row = box.row()
+            row.prop(entry, "filepath", text="URL")
+
+        # TODO: handle follow actions (needs notification from bge)
+        #row = self.layout.row(align=True)
+        #row.prop(entry, "follow", text="follow action")
 
     def draw(self, context):
         ob = context.active_object
         image = ob.active_material.active_texture.image
         player = image.player
-        source = player.source
         layout = self.layout
 
-        self.draw_source_type(context, image.player)
+        self.draw_source_type(context, player)
 
-        if source.sourcetype == 'Movie':
+        if player.sourcetype == 'Movie':
             if 'FILE_BROWSER' in [i.type for i in context.screen.areas]:
                 narea = [i.type for i in context.screen.areas].index('FILE_BROWSER')
                 nspace = [i.type for i in context.screen.areas[narea].spaces].index('FILE_BROWSER')
@@ -77,20 +119,13 @@ class BLive_PT_texture_player(bpy.types.Panel):
                 col = row.column(align=True)
                 col.enabled = False
                 col.prop(space.params, "filename", text="", expand=True)
-
-                self.draw_controls(context)
-
-                row = self.layout.row(align=True)
-                row.prop(source, "inpoint", text="in")
-                row.prop(source, "outpoint", text="out")
-                row = self.layout.row(align=True)
-                row.prop(source, "preseek", text="preseek")
-                row = self.layout.row(align=True)
-                row.prop(source, "audio", text="sound")
-                row.prop(source, "loop", text="loop")
             else:
                 row = layout.row()
                 row.label("add one filebrowser to your workspace")
+
+        self.draw_playlist(player)
+        self.draw_playlist_entry(player)
+        self.draw_controls(player)
 
 #def enumerate_images():
     #image_list = list()
