@@ -150,7 +150,10 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
 
         context.screen.scene = curscene #restore scene
 
-        bpy.ops.wm.save_as_mainfile(filepath=context.blend_data.filepath)
+        if not self.filepath:
+            bpy.ops.wm.save_as_mainfile(filepath=context.blend_data.filepath)
+        else:
+            bpy.ops.wm.save_as_mainfile(filepath=self.filepath)
 
         self.fork(context)
 
