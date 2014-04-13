@@ -274,6 +274,7 @@ class BLive_OT_videotexture_playlist_add_entry(bpy.types.Operator):
         player = image.player
         if not player.sourcetype == 'Movie':
             return context.window_manager.invoke_props_dialog(self)
+        return self.execute(context)
 
     def draw(self, context):
         player = context.active_object.active_material.active_texture.image.player
@@ -326,6 +327,7 @@ class BLive_OT_videotexture_playlist_next_entry(bpy.types.Operator):
 
         if player.active_playlist_entry < len(player.playlist) - 1:
             player.active_playlist_entry = player.active_playlist_entry + 1
+            bpy.ops.blive.videotexture_play()
             return{'FINISHED'}
         else:
             return{'CANCELLED'}
@@ -347,6 +349,7 @@ class BLive_OT_videotexture_playlist_prev_entry(bpy.types.Operator):
 
         if player.active_playlist_entry > 0:
             player.active_playlist_entry = player.active_playlist_entry - 1
+            bpy.ops.blive.videotexture_play()
             return{'FINISHED'}
         else:
             return{'CANCELLED'}
