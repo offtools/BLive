@@ -53,12 +53,12 @@ class BLive_PT_texture_player(bpy.types.Panel):
         row.scale_y = 2
         row.alignment = 'CENTER'
 
-        row.operator("blive.videotexture_playlist_next_entry", text="", icon="REW")
+        row.operator("blive.videotexture_playlist_prev_entry", text="", icon="REW")
         row.operator("blive.videotexture_pause", text="", icon="PAUSE")
         row.operator("blive.videotexture_play", text="", icon="PLAY")
 
         row.operator("blive.videotexture_stop", text="", icon="MESH_PLANE")
-        row.operator("blive.videotexture_playlist_prev_entry", text="", icon="FF")
+        row.operator("blive.videotexture_playlist_next_entry", text="", icon="FF")
         row.operator("blive.videotexture_close", text="", icon="PANEL_CLOSE")
 
         row = box.row()
@@ -95,9 +95,14 @@ class BLive_PT_texture_player(bpy.types.Panel):
         elif entry.sourcetype == 'Camera':
             row = box.row()
             row.prop(entry, "filepath", text="Device")
+            row = box.row()
+            row.prop(entry, "deinterlace", text="deinterlace")
         elif entry.sourcetype == 'Stream':
             row = box.row()
             row.prop(entry, "filepath", text="URL")
+            row = box.row()
+            row.prop(entry, "audio", text="sound")
+            row.prop(entry, "deinterlace", text="deinterlace")
 
         # TODO: handle follow actions (needs notification from bge)
         #row = self.layout.row(align=True)
@@ -125,7 +130,10 @@ class BLive_PT_texture_player(bpy.types.Panel):
                 row.label("add one filebrowser to your workspace")
 
         self.draw_playlist(player)
-        self.draw_playlist_entry(player)
+
+        if player.active_playlist_entry < len(player.playlist):
+            self.draw_playlist_entry(player)
+
         self.draw_controls(player)
 
 #def enumerate_images():

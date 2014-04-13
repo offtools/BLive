@@ -80,7 +80,6 @@ class ImagePlayer(bpy.types.PropertyGroup):
 
     volume = bpy.props.FloatProperty(default=1.0, min=0.0, max=1.0, update=controls_volume)
 
-
 def register():
     print("texture.props.register")
     bpy.utils.register_class(ImageSource)
