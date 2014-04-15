@@ -56,7 +56,7 @@ def register(port):
 
     if not hasattr(bge.logic, "server"):
         bge.logic.server = libloserver.LibloServer(port)
-        print("SERVER: ", bge.logic.server.url)
+        print("SERVER: Starting ", bge.logic.server.url)
 
     logic.register()
     render.register()
@@ -69,4 +69,4 @@ def register(port):
 
     # register server callbacks as last,
     # otherwise the fallback callback will catch all requests
-    bge.logic.server.register()
+    bge.logic.server.register_callbacks()

@@ -20,6 +20,7 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 # TODO: add basic blive_init on every startup (only path append and import statement)
+# TODO: receive disconnect diconnect
 
 import bpy
 # TODO: remove import os, sys later
@@ -65,6 +66,8 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
 
         if not UPDATESCRIPT in bpy.data.texts:
             bpy.data.texts.new(name=UPDATESCRIPT)
+        else:
+            bpy.data.texts[UPDATESCRIPT].clear()
 
         textblock = bpy.data.texts[UPDATESCRIPT]
         textblock.write('import bge\n')
@@ -126,6 +129,8 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
         cmd = [app,  blendfile, sep, portarg]
         blendprocess = subprocess.Popen(cmd)
 
+        if Client().is_connected:
+            Client().close()
         Client().connect(server, port)
 
     @classmethod
@@ -150,10 +155,10 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
 
         context.screen.scene = curscene #restore scene
 
-        if not self.filepath:
-            bpy.ops.wm.save_as_mainfile(filepath=context.blend_data.filepath)
-        else:
+        if self.filepath:
             bpy.ops.wm.save_as_mainfile(filepath=self.filepath)
+        else:
+            bpy.ops.wm.save_as_mainfile(filepath=context.blend_data.filepath)
 
         self.fork(context)
 
@@ -177,9 +182,9 @@ class BLive_OT_stop_gameengine(bpy.types.Operator):
         return{'FINISHED'}
 
 
-class BLive_OT_reload_gameengine(bpy.types.Operator):
-    bl_idname = "blive.gameengine_reload"
-    bl_label = "BLive reload gameengine"
+class BLive_OT_restart_gameengine(bpy.types.Operator):
+    bl_idname = "blive.gameengine_restart"
+    bl_label = "BLive restart gameengine"
     save = bpy.props.BoolProperty(default=False)
 
     #@classmethod
@@ -187,30 +192,10 @@ class BLive_OT_reload_gameengine(bpy.types.Operator):
         #pass
 
     def execute(self, context):
-        # reload gameengine by sending restartGame(), without closing
+        # restart gameengine by sending restartGame()
         if self.save:
             bpy.ops.wm.save_as_mainfile(filepath=context.blend_data.filepath)
         Client().send(Message("/bge/logic/restartGame"))
-
-        server = context.window_manager.blive_settings.server
-        port = context.window_manager.blive_settings.port
-
-        Client().connect(server, port)
-        return{'FINISHED'}
-
-class BLive_OT_restart_gameengine(bpy.types.Operator):
-    bl_idname = "blive.gameengine_restart"
-    bl_label = "BLive restart gameengine"
-
-    #@classmethod
-    #def poll(self, context):
-        #pass
-
-    def execute(self, context):
-        # stop gameengine
-        bpy.ops.blive.gameengine_stop()
-        # start gameengine
-        bpy.ops.blive.gameengine_start()
         return{'FINISHED'}
 
 class BLive_OT_open_gameengine(bpy.types.Operator):
@@ -299,24 +284,35 @@ class BLive_OT_disconnect(bpy.types.Operator):
         Client().disconnect()
         return{'FINISHED'}
 
+# TODO: find out how to print messages into Info Space
+class BLive_OT_report(bpy.types.Operator):
+    bl_idname = "blive.report"
+    bl_label = "BLive report errors or messages"
+    type = bpy.props.StringProperty()
+    message = bpy.props.StringProperty()
+
+    def execute(self, context):
+        self.report(type={self.type}, message=self.message)
+        return{'FINISHED'}
+
 def register():
     print("settings.ops.register")
     bpy.utils.register_class(BLive_OT_start_gameengine)
     bpy.utils.register_class(BLive_OT_stop_gameengine)
-    bpy.utils.register_class(BLive_OT_reload_gameengine)
     bpy.utils.register_class(BLive_OT_open_gameengine)
     bpy.utils.register_class(BLive_OT_restart_gameengine)
     bpy.utils.register_class(BLive_OT_send_osc_message)
     bpy.utils.register_class(BLive_OT_connect)
     bpy.utils.register_class(BLive_OT_disconnect)
+    bpy.utils.register_class(BLive_OT_report)
 
 def unregister():
     print("settings.ops.unregister")
     bpy.utils.unregister_class(BLive_OT_open_gameengine)
-    bpy.utils.unregister_class(BLive_OT_reload_gameengine)
     bpy.utils.unregister_class(BLive_OT_restart_gameengine)
     bpy.utils.unregister_class(BLive_OT_stop_gameengine)
     bpy.utils.unregister_class(BLive_OT_start_gameengine)
     bpy.utils.unregister_class(BLive_OT_send_osc_message)
     bpy.utils.unregister_class(BLive_OT_connect)
     bpy.utils.unregister_class(BLive_OT_disconnect)
+    bpy.utils.unregister_class(BLive_OT_report)

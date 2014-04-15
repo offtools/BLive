@@ -51,9 +51,9 @@ class LibloServer(Server):
         self.handler = list()
 
     def __del__(self):
-        print("SERVER: removed")
+        self.clients.clear()
 
-    def register(self):
+    def register_callbacks(self):
         self.add_method("/bge/connect", '', self.cb_connect)
         self.add_method("/bge/disconnect", '', self.cb_disconnect)
         self.add_method(None, None, self.cb_fallback)
@@ -63,10 +63,15 @@ class LibloServer(Server):
         for func in self.handler:
             func()
 
+    def restart(self, source):
+        for i in self.clients:
+            self.send(i, "/bge/restart")
+
     def shutdown(self, source):
         print("SERVER: Shutting down")
         for i in self.clients:
             self.send(i, "/bge/logic/endGame", source.url)
+        print("SERVER: freeing LibloServer")
         self.free()
 
     def cb_connect(self, path, args, types, source, user_data):

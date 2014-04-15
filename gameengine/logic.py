@@ -52,6 +52,7 @@ class SceneRequestHandler(BaseRequestHandler):
 
     @classmethod
     def call_restartGame(cls, path, args, types, source, user_data):
+        bge.logic.server.restart(source)
         bge.logic.server.free()
         del bge.logic.server
         cls.call_method(path, args, types, source, user_data)

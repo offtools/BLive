@@ -19,11 +19,6 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-#TODO:
-#   stop client on load new file
-#   stop Client Thread not from inside, stop it on, load blendfile, ...
-#   remove sleep statement by better solution
-
 import bpy
 import liblo
 import threading
@@ -73,15 +68,19 @@ class LibloClient(liblo.ServerThread):
         # register dmx channels
         bpy.ops.blive.oscdmx_register_channels()
 
+    @make_method('/bge/restart', '')
+    def cb_restart(self, path, args, types, source, user_data):
+        print("CLIENT: received restart - trying reconnect: ")
+        server = bpy.context.window_manager.blive_settings.server
+        port = bpy.context.window_manager.blive_settings.port
+        self.reconnect(server, port)
+
     @make_method('/bge/error', 'is')
     def cb_error(self, path, args, types, source, user_data):
         if args[0] == 0:
-            print ("CLIENT: received unknown message: ", args)
+            bpy.ops.blive.report(message="CLIENT: received unknown message: {0}".format(args), type='WARNING')
         elif args[0] == 1:
-            print ("CLIENT: out of sync: ", args)
-            # TOOD: caution may crash the gameengine
-            #bpy.ops.wm.save_as_mainfile(filepath=bpy.context.blend_data.filepath)
-            #bpy.ops.blive.gameengine_reload()
+            bpy.ops.blive.report(message="CLIENT: out of sync, reload gameengine: {0}".format(args), type='WARNING')
 
     @make_method('/bge/logic/endGame', 's')
     def cb_shutdown(self, path, args, types, source, user_data):
@@ -102,7 +101,8 @@ class LibloClient(liblo.ServerThread):
         '''activate registered apphandler'''
         for handler in self.appHandler.keys():
             for func in self.appHandler[handler]:
-                getattr(bpy.app.handlers, handler).append(func)
+                if not func in getattr(bpy.app.handlers, handler):
+                    getattr(bpy.app.handlers, handler).append(func)
 
     def _stop_apphandler(self):
         '''deactivate apphandler'''
@@ -116,19 +116,31 @@ class LibloClient(liblo.ServerThread):
     def is_connecting(self):
         return self.__await_connect
 
+    def is_connected(self):
+        return self.__thread_started
+
     def connect(self, host, port, proto=liblo.UDP):
         '''connect to a osc server'''
-        print("CLIENT: connecting")
-
         try:
-            self.target = liblo.Address(host, port, proto)
-            self.start()
-            self.__await_connect = True
-            self.__conreq = LibloClient.ConnectRequest(self)
-            self.__conreq.start()
+            if not self.__thread_started:
+                self.target = liblo.Address(host, port, proto)
+                self.start()
+                self.__await_connect = True
+                self.__conreq = LibloClient.ConnectRequest(self)
+                self.__conreq.start()
+            else:
+                self.target = liblo.Address(host, port, proto)
+                self.reconnect(host, port)
         except liblo.AddressError as err:
             print("TODO Error Handling", err)
             return
+
+    def reconnect(self, host, port, proto=liblo.UDP):
+        '''connect to a osc server after server restart'''
+        if not self.__await_connect:
+            self.__await_connect = True
+            self.__conreq = LibloClient.ConnectRequest(self)
+            self.__conreq.start()
 
     def send(self, path, *args):
         try:
@@ -166,6 +178,7 @@ class LibloClient(liblo.ServerThread):
             print("CLIENT: libloclient thread stopped")
 
     def close(self):
+        print("CLIENT: closing")
         self._stop_apphandler()
         self.stop()
         try:
