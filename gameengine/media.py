@@ -182,7 +182,7 @@ class FFmpegPlayer(_BasePlayer):
         return self._texture.source.repeat
 
     def set_loop(self, loop):
-        if loop is True:
+        if loop == True:
             self._texture.source.repeat = -1
         else:
             self._texture.source.repeat = 0
