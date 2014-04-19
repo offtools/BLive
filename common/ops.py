@@ -19,9 +19,6 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-# TODO: add basic blive_init on every startup (only path append and import statement)
-# TODO: receive disconnect diconnect
-
 import bpy
 # TODO: remove import os, sys later
 import os
@@ -129,7 +126,7 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
         cmd = [app,  blendfile, sep, portarg]
         blendprocess = subprocess.Popen(cmd)
 
-        if Client().is_connected:
+        if Client().is_connected():
             Client().close()
         Client().connect(server, port)
 
