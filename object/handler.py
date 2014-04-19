@@ -59,7 +59,7 @@ def object_update_handler(scene):
         # TODO: replace /material code
         # workaround for object color
         for i in ob.material_slots:
-            if ob.type == 'MESH' and bpy.data.materials[i.name].use_object_color:
+            if ob.type == 'MESH' and len(bpy.data.materials) and bpy.data.materials[i.name].use_object_color:
                 Client().send(Message("/bge/scene/objects/color", ob.name, ob.color[0], ob.color[1], ob.color[2], ob.color[3]))
 
 
