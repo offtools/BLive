@@ -45,7 +45,22 @@ class MeshRequestHandler(BaseRequestHandler):
         return args[1:]
 
     @classmethod
-    def call_method_update(cls, path, args, types, source, user_data):
+    def get_vertex(cls, object, mesh_index, polygon_index, vertex_index):
+        #   retrieve polygon
+        polygon = object.meshes[0].getPolygon(polygon_index)
+
+        #   get verts from polygon
+        verts = [polygon.v1, polygon.v2, polygon.v3, polygon.v4]
+        if verts[3] == 0: verts.pop()
+
+        #   get material index (workaround for matid bug, matid is not an attr of KX_PolyProxy)
+        mat_index = object.meshes[0].materials.index(polygon.material)
+        mesh = object.meshes[0]
+
+        return mesh.getVertex(mat_index, verts[vertex_index])
+
+    @classmethod
+    def call_method_update_face_co(cls, path, args, types, source, user_data):
         scene = bge.logic.getCurrentScene()
         ob = scene.objects[args[0]]
         mesh_index = args[1]
@@ -55,19 +70,25 @@ class MeshRequestHandler(BaseRequestHandler):
         y = args[5]
         z = args[6]
 
-        #   retrieve polygon
-        polygon = ob.meshes[0].getPolygon(polygon_index)
-
-        #   get verts from polygon
-        verts = [polygon.v1, polygon.v2, polygon.v3, polygon.v4]
-        if verts[3] == 0: verts.pop()
-
-        #   get material index (workaround for matid bug, matid is not an attr of KX_PolyProxy)
-        mat_index = ob.meshes[0].materials.index(polygon.material)
-        mesh = ob.meshes[0]
         try:
-            vertex = mesh.getVertex(mat_index, verts[vertex_index])
+            vertex = cls.get_vertex(ob, mesh_index, polygon_index, vertex_index)
             vertex.setXYZ([x,y,z])
+        except IndexError as err:
+            print("%s : mat_idx: %d vert_idx: %d" %(err, mat_index, vertex_index))
+
+    @classmethod
+    def call_method_update_face_uv(cls, path, args, types, source, user_data):
+        scene = bge.logic.getCurrentScene()
+        ob = scene.objects[args[0]]
+        mesh_index = args[1]
+        polygon_index = args[2]
+        vertex_index = args[3]
+        u = args[4]
+        v = args[5]
+
+        try:
+            vertex = cls.get_vertex(ob, mesh_index, polygon_index, vertex_index)
+            vertex.setUV([u,v])
         except IndexError as err:
             print("%s : mat_idx: %d vert_idx: %d" %(err, mat_index, vertex_index))
 
@@ -85,8 +106,9 @@ def register():
         #bge.logic.server.add_method("/bge/scene/objects/meshes/getNumPolygons", "si", MeshRequestHandler.reply_)
         #bge.logic.server.add_method("/bge/scene/objects/meshes/getPolygon", "sii", MeshRequestHandler.reply_)
 
-        #extra update method (using bmesh in blender)
-        bge.logic.server.add_method("/bge/scene/objects/meshes/update", "siiifff", MeshRequestHandler.call_method_update)
+        #extra update methods (using bmesh in blender)
+        bge.logic.server.add_method("/bge/scene/objects/meshes/update_face_co", "siiifff", MeshRequestHandler.call_method_update_face_co)
+        bge.logic.server.add_method("/bge/scene/objects/meshes/update_face_uv", "siiiff", MeshRequestHandler.call_method_update_face_uv)
 
     except (AttributeError, ValueError) as err:
         print("SERVER: could not register /bge/scene/objects/meshes callbacks - ", err)

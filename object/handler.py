@@ -55,7 +55,6 @@ def object_update_handler(scene):
             elif ob.type == 'MESH' and ob.mode == 'EDIT':
                 ops.BLive_OT_osc_object_meshdata.update_mesh(ob)
 
-
         # TODO: replace /material code
         # workaround for object color
         for i in ob.material_slots:
