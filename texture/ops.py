@@ -53,9 +53,9 @@ class BLive_OT_videotexture_play(bpy.types.Operator):
         if not len(player.playlist):
             return{'CANCELLED'}
 
-        if not player.state == 'CLOSED' or player.state == 'CHANGED':
+        if not player.selected_playlist_entry == player.active_playlist_entry:
             # open new media
-            entry = player.playlist[player.active_playlist_entry]
+            entry = player.playlist[player.selected_playlist_entry]
             if entry.sourcetype == 'Movie':
                 bpy.ops.blive.osc_videotexture_open_movie(  obname=ob.name,
                                                             imgname=image.name,
@@ -80,6 +80,7 @@ class BLive_OT_videotexture_play(bpy.types.Operator):
                                                             preseek=0,
                                                             deinterlace=False
                                                          )
+            player.active_playlist_entry = player.selected_playlist_entry
 
         else:
             bpy.ops.blive.osc_videotexture_play(imgname=image.name)
@@ -137,6 +138,7 @@ class BLive_OT_videotexture_close(bpy.types.Operator):
         image = context.active_object.active_material.active_texture.image
         bpy.ops.blive.osc_videotexture_close(imgname=image.name)
         image.player.state = 'CLOSED'
+        image.player.active_playlist_entry = -1
         return {'FINISHED'}
 
 class BLive_OT_videotexture_playlist_add_entry(bpy.types.Operator):
@@ -170,15 +172,15 @@ class BLive_OT_videotexture_playlist_add_entry(bpy.types.Operator):
                     entry.name = filename
                     entry.filepath = filepath
                     entry.sourcetype = player.sourcetype
-                    player.active_playlist_entry = len(player.playlist) - 1
+                    player.selected_playlist_entry = len(player.playlist) - 1
             else:
-                return{'CANCELED'}
+                return{'CANCELLED'}
         elif player.sourcetype == 'Camera' or player.sourcetype == 'Stream':
             entry = player.playlist.add()
             entry.name = self.uri
             entry.filepath = self.uri
             entry.sourcetype = player.sourcetype
-            player.active_playlist_entry = len(player.playlist) - 1
+            #player.selected_playlist_entry = len(player.playlist) - 1
 
         return {'FINISHED'}
 
@@ -217,8 +219,9 @@ class BLive_OT_videotexture_playlist_delete_entry(bpy.types.Operator):
     def execute(self, context):
         player = context.active_object.active_material.active_texture.image.player
 
-        if player.active_playlist_entry < len(player.playlist):
-            player.playlist.remove(player.active_playlist_entry)
+        if player.selected_playlist_entry < len(player.playlist):
+            bpy.ops.blive.videotexture_close()
+            player.playlist.remove(player.selected_playlist_entry)
             return{'FINISHED'}
         else:
             return{'CANCELLED'}
@@ -238,8 +241,9 @@ class BLive_OT_videotexture_playlist_next_entry(bpy.types.Operator):
     def execute(self, context):
         player = context.active_object.active_material.active_texture.image.player
 
-        if player.active_playlist_entry < len(player.playlist) - 1:
-            player.active_playlist_entry = player.active_playlist_entry + 1
+        if player.selected_playlist_entry < len(player.playlist) - 1:
+            player.selected_playlist_entry = player.selected_playlist_entry + 1
+            #player.state = 'CHANGED'
             bpy.ops.blive.videotexture_play()
             return{'FINISHED'}
         else:
@@ -260,12 +264,50 @@ class BLive_OT_videotexture_playlist_prev_entry(bpy.types.Operator):
     def execute(self, context):
         player = context.active_object.active_material.active_texture.image.player
 
-        if player.active_playlist_entry > 0:
-            player.active_playlist_entry = player.active_playlist_entry - 1
+        if player.selected_playlist_entry > 0:
+            player.selected_playlist_entry = player.selected_playlist_entry - 1
+            #player.state = 'CHANGED'
             bpy.ops.blive.videotexture_play()
             return{'FINISHED'}
         else:
             return{'CANCELLED'}
+
+class BLive_OT_videotexture_mixer_popup(bpy.types.Operator):
+    '''Videotexture mixer dialog'''
+    bl_idname = "blive.videotexture_mixer_popup"
+    bl_label = "BLive videotexture mixer"
+
+    @classmethod
+    def poll(self, context):
+        return True
+
+    def execute(self, context):
+            return{'FINISHED'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_popup(self, width=400, height=400)
+
+    def draw(self, context):
+        layout = self.layout
+        for ob in bpy.data.objects:
+            image = None
+            for matslots in ob.material_slots:
+                for texslots in matslots.material.texture_slots:
+                    if hasattr(texslots, 'texture') and hasattr(texslots.texture, 'image'):
+                        image = texslots.texture.image
+            if image and not image.player.state == 'CLOSED':
+                row = layout.row()
+                row.label(ob.name, icon='OBJECT_DATA')
+                row.label(image.name, icon='IMAGE_DATA')
+                filename = os.path.basename(image.player.playlist[image.player.selected_playlist_entry].filepath)
+                row.label(filename, icon='FILE_MOVIE')
+                box = layout.box()
+                row = box.row(align=True)
+                row.prop(ob, 'color', text='Alpha', index=3)
+                row = box.row()
+                row.prop(image.player, 'volume', text='Volume')
+                layout.separator()
 
 #
 # --- Client OSC Operators
@@ -474,6 +516,7 @@ def register():
     bpy.utils.register_class(BLive_OT_videotexture_play)
     bpy.utils.register_class(BLive_OT_videotexture_stop)
     bpy.utils.register_class(BLive_OT_videotexture_close)
+    bpy.utils.register_class(BLive_OT_videotexture_mixer_popup)
 
     bpy.utils.register_class(BLive_OT_videotexture_playlist_add_entry)
     bpy.utils.register_class(BLive_OT_videotexture_playlist_delete_entry)
@@ -502,6 +545,7 @@ def unregister():
     bpy.utils.unregister_class(BLive_OT_videotexture_play)
     bpy.utils.unregister_class(BLive_OT_videotexture_stop)
     bpy.utils.unregister_class(BLive_OT_videotexture_close)
+    bpy.utils.unregister_class(BLive_OT_videotexture_mixer_popup)
 
     bpy.utils.unregister_class(BLive_OT_videotexture_playlist_add_entry)
     bpy.utils.unregister_class(BLive_OT_videotexture_playlist_delete_entry)

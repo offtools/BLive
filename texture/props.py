@@ -36,15 +36,11 @@ class ImageSource(bpy.types.PropertyGroup):
     rate = bpy.props.FloatProperty(default=0.0)
     follow = bpy.props.EnumProperty(name="follow", items=(("reset","Reset Texture",""),("hold","hold last Image",""), ("next", "goto next Entry", "")))
 
-def ImagePlayer_entry_changed(self, context):
-    player = context.active_object.active_material.active_texture.image.player
-    pass
-
 state_enum =   (('PLAYING', 'Playing', 'Playing'),
                 ('PAUSED', 'Paused', 'Paused'),
                 ('STOPPED', 'Stopped', 'Stopped'),
                 ('CLOSED', 'Closed', 'Closed'),
-                ('CHANGED', 'Changed', 'Changed'),
+#                ('CHANGED', 'Changed', 'Changed'),
                 )
 
 class ImagePlayer(bpy.types.PropertyGroup):
@@ -56,7 +52,12 @@ class ImagePlayer(bpy.types.PropertyGroup):
 
     # playlist
     playlist = bpy.props.CollectionProperty(type=ImageSource)
-    active_playlist_entry = bpy.props.IntProperty(default=0, update=ImagePlayer_entry_changed)
+
+    ## selected playlist entry
+    selected_playlist_entry = bpy.props.IntProperty(default=0)
+
+    ## currently played playlist entry
+    active_playlist_entry = bpy.props.IntProperty(default=-1)
 
     # controls
     state = bpy.props.EnumProperty(name='ID Type', items=state_enum, default='CLOSED')
@@ -68,17 +69,17 @@ class ImagePlayer(bpy.types.PropertyGroup):
 
     #audio = bpy.props.BoolProperty(default=False, update=controls_audio)
 
-    def controls_loop(self, context):
+    def loop_updated(self, context):
         image = context.active_object.active_material.active_texture.image
         bpy.ops.blive.osc_videotexture_enable_loop(imgname=image.name, loop=int(self.loop))
 
-    loop = bpy.props.BoolProperty(default=False, update=controls_loop)
+    loop = bpy.props.BoolProperty(default=False, update=loop_updated)
 
-    def controls_volume(self, context):
+    def volume_updated(self, context):
         image = context.active_object.active_material.active_texture.image
         bpy.ops.blive.osc_videotexture_set_volume(imgname=image.name, volume=self.volume)
 
-    volume = bpy.props.FloatProperty(default=1.0, min=0.0, max=1.0, update=controls_volume)
+    volume = bpy.props.FloatProperty(default=1.0, min=0.0, max=1.0, update=volume_updated)
 
 def register():
     print("texture.props.register")

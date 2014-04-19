@@ -20,6 +20,7 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 # TODO: add all properties to playlist entries
+# TODO: add controls for audio and loop (independent from cuelist)
 
 import bpy
 
@@ -47,7 +48,10 @@ class BLive_PT_texture_player(bpy.types.Panel):
         row = layout.row()
 
         box = row.box()
-        box.label('Controls')
+        if len(player.playlist):
+            box.label('Controls: {0}'.format(player.playlist[player.active_playlist_entry].filepath))
+        else:
+            box.label('Controls: ---')
         row = box.row(align=True)
         row.scale_x = 2
         row.scale_y = 2
@@ -66,20 +70,22 @@ class BLive_PT_texture_player(bpy.types.Panel):
         row = box.row()
         ob = bpy.context.active_object
         row.prop(ob, "color", text='Alpha', slider=True, index=3)
+        #row = box.row()
+        #row.prop(player, "loop", toggle=True)
         row = box.row()
-        row.prop(player, "loop", toggle=True)
+        row.operator('blive.videotexture_mixer_popup', text='Mixer', icon='NLA')
 
     def draw_playlist(self, player):
         layout = self.layout
         row = layout.row()
-        row.template_list("UI_UL_list", "playlist", player, "playlist", player, "active_playlist_entry", rows=4, maxrows=8)
+        row.template_list("UI_UL_list", "playlist", player, "playlist", player, "selected_playlist_entry", rows=4, maxrows=8)
 
         col = row.column(align=True)
         col.operator('blive.videotexture_playlist_add_entry', icon='ZOOMIN', text='')
         col.operator('blive.videotexture_playlist_delete_entry', icon='ZOOMOUT', text='')
 
     def draw_playlist_entry(self, player):
-        entry = player.playlist[player.active_playlist_entry]
+        entry = player.playlist[player.selected_playlist_entry]
         box = self.layout.box()
         box.label('Current Playlist Entry')
         if entry.sourcetype == 'Movie':
@@ -131,7 +137,7 @@ class BLive_PT_texture_player(bpy.types.Panel):
 
         self.draw_playlist(player)
 
-        if player.active_playlist_entry < len(player.playlist):
+        if player.selected_playlist_entry < len(player.playlist):
             self.draw_playlist_entry(player)
 
         self.draw_controls(player)
