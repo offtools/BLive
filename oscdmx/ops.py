@@ -20,7 +20,6 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 import bpy
-import re
 from .props import type_enum
 from ..common.libloclient import Client
 from ..utils.utils import unique_name
