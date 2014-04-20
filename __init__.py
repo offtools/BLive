@@ -29,7 +29,7 @@ bl_info = {
     "name": "BLive",
     "author": "offtools",
     "version": (0, 0, 1),
-    "blender": (2, 6, 4),
+    "blender": (2, 6, 6),
     "location": "various Panels with prefix BLive",
     "description": "blender to bge osc network addon",
     "warning": "",
