@@ -40,7 +40,6 @@ state_enum =   (('PLAYING', 'Playing', 'Playing'),
                 ('PAUSED', 'Paused', 'Paused'),
                 ('STOPPED', 'Stopped', 'Stopped'),
                 ('CLOSED', 'Closed', 'Closed'),
-#                ('CHANGED', 'Changed', 'Changed'),
                 )
 
 class ImagePlayer(bpy.types.PropertyGroup):
