@@ -30,7 +30,7 @@ class ImageSource(bpy.types.PropertyGroup):
     preseek = bpy.props.IntProperty(default=0)
     loop = bpy.props.BoolProperty(default=False)
     deinterlace = bpy.props.BoolProperty(default=False)
-    volume = bpy.props.FloatProperty(default=1.0)
+    volume = bpy.props.FloatProperty(default=1.0, min=0.0, max=1.0)
     width = bpy.props.IntProperty(default=320)
     height = bpy.props.IntProperty(default=240)
     rate = bpy.props.FloatProperty(default=0.0)

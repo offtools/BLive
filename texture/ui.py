@@ -97,6 +97,9 @@ class BLive_PT_texture_player(bpy.types.Panel):
             row = box.row(align=True)
             row.prop(entry, "audio", text="sound")
             row.prop(entry, "loop", text="loop")
+            if entry.audio:
+                row = box.row()
+                row.prop(entry, "volume", text="volume")
 
         elif entry.sourcetype == 'Camera':
             row = box.row()
