@@ -32,43 +32,27 @@ def marker_handler(scene):
     if not bpy.context.screen.is_animation_playing:
         return
 
-    # stop animation in editmode
-    if not bpy.context.active_object.mode == 'OBJECT':
-        if bpy.context.screen.is_animation_playing:
-            bpy.ops.screen.animation_play()
+    current_frame = scene.frame_current
+    prev_frame = current_frame - 1
 
-    trigger = scene.timeline_trigger
-    markerdict = trigger.m_markerdict
-    markedframes = dict((i.frame, i) for i in scene.timeline_markers)
-    cur = scene.frame_current
-    prev = cur - 1
+    trigger = scene.timeline_marker_trigger
+    marked_frames = dict((i.frame, i) for i in scene.timeline_markers)
 
-    # check for marker in current frame
-    if cur in markedframes and markedframes[cur].name in trigger.m_markerdict:
-        markerid = markedframes[cur].name
+    def execute_slot(frame, is_current):
+        if frame in marked_frames:
+            marker = trigger.marker_dict[marked_frames[frame].name]
+            queue = trigger.queues[marker.queue]
 
-        if markerid in markerdict and markerdict[markerid].m_queue:
-            #   check pause - stop animation
-            qid = markerdict[markerid].m_queue
-            if trigger.m_queues[qid].m_pause and bpy.context.screen.is_animation_playing:
+            if is_current and queue.pause and bpy.context.screen.is_animation_playing:
                 bpy.ops.screen.animation_play()
 
-            # send events - if not execute_after
-            if not trigger.m_queues[qid].m_execute_after:
-                for slot in trigger.m_queues[qid].m_slots:
-                    wrapperitem = getattr(trigger.m_queues[qid].m_trigger, slot.m_type)
-                    wrapperitem[slot.name].send()
+            if not queue.execute_after or not is_current:
+                for slot in queue.queue_slots:
+                    slot_data = getattr(trigger.data, slot.type)[slot.name]
+                    slot_data.execute()
 
-    # check for marker in prev frame (execute after flag)
-    if prev in markedframes and markedframes[prev].name:
-        markerid =  markedframes[prev].name
-        qid = markerdict[markerid].m_queue
-
-        # send events - if execute_after
-        if qid and trigger.m_queues[qid].m_execute_after:
-            for slot in trigger.m_queues[qid].m_slots:
-                wrapperitem = getattr(trigger.m_queues[qid].m_trigger, slot.m_type)
-                wrapperitem[slot.name].send()
+    execute_slot(frame=current_frame, is_current=True)
+    execute_slot(frame=prev_frame, is_current=False)
 
 def register():
     print("marker.handler.register")

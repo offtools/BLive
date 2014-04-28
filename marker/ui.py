@@ -27,166 +27,141 @@
 
 import bpy
 
-class BLive_PT_timeline_trigger(bpy.types.Panel):
-    bl_label = "BLive Timeline Trigger"
+class TRIGGER_UL_queues(bpy.types.UIList):
+
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        queues = data
+        queue = item
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            layout.prop(queue, 'name', text='', emboss=False)
+            if queue.marker:
+                layout.prop(queue, 'marker', icon='PMARKER_SEL', icon_only=True, emboss=False)
+            else:
+                layout.prop(queue, 'marker', icon='ERROR', icon_only=True, emboss=False)
+
+        # TODO: 'GRID' layout type should be as compact as possible (typically a single icon!).
+        elif self.layout_type in {'GRID'}:
+            layout.alignment = 'CENTER'
+            layout.label(queue.name)
+
+class BLive_PT_timeline_marker_trigger(bpy.types.Panel):
+    bl_label = "BLive Timeline Marker Trigger"
     bl_space_type = "NLA_EDITOR"
     bl_region_type = "UI"
 
     @classmethod
     def poll(self, context):
-        return bool(len(context.scene.timeline_markers))
+        return True
 
     def draw(self, context):
         layout = self.layout
 
         scene = context.scene
-        trigger = scene.timeline_trigger
+        data = scene.timeline_marker_trigger.data
+        queues= scene.timeline_marker_trigger.queues
+        idx = context.scene.timeline_marker_trigger.active_queue
 
+        # list Queues
         row = layout.row()
-        row.label('Timeline Markers')
+        row.template_list("TRIGGER_UL_queues", "queues", scene.timeline_marker_trigger, "queues", scene.timeline_marker_trigger, "active_queue", rows=1, maxrows=4)
+        col = row.column(align=True)
+        col.operator('blive.timeline_trigger_add_queue', text='', icon='ZOOMIN')
+        col.operator('blive.timeline_trigger_remove_queue', text='', icon='ZOOMOUT')
 
-        #   list Timeline Markers
-        row = layout.row()
-        row.template_list("UI_UL_list", "timeline_markers", scene, "timeline_markers", trigger, "m_sel_marker", rows=2, maxrows=8)
-        marker = context.scene.timeline_markers[trigger.m_sel_marker]
-
-        if marker.name in context.scene.timeline_trigger.m_markerdict:
-            #   assign Trigger to selected Timeline Marker
+        if idx > -1 and idx < len(context.scene.timeline_marker_trigger.queues):
+            queue = queues[scene.timeline_marker_trigger.active_queue]
+            layout.label("Assign Timeline Marker")
+            row = layout.row(align=True)
+            row.prop_search(queue, 'marker', scene, 'timeline_markers', text="")
+            row.operator("blive.timeline_trigger_add_assign_marker", text="", icon="ZOOMIN")
+            row.operator("blive.timeline_trigger_remove_revoke_marker", text="", icon="ZOOMOUT")
             row = layout.row()
-            row.label('assign Trigger to Timeline Marker')
-            row = layout.row(align=True)
-            row.prop_search(trigger.m_markerdict[marker.name], "m_queue", trigger, "m_queues", text='', icon='VIEWZOOM')
-            #row.operator("blive.trigger_revoke", text="", icon="ZOOMOUT")
+            row.prop(queue, "execute_after")
+            row.prop(queue, "pause")
 
-            #   add items to trigger
+            # Trigger Slots
+            layout.operator_menu_enum("blive.timeline_trigger_add_slot", "type", text="Add Trigger Slot")
+            for slot in queue.queue_slots:
+                frame = layout.column(align=True)
+                header = frame.box()
+                row = header.row()
+                row.prop(slot, "show_all", text="", icon="TRIA_RIGHT", emboss=False)
+                col = row.column()
+                col.label(slot.name)
+                col = row.column()
+                col.operator("blive.timeline_trigger_remove_slot", text="", icon="PANEL_CLOSE").slot=slot.name
+                if slot.show_all and slot.name in getattr(data, slot.type):
+                    body = frame.box()
+                    slot_data = getattr(data, slot.type)[slot.name]
+                    getattr(self, slot.type)(context, slot_data, body)
 
-            #   get selected Trigger Queue
-            qid = trigger.m_markerdict[marker.name].m_queue
-            if len(qid):
-                box = layout.box()
-                queue = trigger.m_queues[qid]
+    def TriggerOpenVideo(self, context, slot_data, layout):
+        row = layout.row()
+        row.prop(slot_data, "filepath")
+        row = layout.row()
+        row.prop_search(slot_data, "object", context.scene, "objects", text="Object")
+        row = layout.row()
+        row.prop_search(slot_data, "image", bpy.data, "images", text="Image")
+        row = layout.row()
+        row.prop(slot_data, "audio", text="enable Audio")
+        if slot_data.audio:
+            row = layout.row()
+            row.prop(slot_data, "volume", text="Volume")
+        row = layout.row()
+        row.prop(slot_data, "loop", text="Loop Video")
+        row = layout.row()
+        row.prop(slot_data, "preseek", text="Preseek")
+        row = layout.row(align=True)
+        row.prop(slot_data, "inp", text="Inpoint")
+        row.prop(slot_data, "outp", text="Outpoint")
+        row = layout.row()
+        row.prop(slot_data, "deinterlace", text="Deinterlace")
 
-                tbox = box.row(align=True)
-                tbox.prop(queue, "m_pause", text="pause")
-                tbox.prop(queue, "m_execute_after", text="send after")
+    def TriggerOpenCamera(self, context, slot_data, layout):
+        row = layout.row()
+        row.prop(slot_data, "device", text="Device")
+        row = layout.row()
+        row.prop_search(slot_data, "object", context.scene, "objects", text="Object")
+        row = layout.row()
+        row.prop_search(slot_data, "image", bpy.data, "images", text="Image")
+        row = layout.row(align=True)
+        row.prop(slot_data, "width", text="Width")
+        row.prop(slot_data, "height", text="Height")
+        row = layout.row()
+        row.prop(slot_data, "rate", text="Rate")
+        row = layout.row()
+        row.prop(slot_data, "deinterlace", text="Deinterlace")
 
-                #    menu to choose new trigger
-                tbox = box.row()
-                tbox.operator_menu_enum("blive.trigger_append", "type", text="Add Trigger")
+    def TriggerVideotextureState(self, context, slot_data, layout):
+        row = layout.row()
+        row.prop_search(slot_data, "image", bpy.data, "images", text="image")
+        row = layout.row()
+        row.prop(slot_data, "state", text="")
 
-                #   list Trigger items
-                for item in queue.m_slots:
-                    main = layout.column(align=True)
-                    head = main.box()
-                    split = head.split(percentage=0.75)
-                    row = split.row()
-                    if item.m_hidden:
-                        row.prop(item, "m_hidden", text="", icon="TRIA_RIGHT", emboss=False)
-                    else:
-                        row.prop(item, "m_hidden", text="", icon="TRIA_DOWN", emboss=False)
-                    row.label( item.m_type )
-                    split = split.split(percentage=1)
-                    buttons = split.column_flow(columns=1, align=True)
-                    buttons.operator("blive.trigger_remove", text="", icon="PANEL_CLOSE").m_slot = item.name
+    def TriggerChangeScene(self, context, slot_data, layout):
+        row = layout.row()
+        row.prop_search(slot_data, "scene", context.blend_data, "scenes", text="Scene")
 
-                    if not item.m_hidden:
-                        body = main.box()
-                        triggertype = getattr(queue.m_trigger, item.m_type)
-                        if hasattr(self, item.m_type):
-                            getattr(self, item.m_type)(context, triggertype[item.name], body)
-                        else:
-                            row = body.row()
-                            row.label("not implemented")
+    def TriggerGameProperty(self, context, slot_data, layout):
+        row = layout.row()
+        row.prop_search(slot_data, "object", context.scene, "objects", text="Object")
+        row = layout.row()
+        row.prop(slot_data, "gameproperty", text="Game Property")
 
-        #    we need to add a trigger first
-        else:
-            row = layout.row(align=True)
-            row.operator("blive.trigger_new", text="Add Queue")
+    def TriggerOSCMessage(self, context, slot_data, layout):
+        row = layout.row()
+        row.prop(slot_data, "msg", text="OSC Message")
 
-    def TriggerVideoOpen(self, context, trigger, ui):
-        row = ui.row()
-        row.prop(trigger, "m_filepath", text="Open File", icon="FILE_MOVIE")
-        row = ui.row()
-        row.prop_search(trigger, "m_object", context.scene, "objects", text="object")
-        row = ui.row()
-        row.prop_search(trigger, "m_image", bpy.data, "images", text="image")
-        row = ui.row()
-        row.prop(trigger, "m_audio", text="audio")
-        row = ui.row()
-        row.prop(trigger, "m_loop", text="loop video")
-        row = ui.row()
-        row.prop(trigger, "m_preseek", text="preseek")
-        row = ui.row()
-        row.prop(trigger, "m_inp", text="inpoint")
-        row.prop(trigger, "m_outp", text="outpoint")
-        row = ui.row()
-        row.prop(trigger, "m_deinterlace", text="deinterlace")
-
-
-    def TriggerCameraOpen(self, context, trigger, ui):
-        row = ui.row()
-        row.prop(trigger, "m_filepath", text="Open File", icon="FILE_MOVIE")
-        row = ui.row()
-        row.prop_search(trigger, "m_object", context.scene, "objects", text="object")
-        row = ui.row()
-        row.prop_search(trigger, "m_image", bpy.data, "images", text="image")
-        row = ui.row(align=True)
-        row.prop(trigger, "m_width", text="width")
-        row.prop(trigger, "m_height", text="height")
-        row = ui.row()
-        row.prop(trigger, "m_deinterlace", text="deinterlace")
-
-    def TriggerVideoState(self, context, trigger, ui):
-        row = ui.row()
-        row.prop(trigger, "m_state", text="")
-        row = ui.row()
-        row.prop_search(trigger, "m_image", bpy.data, "images", text="image")
-
-    def TriggerDummy(self, context, trigger, ui):
-        row = ui.row()
-        row.prop(trigger, "m_msg", text="send Message")
-
-    def TriggerChangeScene(self, context, trigger, ui):
-        row = ui.row()
-        row.prop_search(trigger, "m_scene", bpy.data, "scenes", text="scene")
-
-    def TriggerGameProperty(self, context, trigger, ui):
-        row = ui.row()
-        row.prop_search(trigger, "m_object", context.scene, "objects", text="object")
-        if not context.scene.objects[trigger.m_object].game.properties:
-            return
-        row = ui.row()
-        row.prop_search(trigger, "m_property", context.scene.objects[trigger.m_object].game, "properties", text="prop")
-        row = ui.row()
-        row.prop(context.scene.objects[trigger.m_object].game.properties[trigger.m_property], "value", text="set")
-
-    def TriggerScript(self, context, trigger, ui):
-        row = ui.row()
-        row.prop_search(trigger, "m_script", bpy.data, "texts", text="Script")
-
-    def TriggerOSCMessage(self, context, trigger, ui):
-        row = ui.row()
-        row.prop(trigger, "m_msg", text="send OSC Message")
-
-class BLive_PT_timeline_tools(bpy.types.Panel):
-    bl_label = "BLive Timeline Tools"
-    bl_space_type = "NLA_EDITOR"
-    bl_region_type = "UI"
-
-    @classmethod
-    def poll(self, context):
-        return bool(len(context.scene.timeline_markers))
-
-    def draw(self, context):
-        layout = self.layout
-        layout.label("Timeline Tools, Jump to markers ...")
+    def TriggerScript(self, context, slot_data, layout):
+        row = layout.row()
+        row.prop_search(slot_data, "script", context.blend_data, "texts", text="Script")
 
 def register():
     print("marker.ui.register")
-    bpy.utils.register_class(BLive_PT_timeline_trigger)
-    bpy.utils.register_class(BLive_PT_timeline_tools)
+    bpy.utils.register_class(TRIGGER_UL_queues)
+    bpy.utils.register_class(BLive_PT_timeline_marker_trigger)
 
 def unregister():
     print("marker.ui.unregister")
-    bpy.utils.unregister_class(BLive_PT_timeline_trigger)
-    bpy.utils.register_class(BLive_PT_timeline_tools)
+    bpy.utils.unregister_class(BLive_PT_timeline_marker_trigger)
+    bpy.utils.unregister_class(TRIGGER_UL_queues)

@@ -28,148 +28,120 @@ import bpy
 from liblo import Message
 from ..common.libloclient import Client
 from liblo import Message
+from ..utils.utils import unique_name
 
-TRIGGER_TYPE_ENUM = [("TriggerDummy","Dummy","Dummy Trigger"), \
-                    ("TriggerVideoOpen","Open Video","Open a Video"), \
-                    ("TriggerCameraOpen","Connect Camera","Connect a Camera"), \
-                    ("TriggerVideoState","Set Video State","Set Play, Pause, Stop"), \
+TRIGGER_TYPE_ENUM = [
+                    ("TriggerOpenVideo","Open Video","Open a Video"), \
+                    ("TriggerOpenCamera","Connect Camera","Connect a Camera"), \
+                    ("TriggerVideotextureState","Set Video State","Set Play, Pause, Stop"), \
                     ("TriggerChangeScene","Change active Scene","Change active Scene"), \
                     ("TriggerGameProperty","Set a Game Property","Set a Game Property"), \
                     ("TriggerScript","Run a Script","Run a script local"), \
                     ("TriggerOSCMessage","Send OSC Message","Send OSC Message") \
                     ]
 
-def TRIGGER_TYPE_NAME(self, _type):
-    types = [ i[0] for i in TRIGGER_TYPE_ENUM ]
-    return TRIGGER_TYPE_ENUM[types.index(_type)][1]
+class TriggerOpenVideo(bpy.types.PropertyGroup):
+    object = bpy.props.StringProperty()
+    filepath = bpy.props.StringProperty(subtype="FILE_PATH")
+    image = bpy.props.StringProperty()
+    audio = bpy.props.BoolProperty()
+    volume = bpy.props.FloatProperty(default=1.0, min=0.0, max=1.0)
+    loop = bpy.props.BoolProperty(default=False)
+    preseek = bpy.props.IntProperty(default=0)
+    inp = bpy.props.FloatProperty(default=0.0)
+    outp = bpy.props.FloatProperty(default=0.0)
+    deinterlace = bpy.props.BoolProperty(default=False)
 
-def TRIGGER_TYPE_DESCRIPTION(_type):
-    types = [ i[0] for i in TRIGGER_TYPE_ENUM ]
-    return TRIGGER_TYPE_ENUM[types.index(_type)][2]
-
-class TriggerDummy(bpy.types.PropertyGroup):
-    m_hidden = bpy.props.BoolProperty(default=True)
-    m_oscpath = bpy.props.StringProperty(default="/debug")
-
-    m_msg = bpy.props.StringProperty(default="Dummy Trigger")
-
-    def send(self):
-        Client().send(self.m_oscpath, self.m_msg)
-
-class TriggerVideoOpen(bpy.types.PropertyGroup):
-    m_hidden = bpy.props.BoolProperty(default=True)
-    m_oscpath = bpy.props.StringProperty(default="/texture/movie/open")
-
-    m_object = bpy.props.StringProperty()
-    m_filepath = bpy.props.StringProperty(subtype="FILE_PATH")
-    m_image = bpy.props.StringProperty()
-    m_audio = bpy.props.BoolProperty()
-    m_loop = bpy.props.BoolProperty(default=False)
-    m_preseek = bpy.props.IntProperty(default=0)
-    m_inp = bpy.props.FloatProperty(default=0.0)
-    m_outp = bpy.props.FloatProperty(default=0.0)
-    m_deinterlace = bpy.props.BoolProperty(default=False)
-
-    def send(self):
-        filepath = bpy.path.abspath(self.m_filepath)
+    def execute(self):
+        filepath = bpy.path.abspath(self.filepath)
         m = Message("/bge/logic/media/openMovie",
-                    self.m_object,
-                    self.m_image,
+                    self.object,
+                    self.image,
                     filepath,
-                    int(self.m_audio),
-                    self.m_inp,
-                    self.m_outp,
-                    int(self.m_loop),
-                    self.m_preseek,
-                    int(self.m_deinterlace)
+                    int(self.audio),
+                    self.inp,
+                    self.outp,
+                    int(self.loop),
+                    self.preseek,
+                    int(self.deinterlace)
                     )
 
         Client().send(m)
 
-class TriggerCameraOpen(bpy.types.PropertyGroup):
-    m_hidden = bpy.props.BoolProperty(default=True)
-    m_oscpath = bpy.props.StringProperty(default="/texture/camera")
+class TriggerOpenCamera(bpy.types.PropertyGroup):
+    object = bpy.props.StringProperty()
+    device = bpy.props.StringProperty(default="/dev/video0")
+    image = bpy.props.StringProperty()
+    width = bpy.props.IntProperty(default=640, min=0)
+    height = bpy.props.IntProperty(default=480, min=0)
+    deinterlace = bpy.props.BoolProperty(default=False)
+    rate = bpy.props.FloatProperty(default=0.0)
 
-    m_object = bpy.props.StringProperty()
-    m_filepath = bpy.props.StringProperty(subtype="FILE_PATH")
-    m_image = bpy.props.StringProperty()
-
-    m_width = bpy.props.IntProperty(default=640, min=0)
-    m_height = bpy.props.IntProperty(default=480, min=0)
-    m_deinterlace = bpy.props.BoolProperty(default=False)
-    m_rate = bpy.props.FloatProperty(default=0.0)
-
-    def send(self):
+    def execute(self):
         m = Message("/bge/logic/media/openCamera",
-                            self.m_object,
-                            self.m_image,
-                            self.m_filepath,
-                            self.m_width,
-                            self.m_height,
-                            self.m_deinterlace,
-                            self.m_rate
+                            self.object,
+                            self.image,
+                            self.filepath,
+                            self.width,
+                            self.height,
+                            self.deinterlace,
+                            self.rate
                             )
         Client().send(m)
 
-class TriggerVideoState(bpy.types.PropertyGroup):
-    m_hidden = bpy.props.BoolProperty(default=True)
-    #~ m_oscpath = bpy.props.StringProperty(default="/texture/state")
-
-    m_image = bpy.props.StringProperty()
-    m_state = bpy.props.EnumProperty(
+class TriggerVideotextureState(bpy.types.PropertyGroup):
+    image = bpy.props.StringProperty()
+    state = bpy.props.EnumProperty(
     items = [("PLAY","play","play Video"),
             ("PAUSE","pause","pause Video"),
             ("STOP","stop","stop Video"),
             ("CLOSE","close","reset Texture")],
             name = "state")
 
-    def send(self):
-        if self.m_state == "PLAY":
-            Client().send(Message("/bge/logic/media/play", self.m_image))
-        elif self.m_state == "PAUSE":
-            Client().send(Message("/bge/logic/media/pause", self.m_image))
-        elif self.m_state == "STOP":
-            Client().send(Message("/bge/logic/media/stop", self.m_image))
-        elif self.m_state == "CLOSE":
-            Client().send(Message("/bge/logic/media/close", self.m_image))
+    def execute(self):
+        if self.state == "PLAY":
+            Client().send(Message("/bge/logic/media/play", self.image))
+        elif self.state == "PAUSE":
+            Client().send(Message("/bge/logic/media/pause", self.image))
+        elif self.state == "STOP":
+            Client().send(Message("/bge/logic/media/stop", self.image))
+        elif self.state == "CLOSE":
+            Client().send(Message("/bge/logic/media/close", self.image))
         pass
 
 class TriggerChangeScene(bpy.types.PropertyGroup):
-    m_hidden = bpy.props.BoolProperty(default=True)
-    m_oscpath = bpy.props.StringProperty(default="/bge/scene/replace")
-    m_scene = bpy.props.StringProperty()
+    scene = bpy.props.StringProperty()
 
-    def send(self):
+    def execute(self):
         #   change scene in blender too
-        bpy.context.screen.scene = bpy.data.scenes[self.m_scene]
-        Client().send(Message(self.m_oscpath, self.m_scene))
+        if self.scene in bpy.data.scenes:
+            bpy.context.screen.scene = bpy.data.scenes[self.scene]
+            Client().send(Message("/bge/scene/replace", self.scene))
 
 class TriggerGameProperty(bpy.types.PropertyGroup):
-    m_hidden = bpy.props.BoolProperty(default=True)
-    m_oscpath = bpy.props.StringProperty(default="/bge/scene/objects/gameproperty")
+    object = bpy.props.StringProperty()
+    gameproperty = bpy.props.StringProperty()
 
-    m_object = bpy.props.StringProperty()
-    m_property = bpy.props.StringProperty()
+    def execute(self):
+        value = bpy.context.scene.objects[self.object].game.properties[self.gameproperty].value
+        Client().send("/bge/scene/objects/gamegameproperty", self.object, self.gameproperty, value)
 
-    def send(self):
-        value = bpy.context.scene.objects[self.m_object].game.properties[self.m_property].value
-        Client().send(self.m_oscpath, self.m_object, self.m_property, value)
-
+# TODO: use import (from string), add update routine
 class TriggerScript(bpy.types.PropertyGroup):
-    m_script = bpy.props.StringProperty()
+    script = bpy.props.StringProperty()
 
-    def send(self):
-        if self.m_script in bpy.data.texts:
-            exec(bpy.data.texts[self.m_script].as_string())
+    def execute(self):
+        if self.script in bpy.data.texts:
+            exec(bpy.data.texts[self.script].as_string())
 
 class TriggerOSCMessage(bpy.types.PropertyGroup):
-    m_msg = bpy.props.StringProperty()
+    msg = bpy.props.StringProperty()
 
-    def send(self):
+    def execute(self):
         # test if first arg contains '/' (path)
-        if self.m_msg.split(' ')[0].count('/'):
-            msg = Message(self.m_msg.split(' ')[0])
-            for i in self.m_msg.split(' ')[1:]:
+        if self.msg.split(' ')[0].count('/'):
+            msg = Message(self.msg.split(' ')[0])
+            for i in self.msg.split(' ')[1:]:
                 # digits are ints
                 if i.isdigit():
                     msg.add(int(i))
@@ -184,72 +156,153 @@ class TriggerOSCMessage(bpy.types.PropertyGroup):
                     msg.add(i)
             Client().send(msg)
 
-class TriggerWrapper(bpy.types.PropertyGroup):
-    '''
-        Property Group for OscTrigger
-    '''
-    TriggerDummy = bpy.props.CollectionProperty(type=TriggerDummy)
-    TriggerVideoOpen = bpy.props.CollectionProperty(type=TriggerVideoOpen)
-    TriggerCameraOpen = bpy.props.CollectionProperty(type=TriggerCameraOpen)
-    TriggerVideoState = bpy.props.CollectionProperty(type=TriggerVideoState)
+class TimelineMarkerDictItem(bpy.types.PropertyGroup):
+    '''single Item of a TimelineMarker Trigger Dictionary'''
+
+    # queue - refences a Trigger Queue
+    def get_queue(self):
+        # return a queue
+        pass
+
+    queue = bpy.props.StringProperty() #get=get_queue)
+
+class TimelineMarkerQueueData(bpy.types.PropertyGroup):
+    '''TimelineMarkerQueueData holds all Triggers'''
+    TriggerOpenVideo = bpy.props.CollectionProperty(type=TriggerOpenVideo)
+    TriggerOpenCamera = bpy.props.CollectionProperty(type=TriggerOpenCamera)
+    TriggerVideotextureState = bpy.props.CollectionProperty(type=TriggerVideotextureState)
     TriggerChangeScene = bpy.props.CollectionProperty(type=TriggerChangeScene)
     TriggerGameProperty = bpy.props.CollectionProperty(type=TriggerGameProperty)
     TriggerScript = bpy.props.CollectionProperty(type=TriggerScript)
     TriggerOSCMessage = bpy.props.CollectionProperty(type=TriggerOSCMessage)
 
-class TriggerSlot(bpy.types.PropertyGroup):
-    m_type = bpy.props.StringProperty()
-    m_hidden = bpy.props.BoolProperty(default=True)
+class TimelineMarkerQueueSlot(bpy.types.PropertyGroup):
+    '''TimelineMarker QueueSlots referencing Triggers by name and type'''
 
-class TriggerQueue(bpy.types.PropertyGroup):
-    m_execute_after = bpy.props.BoolProperty(default=False)
-    m_pause = bpy.props.BoolProperty(default=True)
-    m_trigger = bpy.props.PointerProperty(type=TriggerWrapper)
-    m_slots = bpy.props.CollectionProperty(type=TriggerSlot)
-    m_sel_slot = bpy.props.StringProperty()
+    # Slot Trigger Type
+    type = bpy.props.EnumProperty(default='TriggerOpenVideo', items=TRIGGER_TYPE_ENUM)
 
-class MarkerDict(bpy.types.PropertyGroup):
-    m_queue = bpy.props.StringProperty()
+    # references a Trigger
+    def get_data(self):
+        # returns trigger from TimelineMarkerTrigger.data
+        pass
 
-class TimelineTrigger(bpy.types.PropertyGroup):
-    m_markerdict = bpy.props.CollectionProperty(type=MarkerDict)
-    m_queues = bpy.props.CollectionProperty(type=TriggerQueue)
-    m_sel_marker = bpy.props.IntProperty(default = 0)
+    def set_data(self, value):
+        # update users property of the Trigger
+        pass
+
+    # references Trigger Data
+    #data = bpy.props.StringProperty()
+
+    # show data in ui
+    show_all = bpy.props.BoolProperty(default=False)
+
+class TimelineMarkerQueue(bpy.types.PropertyGroup):
+    '''Trigger Queue, which refences multiple Triggers'''
+
+    def set_marker(self, value):
+        tr = bpy.context.scene.timeline_marker_trigger
+
+        # clear old marker dict entries
+        if '_marker' in self:
+            if value in tr.marker_dict:
+                queue = tr.queues[tr.marker_dict[value].queue]
+                queue.marker = ''
+            if self['_marker'] in tr.marker_dict:
+                idx = tr.marker_dict.keys().index(self['_marker'])
+                tr.marker_dict.remove(idx)
+
+        self['_marker'] = value
+
+        # empty value means revoke marker
+        if not len(value):
+            return
+
+        if not self['_marker'] in tr.marker_dict:
+            item = tr.marker_dict.add()
+            item.name = self['_marker']
+        tr.marker_dict[self['_marker']].queue = self.name
+
+    def get_marker(self):
+        if not '_marker' in self:
+            self['_marker'] = ''
+        return self['_marker']
+
+    marker = bpy.props.StringProperty(default='', get=get_marker, set=set_marker)
+
+    # overwrite behaviour of name property, to ensure unique names
+    def update_name(self, context):
+        # set unique trigger name
+        if context.scene.timeline_marker_trigger.queues.keys().count(self.name) > 1:
+            self.name = unique_name(context.scene.timeline_marker_trigger.queues, self.name)
+        # write new name into marker dictionary
+        self.marker = self.marker
+
+    name = bpy.props.StringProperty(default='Trigger',update=update_name)
+
+    # collection of queue slots, holds name and type of the queue_items
+    queue_slots = bpy.props.CollectionProperty(type=TimelineMarkerQueueSlot)
+
+    # active / selected slot
+    # TODO: check for outside removed triggers and cleanup
+    def update_active(self, context):
+        pass
+
+    active_queue_slot = bpy.props.IntProperty(default=-1)
+
+    # trigger behaviour
+    execute_after = bpy.props.BoolProperty(default=False)
+    pause = bpy.props.BoolProperty(default=True)
+
+class TimelineMarkerTrigger(bpy.types.PropertyGroup):
+    '''Triggers for TimelineMarkers'''
+
+    # acts as dictionary to find trigger by marker names (used by handler)
+    marker_dict = bpy.props.CollectionProperty(type=TimelineMarkerDictItem)
+
+    # trigger queue, which holds a collection of trigger which can be assigned to a marker position
+    queues = bpy.props.CollectionProperty(type=TimelineMarkerQueue)
+
+    # collection of all triggers
+    data = bpy.props.PointerProperty(name='data', type=TimelineMarkerQueueData)
+
+    # active queue in the ui
+    active_queue = bpy.props.IntProperty(default=-1)
 
 def register():
     print("marker.props.register")
 
     bpy.utils.register_class(TriggerScript)
     bpy.utils.register_class(TriggerOSCMessage)
-    bpy.utils.register_class(TriggerDummy)
-    bpy.utils.register_class(TriggerVideoOpen)
-    bpy.utils.register_class(TriggerCameraOpen)
-    bpy.utils.register_class(TriggerVideoState)
+    bpy.utils.register_class(TriggerOpenVideo)
+    bpy.utils.register_class(TriggerOpenCamera)
+    bpy.utils.register_class(TriggerVideotextureState)
     bpy.utils.register_class(TriggerChangeScene)
     bpy.utils.register_class(TriggerGameProperty)
-    bpy.utils.register_class(TriggerWrapper)
-    bpy.utils.register_class(TriggerSlot)
-    bpy.utils.register_class(TriggerQueue)
-    bpy.utils.register_class(MarkerDict)
-    bpy.utils.register_class(TimelineTrigger)
 
-    bpy.types.Scene.timeline_trigger = bpy.props.PointerProperty(type=TimelineTrigger, options={"HIDDEN"})
+    bpy.utils.register_class(TimelineMarkerQueueData)
+    bpy.utils.register_class(TimelineMarkerQueueSlot)
+    bpy.utils.register_class(TimelineMarkerQueue)
+    bpy.utils.register_class(TimelineMarkerDictItem)
+    bpy.utils.register_class(TimelineMarkerTrigger)
+
+    bpy.types.Scene.timeline_marker_trigger = bpy.props.PointerProperty(type=TimelineMarkerTrigger, options={"HIDDEN"})
 
 def unregister():
     print("marker.props.unregister")
 
-    del bpy.types.Scene.timeline_trigger
+    del bpy.types.Scene.timeline_marker_trigger
 
     bpy.utils.unregister_class(TriggerScript)
     bpy.utils.unregister_class(TriggerOSCMessage)
-    bpy.utils.unregister_class(TriggerDummy)
-    bpy.utils.unregister_class(TriggerVideoOpen)
-    bpy.utils.unregister_class(TriggerCameraOpen)
-    bpy.utils.unregister_class(TriggerVideoState)
+    bpy.utils.unregister_class(TriggerOpenVideo)
+    bpy.utils.unregister_class(TriggerOpenCamera)
+    bpy.utils.unregister_class(TriggerVideotextureState)
     bpy.utils.unregister_class(TriggerChangeScene)
     bpy.utils.unregister_class(TriggerGameProperty)
-    bpy.utils.unregister_class(TriggerQueue)
-    bpy.utils.unregister_class(TriggerSlot)
-    bpy.utils.unregister_class(TriggerWrapper)
-    bpy.utils.unregister_class(MarkerDict)
-    bpy.utils.unregister_class(TimelineTrigger)
+
+    bpy.utils.unregister_class(TimelineMarkerTrigger)
+    bpy.utils.unregister_class(TimelineMarkerDictItem)
+    bpy.utils.unregister_class(TimelineMarkerQueue)
+    bpy.utils.unregister_class(TimelineMarkerQueueSlot)
+    bpy.utils.unregister_class(TimelineMarkerQueueData)
