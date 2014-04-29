@@ -42,7 +42,17 @@ TRIGGER_TYPE_ENUM = [
 
 class TriggerOpenVideo(bpy.types.PropertyGroup):
     object = bpy.props.StringProperty()
-    filepath = bpy.props.StringProperty(subtype="FILE_PATH")
+
+    def get_filepath(self):
+        if not '_filepath' in self:
+            self['_filepath'] = ''
+        return self['_filepath']
+
+    def set_filepath(self, f):
+        self['_filepath'] = bpy.path.abspath(f)
+
+    filepath = bpy.props.StringProperty(subtype="FILE_PATH", get=get_filepath, set=set_filepath)
+
     image = bpy.props.StringProperty()
     audio = bpy.props.BoolProperty()
     volume = bpy.props.FloatProperty(default=1.0, min=0.0, max=1.0)
@@ -53,11 +63,10 @@ class TriggerOpenVideo(bpy.types.PropertyGroup):
     deinterlace = bpy.props.BoolProperty(default=False)
 
     def execute(self):
-        filepath = bpy.path.abspath(self.filepath)
         m = Message("/bge/logic/media/openMovie",
                     self.object,
                     self.image,
-                    filepath,
+                    self.filepath,
                     int(self.audio),
                     self.inp,
                     self.outp,
@@ -124,7 +133,7 @@ class TriggerGameProperty(bpy.types.PropertyGroup):
 
     def execute(self):
         value = bpy.context.scene.objects[self.object].game.properties[self.gameproperty].value
-        Client().send("/bge/scene/objects/gamegameproperty", self.object, self.gameproperty, value)
+        Client().send("/bge/scene/objects/gameproperty", self.object, self.gameproperty, value)
 
 # TODO: use import (from string), add update routine
 class TriggerScript(bpy.types.PropertyGroup):
