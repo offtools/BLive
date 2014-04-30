@@ -172,7 +172,6 @@ class BLive_OT_videotexture_playlist_add_entry(bpy.types.Operator):
                     entry.name = filename
                     entry.filepath = filepath
                     entry.sourcetype = player.sourcetype
-                    player.selected_playlist_entry = len(player.playlist) - 1
             else:
                 return{'CANCELLED'}
         elif player.sourcetype == 'Camera' or player.sourcetype == 'Stream':
@@ -180,7 +179,11 @@ class BLive_OT_videotexture_playlist_add_entry(bpy.types.Operator):
             entry.name = self.uri
             entry.filepath = self.uri
             entry.sourcetype = player.sourcetype
-            #player.selected_playlist_entry = len(player.playlist) - 1
+
+        #if player.selected_playlist_entry > -1 and player.selected_playlist_entry < len(player.playlist) - 1:
+        #    player.playlist.move(len(player.playlist) - 1, player.selected_playlist_entry)
+        # append at end of playlist
+        player.selected_playlist_entry = len(player.playlist) - 1
 
         return {'FINISHED'}
 
@@ -203,6 +206,50 @@ class BLive_OT_videotexture_playlist_add_entry(bpy.types.Operator):
             row = self.layout.row()
             row.prop(self, "uri", text='')
 
+class BLive_OT_videotexture_playlist_move_entry_up(bpy.types.Operator):
+    '''Videotexture move playlist entry up'''
+    bl_idname = "blive.videotexture_playlist_move_entry_up"
+    bl_label = "BLive move playlist entry up"
+
+    @classmethod
+    def poll(self, context):
+        try:
+            return bool(context.active_object.active_material.active_texture.image)
+        except AttributeError:
+            return False
+
+    def execute(self, context):
+        player = context.active_object.active_material.active_texture.image.player
+
+        if player.selected_playlist_entry > 0 and player.selected_playlist_entry < len(player.playlist):
+            player.playlist.move(player.selected_playlist_entry, player.selected_playlist_entry - 1)
+            player.selected_playlist_entry = player.selected_playlist_entry - 1
+            return{'FINISHED'}
+        else:
+            return{'CANCELLED'}
+
+
+class BLive_OT_videotexture_playlist_move_entry_down(bpy.types.Operator):
+    '''Videotexture move playlist entry down'''
+    bl_idname = "blive.videotexture_playlist_move_entry_down"
+    bl_label = "BLive move playlist entry down"
+
+    @classmethod
+    def poll(self, context):
+        try:
+            return bool(context.active_object.active_material.active_texture.image)
+        except AttributeError:
+            return False
+
+    def execute(self, context):
+        player = context.active_object.active_material.active_texture.image.player
+
+        if player.selected_playlist_entry > -1 and player.selected_playlist_entry < len(player.playlist) - 1:
+            player.playlist.move(player.selected_playlist_entry, player.selected_playlist_entry + 1)
+            player.selected_playlist_entry = player.selected_playlist_entry + 1
+            return{'FINISHED'}
+        else:
+            return{'CANCELLED'}
 
 class BLive_OT_videotexture_playlist_delete_entry(bpy.types.Operator):
     '''Videotexture delete playlist entry'''
@@ -522,6 +569,8 @@ def register():
     bpy.utils.register_class(BLive_OT_videotexture_playlist_delete_entry)
     bpy.utils.register_class(BLive_OT_videotexture_playlist_next_entry)
     bpy.utils.register_class(BLive_OT_videotexture_playlist_prev_entry)
+    bpy.utils.register_class(BLive_OT_videotexture_playlist_move_entry_up)
+    bpy.utils.register_class(BLive_OT_videotexture_playlist_move_entry_down)
 
     bpy.utils.register_class(BLive_OT_osc_videotexture_open_movie)
     bpy.utils.register_class(BLive_OT_osc_videotexture_enable_audio)

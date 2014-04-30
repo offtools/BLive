@@ -83,6 +83,9 @@ class BLive_PT_texture_player(bpy.types.Panel):
         col = row.column(align=True)
         col.operator('blive.videotexture_playlist_add_entry', icon='ZOOMIN', text='')
         col.operator('blive.videotexture_playlist_delete_entry', icon='ZOOMOUT', text='')
+        col.operator('blive.videotexture_playlist_move_entry_up', icon='TRIA_UP', text='')
+        col.operator('blive.videotexture_playlist_move_entry_down', icon='TRIA_DOWN', text='')
+
 
     def draw_playlist_entry(self, player):
         entry = player.playlist[player.selected_playlist_entry]
