@@ -180,9 +180,7 @@ class BLive_OT_videotexture_playlist_add_entry(bpy.types.Operator):
             entry.filepath = self.uri
             entry.sourcetype = player.sourcetype
 
-        #if player.selected_playlist_entry > -1 and player.selected_playlist_entry < len(player.playlist) - 1:
-        #    player.playlist.move(len(player.playlist) - 1, player.selected_playlist_entry)
-        # append at end of playlist
+        # select currently added entry
         player.selected_playlist_entry = len(player.playlist) - 1
 
         return {'FINISHED'}
