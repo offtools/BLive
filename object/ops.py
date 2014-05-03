@@ -131,16 +131,21 @@ class BLive_OT_osc_object_meshdata(bpy.types.Operator):
         # operators seems much slower, we add a classmedthod to call the code directly from handlers (see handler.py)
         bm = bmesh.from_edit_mesh(data)
         uv_lay = bm.loops.layers.uv.active
-        if not uv_lay:
-            return
         mesh_index = 0 # we only support one bm per object
         bundle = Bundle()
-        for face in bm.faces:
-            for vindex, vertex in enumerate(face.verts):
-                bundle.add(Message("/bge/scene/objects/meshes/update_face_co", ob.name, mesh_index, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2]))
-            for vindex, loop in enumerate(face.loops):
-                uv = loop[uv_lay].uv
-                bundle.add(Message("/bge/scene/objects/meshes/update_face_uv", ob.name, mesh_index, face.index, vindex, uv[0], uv[1]))
+
+        if uv_lay:
+            for face in bm.faces:
+                for vindex, vertex in enumerate(face.verts):
+                    bundle.add(Message("/bge/scene/objects/meshes/update_face_co", ob.name, mesh_index, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2]))
+                for vindex, loop in enumerate(face.loops):
+                    uv = loop[uv_lay].uv
+                    bundle.add(Message("/bge/scene/objects/meshes/update_face_uv", ob.name, mesh_index, face.index, vindex, uv[0], uv[1]))
+        else:
+            for face in bm.faces:
+                for vindex, vertex in enumerate(face.verts):
+                    bundle.add(Message("/bge/scene/objects/meshes/update_face_co", ob.name, mesh_index, face.index, vindex, vertex.co[0], vertex.co[1], vertex.co[2]))
+
         Client().send(bundle)
 
     def execute(self, context):

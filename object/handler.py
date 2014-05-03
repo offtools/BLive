@@ -47,7 +47,7 @@ def object_update_handler(scene):
 
         if ob.is_updated_data:
             if ob.type == 'CAMERA':
-                ops.BLive_OT_osc_object_active_camera.update_projectionmatrix(ob)
+                ops.BLive_OT_osc_camera_projectionmatrix.update_projectionmatrix(ob)
 
             elif ob.type == 'LAMP':
                 ops.BLive_OT_osc_object_lamp.update_lamp(ob)
