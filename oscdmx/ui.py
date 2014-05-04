@@ -49,7 +49,10 @@ class BLive_PT_OscDmx_Patch(bpy.types.Panel):
         row = box.row()
         row.prop(dmx, "path_prefix", text='OSC Prefix')
         row = box.row()
-        row.template_list("UI_UL_list", "channels", dmx, "channels", dmx, "active_channel", rows=2, maxrows=4)
+        if bpy.app.version[1] < 66:
+            row.template_list(dmx, "channels", dmx, "active_channel", rows=2, maxrows=4)
+        else:
+            row.template_list("UI_UL_list", "channels", dmx, "channels", dmx, "active_channel", rows=2, maxrows=4)
         row = box.row()
         row.prop(dmx, "active_channel_by_name", text='Channel')
         row.operator('blive.oscdmx_add_channel', text='', icon='ZOOMIN')
@@ -61,7 +64,10 @@ class BLive_PT_OscDmx_Patch(bpy.types.Panel):
 
             if dmx.sel_method == 'properties':
                 row = box.row()
-                row.template_list("UI_UL_list", "properties", channel, "properties", dmx, "active_prop_handler", rows=2, maxrows=8)
+                if bpy.app.version[1] < 66:
+                    row.template_list(channel, "properties", dmx, "active_prop_handler", rows=2, maxrows=8)
+                else:
+                    row.template_list("UI_UL_list", "properties", channel, "properties", dmx, "active_prop_handler", rows=2, maxrows=8)
                 col = row.column(align=True)
                 col.operator('blive.oscdmx_add_channel_handler', text='', icon='ZOOMIN')
                 col.operator('blive.oscdmx_del_channel_handler', text='', icon='ZOOMOUT')
@@ -85,7 +91,10 @@ class BLive_PT_OscDmx_Patch(bpy.types.Panel):
 
             elif dmx.sel_method == 'script':
                 row = box.row()
-                row.template_list("UI_UL_list", "scripts", channel, "scripts", dmx, "active_script_handler", rows=2, maxrows=8)
+                if bpy.app.version[1] < 66:
+                    row.template_list(channel, "scripts", dmx, "active_script_handler", rows=2, maxrows=8)
+                else:
+                    row.template_list("UI_UL_list", "scripts", channel, "scripts", dmx, "active_script_handler", rows=2, maxrows=8)
                 col = row.column(align=True)
                 col.operator('blive.oscdmx_add_channel_handler', text='', icon='ZOOMIN')
                 col.operator('blive.oscdmx_del_channel_handler', text='', icon='ZOOMOUT')

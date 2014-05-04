@@ -78,7 +78,10 @@ class BLive_PT_texture_player(bpy.types.Panel):
     def draw_playlist(self, player):
         layout = self.layout
         row = layout.row()
-        row.template_list("UI_UL_list", "playlist", player, "playlist", player, "selected_playlist_entry", rows=4, maxrows=8)
+        if bpy.app.version[1] < 66:
+            row.template_list(player, "playlist", player, "selected_playlist_entry", rows=4, maxrows=8)
+        else:
+            row.template_list("UI_UL_list", "playlist", player, "playlist", player, "selected_playlist_entry", rows=4, maxrows=8)
 
         col = row.column(align=True)
         col.operator('blive.videotexture_playlist_add_entry', icon='ZOOMIN', text='')

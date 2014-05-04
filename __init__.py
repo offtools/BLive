@@ -37,6 +37,8 @@ bl_info = {
     "tracker_url": "",
     "category": "Game Engine"}
 
+LIBLO_PATH=''
+
 # import modules
 if "bpy" in locals():
     import imp
