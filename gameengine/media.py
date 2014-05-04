@@ -145,8 +145,8 @@ class FFmpegPlayer(_BasePlayer):
         # --- configure and play audio stream
         self.setup_audio()
 
-        # -- scale the video
-        self._texture.source.scale = True
+        # -- dont use scale the video (image quality becomes worst)
+        self._texture.source.scale = False
 
         # -- play the video
         self.state = 'PLAY'
@@ -279,8 +279,8 @@ class CameraPlayer(_BasePlayer):
             print("Error! inopening Camera")
             return
 
-        # -- scale the video
-        self._texture.source.scale = True
+        # -- scaler
+        self._texture.source.scale = False
 
     def get_deinterlace(self):
         if hasattr(self._texture, "source"):
