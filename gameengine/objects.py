@@ -287,13 +287,13 @@ def register():
 
         bge.logic.server.add_method("/bge/scene/objects/reinstancePhysicsMesh", "sss", GameObjectRequestHandler.call_method_reply_bool)
 
-        bge.logic.server.add_method("/bge/scene/objects/playAction", "sff", GameObjectRequestHandler.call_method)
-        bge.logic.server.add_method("/bge/scene/objects/playAction", "sffi", GameObjectRequestHandler.call_method)
-        bge.logic.server.add_method("/bge/scene/objects/playAction", "sffii", GameObjectRequestHandler.call_method)
-        bge.logic.server.add_method("/bge/scene/objects/playAction", "sffiif", GameObjectRequestHandler.call_method)
-        bge.logic.server.add_method("/bge/scene/objects/playAction", "sffiifi", GameObjectRequestHandler.call_method)
-        bge.logic.server.add_method("/bge/scene/objects/playAction", "sffiifif", GameObjectRequestHandler.call_method)
-        bge.logic.server.add_method("/bge/scene/objects/playAction", "sffiififi", GameObjectRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/objects/playAction", "ssff", GameObjectRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/objects/playAction", "ssffi", GameObjectRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/objects/playAction", "ssffii", GameObjectRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/objects/playAction", "ssffiif", GameObjectRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/objects/playAction", "ssffiifi", GameObjectRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/objects/playAction", "ssffiifif", GameObjectRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/objects/playAction", "ssffiififi", GameObjectRequestHandler.call_method)
 
         bge.logic.server.add_method("/bge/scene/objects/playAction", "s", GameObjectRequestHandler.call_method)
         bge.logic.server.add_method("/bge/scene/objects/playAction", "si", GameObjectRequestHandler.call_method)
