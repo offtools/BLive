@@ -295,8 +295,8 @@ def register():
         bge.logic.server.add_method("/bge/scene/objects/playAction", "ssffiifif", GameObjectRequestHandler.call_method)
         bge.logic.server.add_method("/bge/scene/objects/playAction", "ssffiififi", GameObjectRequestHandler.call_method)
 
-        bge.logic.server.add_method("/bge/scene/objects/playAction", "s", GameObjectRequestHandler.call_method)
-        bge.logic.server.add_method("/bge/scene/objects/playAction", "si", GameObjectRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/objects/stopAction", "s", GameObjectRequestHandler.call_method)
+        bge.logic.server.add_method("/bge/scene/objects/stopAction", "si", GameObjectRequestHandler.call_method)
 
         bge.logic.server.add_method("/bge/scene/objects/getActionFrame", "si", GameObjectRequestHandler.call_method_reply)
         bge.logic.server.add_method("/bge/scene/objects/getActionFrame", "s", GameObjectRequestHandler.call_method_reply)
