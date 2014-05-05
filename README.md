@@ -16,18 +16,21 @@ Installation:
 
 First install pyliblo on your system, then install and enable the addon like any other addon. 
 
-Archlinux:
+_Archlinux:_
 
 yaourt -S python-pyliblo
 
-Debian:
+_Debian:_
 
 TODO
+Debian uses an older version of version of blender, with an deprecated python API
 
-Ubuntu:
+_Ubuntu:_
 
-TODO
+Under 14.04 the addon should work by installing python3-liblo:
 
-OSX:
+apt-get install python3-liblo
+
+_OSX:_
 
 TODO
