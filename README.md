@@ -14,23 +14,32 @@ BLive is tested under Archlinux with blender 2.70. It should be backwards compat
 Installation:
 =============
 
-First install pyliblo on your system, then install and enable the addon like any other addon. 
+First install pyliblo on your system, then install and enable the addon like any other addon.
 
 _Archlinux:_
 
 yaourt -S python-pyliblo
 
-_Debian:_
-
-TODO
-Debian uses an older version of version of blender, with an deprecated python API
-
 _Ubuntu:_
 
-Under 14.04 the addon should work by installing python3-liblo:
+under 14.04 the addon works by installing python3-liblo.
 
 apt-get install python3-liblo
 
-_OSX:_
+_Debian:_
 
 TODO
+Debian uses an older version of version of blender, with an deprecated python API.
+With the recent version from blender.org, you need to build pyliblo with the same python
+version, that blender uses internally.
+
+_OSX:_
+
+(not tested, just guessed) you can install liblo via macports, also cython is listed there.
+Download and build pyliblo, then copy it to your blender installation path under:
+BLENDERPATH/scripts/modules/
+
+_Windows_
+
+Building pyliblo under Windows, if someone manages that, please send a pull request :)
+http://magic-smoke.blogspot.de/2012/07/building-pyliblo-on-windows-using.html
