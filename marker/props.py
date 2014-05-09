@@ -175,8 +175,8 @@ class TimelineMarkerDictItem(bpy.types.PropertyGroup):
 
     queue = bpy.props.StringProperty() #get=get_queue)
 
-class TimelineMarkerQueueData(bpy.types.PropertyGroup):
-    '''TimelineMarkerQueueData holds all Triggers'''
+class TriggerData(bpy.types.PropertyGroup):
+    '''TriggerData holds all Triggers'''
     TriggerOpenVideo = bpy.props.CollectionProperty(type=TriggerOpenVideo)
     TriggerOpenCamera = bpy.props.CollectionProperty(type=TriggerOpenCamera)
     TriggerVideotextureState = bpy.props.CollectionProperty(type=TriggerVideotextureState)
@@ -185,26 +185,16 @@ class TimelineMarkerQueueData(bpy.types.PropertyGroup):
     TriggerScript = bpy.props.CollectionProperty(type=TriggerScript)
     TriggerOSCMessage = bpy.props.CollectionProperty(type=TriggerOSCMessage)
 
-class TimelineMarkerQueueSlot(bpy.types.PropertyGroup):
+class TriggerSlot(bpy.types.PropertyGroup):
     '''TimelineMarker QueueSlots referencing Triggers by name and type'''
 
     # Slot Trigger Type
     type = bpy.props.EnumProperty(default='TriggerOpenVideo', items=TRIGGER_TYPE_ENUM)
 
-    # references a Trigger
-    def get_data(self):
-        # returns trigger from TimelineMarkerTrigger.data
-        pass
+    # Trigger Name
+    trigger = bpy.props.StringProperty()
 
-    def set_data(self, value):
-        # update users property of the Trigger
-        pass
-
-    # references Trigger Data
-    #data = bpy.props.StringProperty()
-
-    # show data in ui
-    show_all = bpy.props.BoolProperty(default=False)
+    show_all = bpy.props.BoolProperty()
 
 class TimelineMarkerQueue(bpy.types.PropertyGroup):
     '''Trigger Queue, which refences multiple Triggers'''
@@ -250,7 +240,7 @@ class TimelineMarkerQueue(bpy.types.PropertyGroup):
     name = bpy.props.StringProperty(default='Trigger',update=update_name)
 
     # collection of queue slots, holds name and type of the queue_items
-    queue_slots = bpy.props.CollectionProperty(type=TimelineMarkerQueueSlot)
+    queue_slots = bpy.props.CollectionProperty(type=TriggerSlot)
 
     # active / selected slot
     # TODO: check for outside removed triggers and cleanup
@@ -273,7 +263,7 @@ class TimelineMarkerTrigger(bpy.types.PropertyGroup):
     queues = bpy.props.CollectionProperty(type=TimelineMarkerQueue)
 
     # collection of all triggers
-    data = bpy.props.PointerProperty(name='data', type=TimelineMarkerQueueData)
+    data = bpy.props.PointerProperty(name='data', type=TriggerData)
 
     # active queue in the ui
     active_queue = bpy.props.IntProperty(default=-1)
@@ -289,8 +279,8 @@ def register():
     bpy.utils.register_class(TriggerChangeScene)
     bpy.utils.register_class(TriggerGameProperty)
 
-    bpy.utils.register_class(TimelineMarkerQueueData)
-    bpy.utils.register_class(TimelineMarkerQueueSlot)
+    bpy.utils.register_class(TriggerData)
+    bpy.utils.register_class(TriggerSlot)
     bpy.utils.register_class(TimelineMarkerQueue)
     bpy.utils.register_class(TimelineMarkerDictItem)
     bpy.utils.register_class(TimelineMarkerTrigger)
@@ -313,5 +303,6 @@ def unregister():
     bpy.utils.unregister_class(TimelineMarkerTrigger)
     bpy.utils.unregister_class(TimelineMarkerDictItem)
     bpy.utils.unregister_class(TimelineMarkerQueue)
-    bpy.utils.unregister_class(TimelineMarkerQueueSlot)
-    bpy.utils.unregister_class(TimelineMarkerQueueData)
+
+    bpy.utils.unregister_class(TriggerSlot)
+    bpy.utils.unregister_class(TriggerData)

@@ -40,15 +40,7 @@
 
 
 import bge
-
-try:
-    from liblo import Server, UDP
-except ImportError:
-    import sys
-    from .. import LIBLO_PATH
-    sys.path.append(LIBLO_PATH)
-    from liblo import Server, UDP
-
+from liblo import Server, UDP
 from gameengine.requesthandler import *
 from gameengine.error import *
 

@@ -63,10 +63,7 @@ class BLive_PT_timeline_marker_trigger(bpy.types.Panel):
 
         # list Queues
         row = layout.row()
-        if bpy.app.version[1] < 66:
-            row.template_list(scene.timeline_marker_trigger, "queues", scene.timeline_marker_trigger, "active_queue", rows=1, maxrows=4)
-        else:
-            row.template_list("TRIGGER_UL_queues", "queues", scene.timeline_marker_trigger, "queues", scene.timeline_marker_trigger, "active_queue", rows=1, maxrows=4)
+        row.template_list("TRIGGER_UL_queues", "queues", scene.timeline_marker_trigger, "queues", scene.timeline_marker_trigger, "active_queue", rows=1, maxrows=4)
         col = row.column(align=True)
         col.operator('blive.timeline_trigger_add_queue', text='', icon='ZOOMIN')
         col.operator('blive.timeline_trigger_remove_queue', text='', icon='ZOOMOUT')
@@ -159,40 +156,12 @@ class BLive_PT_timeline_marker_trigger(bpy.types.Panel):
         row = layout.row()
         row.prop_search(slot_data, "script", context.blend_data, "texts", text="Script")
 
-#class BLive_PT_multitrack_cuelist(bpy.types.Panel):
-    #bl_label = "BLive Multitrack Cuelist"
-    #bl_space_type = "VIEW_3D"
-    #bl_region_type = "TOOLS"
-
-    #@classmethod
-    #def poll(self, context):
-        #return True
-
-    #def draw(self, context):
-        #layout = self.layout
-        #mtcl = context.window_manager.multitrack_cuelist
-        #row = layout.row()
-        #row.prop(mtcl, "active_page", text="Page")
-        #row.prop(mtcl, "cols_per_page", text="Tacks per Page")
-        #row.operator("blive.mtcl_add_column", text="Add Column")
-        #row.operator("blive.mtcl_add_cue", text="Add Cue")
-
-        #for i in range(len(mtcl.cues)):
-            #row = layout.row()
-            #row.label(mtcl.cues[i].name)
-            #for col in mtcl.columns:
-                #col = row.column()
-                #col.label(col, "image")
-
-
 def register():
     print("marker.ui.register")
     bpy.utils.register_class(TRIGGER_UL_queues)
     bpy.utils.register_class(BLive_PT_timeline_marker_trigger)
-    #bpy.utils.register_class(BLive_PT_multitrack_cuelist)
 
 def unregister():
     print("marker.ui.unregister")
     bpy.utils.unregister_class(BLive_PT_timeline_marker_trigger)
     bpy.utils.unregister_class(TRIGGER_UL_queues)
-    #bpy.utils.unregister_class(BLive_PT_multitrack_cuelist)

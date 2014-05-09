@@ -61,7 +61,7 @@ class BLive_OT_timeline_trigger_remove_queue(bpy.types.Operator):
         queues.remove(idx)
         return{'FINISHED'}
 
-class BLive_OT_timeline_trigger_add_slot(bpy.types.Operator):
+class BLIVE_OT_timeline_trigger_add_slot(bpy.types.Operator):
     '''add timeline trigger queue slot'''
 
     bl_idname = "blive.timeline_trigger_add_slot"
@@ -168,7 +168,7 @@ def register():
     print("marker.ops.register")
     bpy.utils.register_class(BLive_OT_timeline_trigger_add_queue)
     bpy.utils.register_class(BLive_OT_timeline_trigger_remove_queue)
-    bpy.utils.register_class(BLive_OT_timeline_trigger_add_slot)
+    bpy.utils.register_class(BLIVE_OT_timeline_trigger_add_slot)
     bpy.utils.register_class(BLive_OT_timeline_trigger_remove_slot)
     bpy.utils.register_class(BLive_OT_timeline_trigger_add_assign_marker)
     bpy.utils.register_class(BLive_OT_timeline_trigger_remove_revoke_marker)

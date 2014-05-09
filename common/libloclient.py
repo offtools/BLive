@@ -20,15 +20,7 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 import bpy
-
-try:
-    import liblo
-except ImportError as err:
-    import sys
-    from .. import LIBLO_PATH
-    sys.path.append(LIBLO_PATH)
-    import liblo
-
+import liblo
 import threading
 import time
 from liblo import make_method

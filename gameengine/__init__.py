@@ -23,8 +23,6 @@
 #   *move port in to init script of the logic
 #   *move server scripts from logic into scene.pre_draw
 
-LIBLO_PATH = ''
-
 import sys
 import getopt
 import bge
