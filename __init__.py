@@ -46,6 +46,7 @@ if "bpy" in locals():
     imp.reload(marker)
     imp.reload(object)
     imp.reload(oscdmx)
+    imp.reload(utils)
 else:
     from . import common
     from . import viewport
@@ -53,6 +54,7 @@ else:
     from . import marker
     from . import object
     from . import oscdmx
+    from . import utils
 
 import bpy
 
@@ -64,6 +66,7 @@ def register():
     marker.register()
     object.register()
     oscdmx.register()
+    utils.register()
 
 def unregister():
     print("__init__.unregister")
@@ -73,6 +76,7 @@ def unregister():
     texture.unregister()
     viewport.unregister()
     common.unregister()
+    utils.unregister()
 
 if __name__ == "__main__":
     pass

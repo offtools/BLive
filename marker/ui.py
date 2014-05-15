@@ -67,6 +67,8 @@ class BLive_PT_timeline_marker_trigger(bpy.types.Panel):
         col = row.column(align=True)
         col.operator('blive.timeline_trigger_add_queue', text='', icon='ZOOMIN')
         col.operator('blive.timeline_trigger_remove_queue', text='', icon='ZOOMOUT')
+        col.operator('blive.timeline_trigger_up', text='', icon='TRIA_UP')
+        col.operator('blive.timeline_trigger_down', text='', icon='TRIA_DOWN')
 
         if idx > -1 and idx < len(context.scene.timeline_marker_trigger.queues):
             queue = queues[scene.timeline_marker_trigger.active_queue]
@@ -153,15 +155,65 @@ class BLive_PT_timeline_marker_trigger(bpy.types.Panel):
         row.prop(slot_data, "msg", text="OSC Message")
 
     def TriggerScript(self, context, slot_data, layout):
+        row = layout.row(align=True)
+        row.prop_search(slot_data, "module", context.blend_data, "texts", text="Script")
+        row.operator("blive.reimport_script", text="", icon="FILE_REFRESH").module = slot_data.module
         row = layout.row()
-        row.prop_search(slot_data, "script", context.blend_data, "texts", text="Script")
+        row.prop(slot_data, "function", text="Function")
+        row = layout.row()
+
+    def TriggerPlayAction(self, context, slot_data, layout):
+        row = layout.row()
+        row.prop_search(slot_data, "object", context.scene, "objects", text="Object")
+        row = layout.row()
+        row.prop_search(slot_data, "action", context.blend_data, "actions", text="Action")
+        row = layout.row(align=True)
+        row.prop(slot_data, "start", text="Start Frame")
+        row.prop(slot_data, "end", text="End Frame")
+        row = layout.row()
+        row.prop(slot_data, "layer", text="Layer")
+        row.prop(slot_data, "layer_weight", text="Layer Weight")
+        row = layout.row()
+        row.prop(slot_data, "priority", text="Priority")
+        row = layout.row()
+        row.prop(slot_data, "ipo_flags", text="Ipo Flags")
+        row = layout.row()
+        row.prop(slot_data, "speed", text="Speed")
+        row = layout.row()
+        row.prop(slot_data, "blend_mode", text="Blend Mode")
+
+class BLive_PT_timeline_marker_trigger_cuelist(bpy.types.Panel):
+    bl_label = "BLive Trigger Cuelist"
+    bl_space_type = "NLA_EDITOR"
+    bl_region_type = "UI"
+
+    @classmethod
+    def poll(self, context):
+        return True
+
+    def draw(self, context):
+        scene = context.scene
+        data = scene.timeline_marker_trigger.data
+        queues= scene.timeline_marker_trigger.queues
+        idx = context.scene.timeline_marker_trigger.active_queue
+
+        layout = self.layout
+        row = layout.row(align=True)
+        row.alignment = 'CENTER'
+        split = row.split(percentage=0.5)
+        split.scale_x = 2
+        split.scale_y = 2
+        split.operator("blive.timeline_trigger_prev", text=queues[idx-1].name, icon="REW")
+        split.operator("blive.timeline_trigger_next", text=queues[idx].name, icon="FF")
 
 def register():
     print("marker.ui.register")
     bpy.utils.register_class(TRIGGER_UL_queues)
     bpy.utils.register_class(BLive_PT_timeline_marker_trigger)
+    bpy.utils.register_class(BLive_PT_timeline_marker_trigger_cuelist)
 
 def unregister():
     print("marker.ui.unregister")
     bpy.utils.unregister_class(BLive_PT_timeline_marker_trigger)
     bpy.utils.unregister_class(TRIGGER_UL_queues)
+    bpy.utils.unregister_class(BLive_PT_timeline_marker_trigger_cuelist)

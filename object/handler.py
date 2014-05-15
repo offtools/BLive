@@ -30,9 +30,6 @@ from . import ops
 
 @persistent
 def object_update_handler(scene):
-    if scene.is_updated:
-        print("Scene updated")
-
     # check objects updates
     for ob in scene.objects:
         if ob.is_updated:

@@ -19,7 +19,11 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
+#FIX: trigger_prev, should run the prev entry, not the last again
+
 import bpy
+import sys
+import imp
 from .props import TRIGGER_TYPE_ENUM
 from ..utils.utils import unique_name
 
@@ -164,6 +168,117 @@ class BLive_OT_timeline_trigger_remove_revoke_marker(bpy.types.Operator):
 
         return{'FINISHED'}
 
+class BLive_OT_timeline_trigger_cuelist_next(bpy.types.Operator):
+    '''trigger cuelist next'''
+
+    bl_idname = "blive.timeline_trigger_next"
+    bl_label = "BLive trigger cuelist next"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(self, context):
+        return len(context.scene.timeline_marker_trigger.queues)
+
+    def execute(self, context):
+        trigger = context.scene.timeline_marker_trigger
+        idx = context.scene.timeline_marker_trigger.active_queue
+        queue = context.scene.timeline_marker_trigger.queues[idx]
+        for slot in queue.queue_slots:
+            slot_data = getattr(trigger.data, slot.type)[slot.name]
+            slot_data.execute()
+        if len(context.scene.timeline_marker_trigger.queues) -1 > context.scene.timeline_marker_trigger.active_queue:
+            context.scene.timeline_marker_trigger.active_queue = context.scene.timeline_marker_trigger.active_queue + 1
+        else:
+            context.scene.timeline_marker_trigger.active_queue = 0
+        return{'FINISHED'}
+
+class BLive_OT_timeline_trigger_cuelist_prev(bpy.types.Operator):
+    '''trigger cuelist next'''
+
+    bl_idname = "blive.timeline_trigger_prev"
+    bl_label = "BLive trigger cuelist prev"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(self, context):
+        return len(context.scene.timeline_marker_trigger.queues)
+
+    def execute(self, context):
+        trigger = context.scene.timeline_marker_trigger
+
+        if len(context.scene.timeline_marker_trigger.queues) > context.scene.timeline_marker_trigger.active_queue and context.scene.timeline_marker_trigger.active_queue > 0:
+            context.scene.timeline_marker_trigger.active_queue = context.scene.timeline_marker_trigger.active_queue - 1
+        else:
+            context.scene.timeline_marker_trigger.active_queue = len(context.scene.timeline_marker_trigger.queues) - 1
+        idx = context.scene.timeline_marker_trigger.active_queue
+        queue = context.scene.timeline_marker_trigger.queues[idx]
+        for slot in queue.queue_slots:
+            slot_data = getattr(trigger.data, slot.type)[slot.name]
+            slot_data.execute()
+        return{'FINISHED'}
+
+
+class BLive_OT_timeline_trigger_cuelist_up(bpy.types.Operator):
+    '''Videotexture move playlist entry up'''
+    bl_idname = "blive.timeline_trigger_up"
+    bl_label = "BLive move timeline trigger entry up"
+
+    @classmethod
+    def poll(self, context):
+        return len(context.scene.timeline_marker_trigger.queues)
+
+    def execute(self, context):
+        trigger = context.scene.timeline_marker_trigger
+        idx = context.scene.timeline_marker_trigger.active_queue
+
+        if idx > 0 and idx < len(trigger.queues):
+            trigger.queues.move(idx, idx - 1)
+            context.scene.timeline_marker_trigger.active_queue = idx - 1
+            return{'FINISHED'}
+        else:
+            return{'CANCELLED'}
+
+
+class BLive_OT_timeline_trigger_cuelist_down(bpy.types.Operator):
+    '''Videotexture move playlist entry down'''
+    bl_idname = "blive.timeline_trigger_down"
+    bl_label = "BLive move timeline trigger entry down"
+
+    @classmethod
+    def poll(self, context):
+        return len(context.scene.timeline_marker_trigger.queues)
+
+    def execute(self, context):
+        trigger = context.scene.timeline_marker_trigger
+        idx = context.scene.timeline_marker_trigger.active_queue
+
+        if idx > -1 and idx < len(trigger.queues) - 1:
+            trigger.queues.move(idx, idx + 1)
+            context.scene.timeline_marker_trigger.active_queue = idx + 1
+            return{'FINISHED'}
+        else:
+            return{'CANCELLED'}
+
+class BLive_OT_timeline_trigger_reimport_scripts(bpy.types.Operator):
+    '''add timeline marker trigger update imported scripts'''
+
+    bl_idname = "blive.timeline_trigger_reimport_scripts"
+    bl_label = "BLive add timeline trigger update scripts"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    module = bpy.props.StringProperty()
+
+    @classmethod
+    def poll(self, context):
+        return True
+
+    def execute(self, context):
+        if self.module in context.blend_data.texts and self.module[:-3] in sys.modules:
+            imp.reload(sys.modules[self.module[:-3]])
+            return{'FINISHED'}
+        else:
+            return{'CANCELLED'}
+
 def register():
     print("marker.ops.register")
     bpy.utils.register_class(BLive_OT_timeline_trigger_add_queue)
@@ -172,6 +287,11 @@ def register():
     bpy.utils.register_class(BLive_OT_timeline_trigger_remove_slot)
     bpy.utils.register_class(BLive_OT_timeline_trigger_add_assign_marker)
     bpy.utils.register_class(BLive_OT_timeline_trigger_remove_revoke_marker)
+    bpy.utils.register_class(BLive_OT_timeline_trigger_cuelist_next)
+    bpy.utils.register_class(BLive_OT_timeline_trigger_cuelist_prev)
+    bpy.utils.register_class(BLive_OT_timeline_trigger_cuelist_up)
+    bpy.utils.register_class(BLive_OT_timeline_trigger_cuelist_down)
+    bpy.utils.register_class(BLive_OT_timeline_trigger_reimport_scripts)
 
 def unregister():
     print("marker.ops.unregister")
@@ -181,3 +301,8 @@ def unregister():
     bpy.utils.unregister_class(BLive_OT_timeline_trigger_remove_slot)
     bpy.utils.unregister_class(BLive_OT_timeline_trigger_add_assign_marker)
     bpy.utils.unregister_class(BLive_OT_timeline_trigger_remove_revoke_marker)
+    bpy.utils.unregister_class(BLive_OT_timeline_trigger_cuelist_next)
+    bpy.utils.unregister_class(BLive_OT_timeline_trigger_cuelist_prev)
+    bpy.utils.unregister_class(BLive_OT_timeline_trigger_cuelist_up)
+    bpy.utils.unregister_class(BLive_OT_timeline_trigger_cuelist_down)
+    bpy.utils.unregister_class(BLive_OT_timeline_trigger_reimport_scripts)

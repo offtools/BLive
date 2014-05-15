@@ -25,6 +25,7 @@
 #       remove dummy
 
 import bpy
+import sys
 from liblo import Message
 from ..common.libloclient import Client
 from liblo import Message
@@ -37,7 +38,8 @@ TRIGGER_TYPE_ENUM = [
                     ("TriggerChangeScene","Change active Scene","Change active Scene"), \
                     ("TriggerGameProperty","Set a Game Property","Set a Game Property"), \
                     ("TriggerScript","Run a Script","Run a script local"), \
-                    ("TriggerOSCMessage","Send OSC Message","Send OSC Message") \
+                    ("TriggerOSCMessage","Send OSC Message","Send OSC Message"), \
+                    ("TriggerPlayAction","Play Action","Play Action") \
                     ]
 
 class TriggerOpenVideo(bpy.types.PropertyGroup):
@@ -137,11 +139,16 @@ class TriggerGameProperty(bpy.types.PropertyGroup):
 
 # TODO: use import (from string), add update routine
 class TriggerScript(bpy.types.PropertyGroup):
-    script = bpy.props.StringProperty()
+    module = bpy.props.StringProperty()
+    function = bpy.props.StringProperty()
 
     def execute(self):
-        if self.script in bpy.data.texts:
-            exec(bpy.data.texts[self.script].as_string())
+        if self.module in sys.modules:
+            m = sys.modules[self.module[:-3]]
+            getattr(m, self.function)()
+        else:
+            m = __import__(self.module[:-3])
+            getattr(m, self.function)()
 
 class TriggerOSCMessage(bpy.types.PropertyGroup):
     msg = bpy.props.StringProperty()
@@ -165,6 +172,35 @@ class TriggerOSCMessage(bpy.types.PropertyGroup):
                     msg.add(i)
             Client().send(msg)
 
+class TriggerPlayAction(bpy.types.PropertyGroup):
+    object = bpy.props.StringProperty()
+    action = bpy.props.StringProperty()
+    start = bpy.props.FloatProperty(default=0.0)
+    end = bpy.props.FloatProperty(default=0.0)
+    layer = bpy.props.IntProperty(default=0)
+    priority = bpy.props.IntProperty(default=0)
+    blendin = bpy.props.FloatProperty(default=0)
+    play_mode = bpy.props.IntProperty(default=0)
+    layer_weight = bpy.props.FloatProperty(default=0.0)
+    ipo_flags = bpy.props.IntProperty(default=0)
+    speed = bpy.props.FloatProperty(default=1.0)
+    blend_mode = bpy.props.IntProperty(default=0)
+
+    def execute(self):
+        Client().send(Message("/bge/scene/objects/playAction",  self.object,
+                                                                self.action,
+                                                                self.start,
+                                                                self.end,
+                                                                self.layer))
+                                                                #self.priority,
+                                                                #self.blendin,
+                                                                #self.play_mode,
+                                                                #self.layer_weight,
+                                                                #self.ipo_flags,
+                                                                #self.speed,
+                                                                #self.blend_mode)
+                                                                #)
+
 class TimelineMarkerDictItem(bpy.types.PropertyGroup):
     '''single Item of a TimelineMarker Trigger Dictionary'''
 
@@ -184,6 +220,7 @@ class TriggerData(bpy.types.PropertyGroup):
     TriggerGameProperty = bpy.props.CollectionProperty(type=TriggerGameProperty)
     TriggerScript = bpy.props.CollectionProperty(type=TriggerScript)
     TriggerOSCMessage = bpy.props.CollectionProperty(type=TriggerOSCMessage)
+    TriggerPlayAction = bpy.props.CollectionProperty(type=TriggerPlayAction)
 
 class TriggerSlot(bpy.types.PropertyGroup):
     '''TimelineMarker QueueSlots referencing Triggers by name and type'''
@@ -278,6 +315,7 @@ def register():
     bpy.utils.register_class(TriggerVideotextureState)
     bpy.utils.register_class(TriggerChangeScene)
     bpy.utils.register_class(TriggerGameProperty)
+    bpy.utils.register_class(TriggerPlayAction)
 
     bpy.utils.register_class(TriggerData)
     bpy.utils.register_class(TriggerSlot)
@@ -299,6 +337,7 @@ def unregister():
     bpy.utils.unregister_class(TriggerVideotextureState)
     bpy.utils.unregister_class(TriggerChangeScene)
     bpy.utils.unregister_class(TriggerGameProperty)
+    bpy.utils.unregister_class(TriggerPlayAction)
 
     bpy.utils.unregister_class(TimelineMarkerTrigger)
     bpy.utils.unregister_class(TimelineMarkerDictItem)

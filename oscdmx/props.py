@@ -72,12 +72,12 @@ class OscDmxScriptHandler(OscDmxHandler):
     function = bpy.props.StringProperty()
 
     def execute(self, chan, arg):
-        if self.module in globals():
-            m = globals()[self.module]
-            getattr(m, self.function)(chan, arg)
+        if self.module in sys.modules:
+            m = sys.modules[self.module[:-3]]
+            getattr(m, self.function)()
         else:
-            m = __import__(self.module)
-            getattr(m, self.function)(chan, arg)
+            m = __import__(self.module[:-3])
+            getattr(m, self.function)()
 
 def check_array(self, context):
     if hasattr(self.data_path, '__len__') and '[' in self.data_path:

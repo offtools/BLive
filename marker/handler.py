@@ -36,7 +36,7 @@ def marker_handler(scene):
     prev_frame = current_frame - 1
 
     trigger = scene.timeline_marker_trigger
-    marked_frames = dict((i.frame, i) for i in scene.timeline_markers)
+    marked_frames = dict((scene.timeline_markers[i.name].frame, i) for i in trigger.marker_dict)
 
     def execute_slot(frame, is_current):
         if frame in marked_frames:
