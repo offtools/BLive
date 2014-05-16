@@ -20,9 +20,6 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 # TODO: use operators instead calling BLiveClient
-#       TriggerScript, use import (module/function) instead of reading script everytime
-#       reenable videotexture controls
-#       remove dummy
 
 import bpy
 import sys
@@ -137,7 +134,6 @@ class TriggerGameProperty(bpy.types.PropertyGroup):
         value = bpy.context.scene.objects[self.object].game.properties[self.gameproperty].value
         Client().send("/bge/scene/objects/gameproperty", self.object, self.gameproperty, value)
 
-# TODO: use import (from string), add update routine
 class TriggerScript(bpy.types.PropertyGroup):
     module = bpy.props.StringProperty()
     function = bpy.props.StringProperty()

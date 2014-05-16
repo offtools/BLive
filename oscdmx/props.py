@@ -19,8 +19,6 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-#TODO: possibilty to reimport scripts (ui)
-
 import bpy
 import re
 from ..common.libloclient import Client
