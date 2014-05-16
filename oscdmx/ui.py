@@ -92,6 +92,7 @@ class BLive_PT_OscDmx_Patch(bpy.types.Panel):
 
                 if len(channel.scripts) > dmx.active_script_handler:
                     handler = channel.scripts[dmx.active_script_handler]
+                    col.operator("blive.reimport_script", text="", icon="FILE_REFRESH").module = handler.module
 
                     row = box.row()
                     row.prop_search(handler, "module", bpy.data, 'texts', text='Script', icon='VIEWZOOM')
@@ -99,7 +100,7 @@ class BLive_PT_OscDmx_Patch(bpy.types.Panel):
                         row = box.row()
                         row.label('(script name should contain .py suffix!)')
                     else:
-                        row = box.row()
+                        row = box.row(align=True)
                         row.prop(handler, "function", text='Function')
 
 
