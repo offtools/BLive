@@ -19,8 +19,6 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-# TODO: user operators instead calling BLiveClient
-
 import bpy
 
 class BLiveViewport(bpy.types.PropertyGroup):
