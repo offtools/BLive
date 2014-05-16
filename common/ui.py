@@ -19,8 +19,6 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
-# FIXME: max. Port number in game property is 10000
-
 import bpy
 from ..common.libloclient import Client
 

@@ -20,10 +20,6 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 import bpy
-# TODO: remove import os, sys later
-import os
-import sys
-import time
 import subprocess
 from liblo import Bundle, Message
 from .libloclient import Client

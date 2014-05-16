@@ -25,7 +25,7 @@ from .libloclient import Client
 class BLiveSettings(bpy.types.PropertyGroup):
     """blender wide Settings
     """
-    port = bpy.props.IntProperty(default=9900)
+    port = bpy.props.IntProperty(default=9900, min=9000, max=90000)
     server = bpy.props.StringProperty(default="127.0.0.1")
     bge_window_width = bpy.props.IntProperty(default=640)
     bge_window_height = bpy.props.IntProperty(default=480)
