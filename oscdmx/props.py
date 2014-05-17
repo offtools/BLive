@@ -167,7 +167,7 @@ def register():
 def unregister():
     print("oscdmx.props.unregister")
     bpy.utils.unregister_class(OscDmxPropertyHandler)
-    bpy.utils.register_class(OscDmxScriptHandler)
-    bpy.utils.register_class(OscDmxHandler)
+    bpy.utils.unregister_class(OscDmxScriptHandler)
+    bpy.utils.unregister_class(OscDmxHandler)
     bpy.utils.unregister_class(OscDmxChannel)
     bpy.utils.unregister_class(OscDmx)
