@@ -104,6 +104,7 @@ def register():
         bge.logic.server.add_method("/bge/scene/cameras/world_to_camera", "s", CameraRequestHandler.reply_matrix4x4)
 
         bge.logic.server.add_method("/bge/scene/cameras/useViewport", "si", CameraRequestHandler.set_bool_value)
+        bge.logic.server.add_method("/bge/scene/cameras/useViewport", "s", CameraRequestHandler.reply_bool)
 
         bge.logic.server.add_method("/bge/scene/cameras/sphereInsideFrustum", "sffff", CameraRequestHandler.call_method_sfffx_reply)
 
