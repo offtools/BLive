@@ -86,6 +86,7 @@ class BLive_OT_videotexture_play(bpy.types.Operator):
             bpy.ops.blive.osc_videotexture_play(imgname=image.name)
 
         image.player.state = 'PLAYING'
+        player.volume = player.playlist[player.active_playlist_entry].volume
         return {'FINISHED'}
 
 class BLive_OT_videotexture_pause(bpy.types.Operator):

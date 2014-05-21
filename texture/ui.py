@@ -20,6 +20,7 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 # TODO: add all properties to playlist entries
+# TODO: grab Audio value from Cuelist and add it to Controls
 # TODO: add controls for audio and loop (independent from cuelist)
 
 import bpy
@@ -70,8 +71,6 @@ class BLive_PT_texture_player(bpy.types.Panel):
         row = box.row()
         ob = bpy.context.active_object
         row.prop(ob, "color", text='Alpha', slider=True, index=3)
-        #row = box.row()
-        #row.prop(player, "loop", toggle=True)
         row = box.row()
         row.operator('blive.videotexture_mixer_popup', text='Mixer', icon='NLA')
 
