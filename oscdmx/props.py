@@ -20,6 +20,7 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 import bpy
+import sys
 import re
 from ..common.libloclient import Client
 
