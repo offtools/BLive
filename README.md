@@ -43,3 +43,8 @@ _Windows_
 
 Building pyliblo under Windows, if someone manages that, please send a pull request :)
 http://magic-smoke.blogspot.de/2012/07/building-pyliblo-on-windows-using.html
+
+Usage:
+=====
+
+a new tutorial and two example blendfiles are added to the github wiki
