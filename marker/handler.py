@@ -46,7 +46,7 @@ def marker_handler(scene):
             if is_current and queue.pause and bpy.context.screen.is_animation_playing:
                 bpy.ops.screen.animation_play()
 
-            if not queue.execute_after or not is_current:
+            if (not queue.execute_after and is_current) or (queue.execute_after and not is_current):
                 for slot in queue.queue_slots:
                     slot_data = getattr(trigger.data, slot.type)[slot.name]
                     slot_data.execute()
