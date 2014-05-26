@@ -19,6 +19,10 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
+# TODO: possibilty to server address of the Client manual
+# TODO: add close and cleanup handler, which closes thread and does reset stuff
+# TODO: add possibility to pause sending updates
+
 import bpy
 import liblo
 import threading
@@ -31,6 +35,7 @@ class LibloClient(liblo.ServerThread):
         self.appHandler = dict()
         self.__await_connect = False
         self.__thread_started = False
+        self.__connected = False
 
     class ConnectRequest(threading.Thread):
         def __init__(self, client):
@@ -47,6 +52,7 @@ class LibloClient(liblo.ServerThread):
         print ("CLIENT: connected - got server reply: ", args[0])
         self.__await_connect = False
         del self.__conreq
+        self.__connected = True
 
         # save bge Window size
         settings = bpy.context.window_manager.blive_settings
@@ -86,6 +92,7 @@ class LibloClient(liblo.ServerThread):
     def cb_shutdown(self, path, args, types, source, user_data):
         print ("CLIENT: received shutdown - closing client", args)
         #self.close() #TODO: dont close thread from inside thread, just notify blender
+        self.__connected = False
 
     @make_method('/bge/*', None)
     def cb_fallback(self, path, args, types, source, user_data):
@@ -117,7 +124,7 @@ class LibloClient(liblo.ServerThread):
         return self.__await_connect
 
     def is_connected(self):
-        return self.__thread_started
+        return self.__connected
 
     def connect(self, host, port, proto=liblo.UDP):
         '''connect to a osc server'''

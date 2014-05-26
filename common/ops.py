@@ -33,9 +33,6 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
     bl_label = "BLive start gameengine"
 
     filepath = bpy.props.StringProperty(subtype="FILE_PATH")
-    filename = bpy.props.StringProperty()
-    files = bpy.props.CollectionProperty(name="File Path",type=bpy.types.OperatorFileListElement)
-    directory = bpy.props.StringProperty(subtype='DIR_PATH')
 
     def add_start_script(self):
         '''create startup script
@@ -128,7 +125,7 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
 
     @classmethod
     def poll(self, context):
-        return True
+        return not Client().is_connected()
 
     def execute(self, context):
         # add scripts
@@ -147,17 +144,16 @@ class BLive_OT_start_gameengine(bpy.types.Operator):
             self.add_logic(sc)
 
         context.screen.scene = curscene #restore scene
-
-        if self.filepath:
-            bpy.ops.wm.save_as_mainfile(filepath=self.filepath)
-        else:
-            bpy.ops.wm.save_as_mainfile(filepath=context.blend_data.filepath)
-
+        bpy.ops.wm.save_as_mainfile(filepath=self.filepath)
         self.fork(context)
 
         return{'FINISHED'}
 
     def invoke(self, context, event):
+        if not context.blend_data.filepath:
+            self.filepath = "Untitled.blend"
+        else:
+            self.filepath = context.blend_data.filepath
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
@@ -167,22 +163,21 @@ class BLive_OT_stop_gameengine(bpy.types.Operator):
 
     @classmethod
     def poll(self, context):
-        return True
+        return Client().is_connected()
 
     def execute(self, context):
         # send disconnect to quit gameengine
         Client().send(Message("/bge/logic/endGame"))
         return{'FINISHED'}
 
-
 class BLive_OT_restart_gameengine(bpy.types.Operator):
     bl_idname = "blive.gameengine_restart"
     bl_label = "BLive restart gameengine"
     save = bpy.props.BoolProperty(default=False)
 
-    #@classmethod
-    #def poll(self, context):
-        #pass
+    @classmethod
+    def poll(self, context):
+        return Client().is_connected()
 
     def execute(self, context):
         # restart gameengine by sending restartGame()
@@ -195,9 +190,10 @@ class BLive_OT_open_gameengine(bpy.types.Operator):
     bl_idname = "blive.gameengine_open"
     bl_label = "BLive open blendfile"
     filepath = bpy.props.StringProperty(subtype="FILE_PATH")
-    filename = bpy.props.StringProperty()
-    files = bpy.props.CollectionProperty(name="File Path",type=bpy.types.OperatorFileListElement)
-    directory = bpy.props.StringProperty(subtype='DIR_PATH')
+
+    @classmethod
+    def poll(self, context):
+        return Client().is_connected()
 
     def execute(self, context):
         # open new blendfinle in blender and the the gameengine
@@ -223,7 +219,7 @@ class BLive_OT_send_osc_message(bpy.types.Operator):
 
     @classmethod
     def poll(self, context):
-        return True
+        return Client().is_connected()
 
     def execute(self, context):
         debug = context.window_manager.blive_debug
@@ -253,9 +249,9 @@ class BLive_OT_connect(bpy.types.Operator):
     bl_idname = "blive.connect"
     bl_label = "BLive connect to gameengine"
 
-    #@classmethod
-    #def poll(self, context):
-        #pass
+    @classmethod
+    def poll(self, context):
+        return not Client().is_connected()
 
     def execute(self, context):
         sc = context.scene
@@ -269,9 +265,9 @@ class BLive_OT_disconnect(bpy.types.Operator):
     bl_idname = "blive.disconnect"
     bl_label = "BLive disconnect from gameengine"
 
-    #@classmethod
-    #def poll(self, context):
-        #pass
+    @classmethod
+    def poll(self, context):
+        return Client().is_connected()
 
     def execute(self, context):
         Client().disconnect()

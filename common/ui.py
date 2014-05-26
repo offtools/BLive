@@ -19,6 +19,8 @@
 
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
+# TODO: add button  to pause sending updates
+
 import bpy
 from ..common.libloclient import Client
 
