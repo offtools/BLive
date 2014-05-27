@@ -29,7 +29,7 @@ def dmx_callback(path, args, types, source, user_data):
     oscdmx = context.scene.oscdmx
     chan = oscdmx.channels[str(user_data)]
     for p in chan:
-        p.execute(chan, args[0])
+        p.execute(chan.name, args[0])
 
 class BLive_OT_OscDmx_register_channels(bpy.types.Operator):
     '''OSC dmx - register channels, done by client connect'''

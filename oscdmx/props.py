@@ -76,7 +76,7 @@ class OscDmxScriptHandler(OscDmxHandler):
             getattr(m, self.function)()
         else:
             m = __import__(self.module[:-3])
-            getattr(m, self.function)()
+            getattr(m, self.function)(chan, arg)
 
 def check_array(self, context):
     if hasattr(self.data_path, '__len__') and '[' in self.data_path:
