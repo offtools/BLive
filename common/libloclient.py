@@ -31,7 +31,7 @@ from liblo import make_method
 
 class LibloClient(liblo.ServerThread):
     def __init__(self):
-        super().__init__()
+        super().__init__(port=9901)
         self.appHandler = dict()
         self.__await_connect = False
         self.__thread_started = False
