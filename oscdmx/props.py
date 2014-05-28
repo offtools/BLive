@@ -106,11 +106,11 @@ class OscDmxPropertyHandler(OscDmxHandler):
 
 class OscDmxChannel(bpy.types.PropertyGroup):
     """oscdmx channel"""
-    registered = bpy.props.BoolProperty(default=False)
     properties = bpy.props.CollectionProperty(type=OscDmxPropertyHandler)
     scripts = bpy.props.CollectionProperty(type=OscDmxScriptHandler)
     idx1 = bpy.props.IntProperty(default=0, subtype='UNSIGNED')
     idx2 = bpy.props.IntProperty(default=-1, subtype='UNSIGNED')
+    value = bpy.props.FloatProperty(default=0.0)
 
     def add_handler(self, method):
         pass

@@ -30,6 +30,8 @@ def dmx_callback(path, args, types, source, user_data):
     chan = oscdmx.channels[str(user_data)]
     for p in chan:
         p.execute(chan.name, args[0])
+    # store old dmx value
+    bpy.context.scene.oscdmx.channels['0'].value = args[0]
 
 class BLive_OT_OscDmx_register_channels(bpy.types.Operator):
     '''OSC dmx - register channels, done by client connect'''
@@ -39,8 +41,8 @@ class BLive_OT_OscDmx_register_channels(bpy.types.Operator):
     def execute(self, context):
         oscdmx = context.scene.oscdmx
         for ch in oscdmx.channels:
+            print("OSCDMX - Register Channel: ", ch.name)
             Client().add_method("{0}/{1}".format(oscdmx.path_prefix, int(ch.name)), "f", dmx_callback, int(ch.name))
-            ch.registered = True
         return{'FINISHED'}
 
 class BLive_OT_OscDmx_add_channel(bpy.types.Operator):
@@ -55,7 +57,6 @@ class BLive_OT_OscDmx_add_channel(bpy.types.Operator):
             dmx.active_channel = len(dmx.channels) - 1
             ch.name = str(dmx.active_channel_by_name)
             Client().add_method("{0}/{1}".format(dmx.path_prefix, dmx.active_channel_by_name), "f", dmx_callback, dmx.active_channel_by_name)
-            ch.registered = True
             return{'FINISHED'}
         else:
             return{'CANCELLED'}

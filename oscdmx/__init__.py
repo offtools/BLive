@@ -26,6 +26,7 @@ if "bpy" in locals():
     imp.reload(props)
     imp.reload(ops)
     imp.reload(ui)
+
 else:
     from . import props
     from . import ops
@@ -39,7 +40,7 @@ def register():
     ui.register()
 
 def unregister():
-    print("common.unregister")
+    print("oscdmx.unregister")
     ui.unregister()
     ops.unregister()
     props.unregister()
