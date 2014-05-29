@@ -32,6 +32,7 @@ class TRIGGER_UL_queues(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         queues = data
         queue = item
+
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             layout.prop(queue, 'name', text='', emboss=False)
             if queue.marker:
@@ -74,6 +75,8 @@ class BLive_PT_timeline_marker_trigger(bpy.types.Panel):
             queue = queues[scene.timeline_marker_trigger.active_queue]
             layout.label("Assign Timeline Marker")
             row = layout.row(align=True)
+            if queue.marker not in scene.timeline_markers: # cleanup lost deleted markers
+                bpy.ops.blive.timeline_trigger_revoke_marker()
             row.prop_search(queue, 'marker', scene, 'timeline_markers', text="")
             row.operator("blive.timeline_trigger_add_assign_marker", text="", icon="ZOOMIN")
             row.operator("blive.timeline_trigger_remove_revoke_marker", text="", icon="ZOOMOUT")
@@ -182,6 +185,12 @@ class BLive_PT_timeline_marker_trigger(bpy.types.Panel):
         row = layout.row()
         row.prop(slot_data, "blend_mode", text="Blend Mode")
 
+    def TriggerVisibility(self, context, slot_data, layout):
+        row = layout.row()
+        row.prop_search(slot_data, "object", context.scene, "objects", text="Object")
+        row = layout.row()
+        row.prop(slot_data, "visible", text="Show")
+
 class BLive_PT_timeline_marker_trigger_cuelist(bpy.types.Panel):
     bl_label = "BLive Trigger Cuelist"
     bl_space_type = "NLA_EDITOR"
@@ -189,7 +198,7 @@ class BLive_PT_timeline_marker_trigger_cuelist(bpy.types.Panel):
 
     @classmethod
     def poll(self, context):
-        return True
+        return len(context.scene.timeline_marker_trigger.queues)
 
     def draw(self, context):
         scene = context.scene
@@ -203,7 +212,7 @@ class BLive_PT_timeline_marker_trigger_cuelist(bpy.types.Panel):
         split = row.split(percentage=0.5)
         split.scale_x = 2
         split.scale_y = 2
-        split.operator("blive.timeline_trigger_prev", text=queues[idx-1].name, icon="REW")
+        split.operator("blive.timeline_trigger_prev", text=queues[idx].name, icon="REW")
         split.operator("blive.timeline_trigger_next", text=queues[idx].name, icon="FF")
 
 def register():

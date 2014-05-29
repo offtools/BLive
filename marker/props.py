@@ -36,7 +36,8 @@ TRIGGER_TYPE_ENUM = [
                     ("TriggerGameProperty","Set a Game Property","Set a Game Property"), \
                     ("TriggerScript","Run a Script","Run a script local"), \
                     ("TriggerOSCMessage","Send OSC Message","Send OSC Message"), \
-                    ("TriggerPlayAction","Play Action","Play Action") \
+                    ("TriggerPlayAction","Play Action","Play Action"), \
+                    ("TriggerVisibility","Visibility","Visibility") \
                     ]
 
 class TriggerOpenVideo(bpy.types.PropertyGroup):
@@ -144,7 +145,8 @@ class TriggerScript(bpy.types.PropertyGroup):
             getattr(m, self.function)()
         else:
             m = __import__(self.module[:-3])
-            getattr(m, self.function)()
+            if hasattr(m, self.function):
+                getattr(m, self.function)()
 
 class TriggerOSCMessage(bpy.types.PropertyGroup):
     msg = bpy.props.StringProperty()
@@ -196,6 +198,14 @@ class TriggerPlayAction(bpy.types.PropertyGroup):
                                                                 #self.speed,
                                                                 #self.blend_mode)
                                                                 #)
+class TriggerVisibility(bpy.types.PropertyGroup):
+    object = bpy.props.StringProperty()
+    visible = bpy.props.BoolProperty(default=False)
+
+    def execute(self):
+        if self.object in bpy.context.scene.objects:
+            bpy.context.scene.objects[self.object].hide = not self.visible
+            Client().send(Message("/bge/scene/objects/visible",  self.object, int(self.visible)))
 
 class TimelineMarkerDictItem(bpy.types.PropertyGroup):
     '''single Item of a TimelineMarker Trigger Dictionary'''
@@ -217,6 +227,7 @@ class TriggerData(bpy.types.PropertyGroup):
     TriggerScript = bpy.props.CollectionProperty(type=TriggerScript)
     TriggerOSCMessage = bpy.props.CollectionProperty(type=TriggerOSCMessage)
     TriggerPlayAction = bpy.props.CollectionProperty(type=TriggerPlayAction)
+    TriggerVisibility = bpy.props.CollectionProperty(type=TriggerVisibility)
 
 class TriggerSlot(bpy.types.PropertyGroup):
     '''TimelineMarker QueueSlots referencing Triggers by name and type'''
@@ -301,6 +312,9 @@ class TimelineMarkerTrigger(bpy.types.PropertyGroup):
     # active queue in the ui
     active_queue = bpy.props.IntProperty(default=-1)
 
+    # direction for Cuelist
+    direction = bpy.props.EnumProperty(name='direction', items=( ("BACKWARD","Backward",""),("FORWARD", "FORWARD","")), default='FORWARD')
+
 def register():
     print("marker.props.register")
 
@@ -312,6 +326,7 @@ def register():
     bpy.utils.register_class(TriggerChangeScene)
     bpy.utils.register_class(TriggerGameProperty)
     bpy.utils.register_class(TriggerPlayAction)
+    bpy.utils.register_class(TriggerVisibility)
 
     bpy.utils.register_class(TriggerData)
     bpy.utils.register_class(TriggerSlot)
@@ -334,6 +349,7 @@ def unregister():
     bpy.utils.unregister_class(TriggerChangeScene)
     bpy.utils.unregister_class(TriggerGameProperty)
     bpy.utils.unregister_class(TriggerPlayAction)
+    bpy.utils.unregister_class(TriggerVisibility)
 
     bpy.utils.unregister_class(TimelineMarkerTrigger)
     bpy.utils.unregister_class(TimelineMarkerDictItem)
