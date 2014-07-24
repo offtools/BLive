@@ -37,7 +37,7 @@ def object_update_handler(scene):
             bundle.add(Message("/bge/scene/objects/position", ob.name, ob.location[0], ob.location[1], ob.location[2]))
             bundle.add(Message("/bge/scene/objects/orientation", ob.name, ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2]))
 
-            if ob.type == 'MESH':
+            if ob.type in {'MESH','FONT'}:
                 bundle.add(Message("/bge/scene/objects/scaling", ob.name, ob.scale[0], ob.scale[1], ob.scale[2]))
 
             Client().send(bundle)
@@ -54,7 +54,7 @@ def object_update_handler(scene):
 
         # workaround for object color
         for i in ob.material_slots:
-            if ob.type == 'MESH' and len(bpy.data.materials) and bpy.data.materials[i.name].use_object_color:
+            if ob.type in {'MESH','FONT'} and len(bpy.data.materials) and bpy.data.materials[i.name].use_object_color:
                 Client().send(Message("/bge/scene/objects/color", ob.name, ob.color[0], ob.color[1], ob.color[2], ob.color[3]))
 
 
