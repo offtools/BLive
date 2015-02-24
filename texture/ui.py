@@ -20,8 +20,7 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 # TODO: add all properties to playlist entries
-# TODO: grab Audio value from Cuelist and add it to Controls
-# TODO: add controls for audio and loop (independent from cuelist)
+# TODO: reset cuelist controls on load/reload
 
 import bpy
 
@@ -77,10 +76,12 @@ class BLive_PT_texture_player(bpy.types.Panel):
     def draw_playlist(self, player):
         layout = self.layout
         row = layout.row()
-        row.template_list("UI_UL_list", "playlist", player, "playlist", player, "selected_playlist_entry", rows=4, maxrows=8)
+        row.template_list("UI_UL_list", "playlist", player, "playlist", player, "selected_playlist_entry", rows=6, maxrows=8)
         col = row.column(align=True)
         col.operator('blive.videotexture_playlist_add_entry', icon='ZOOMIN', text='')
         col.operator('blive.videotexture_playlist_delete_entry', icon='ZOOMOUT', text='')
+        col.operator('blive.videotexture_playlist_add_dir', icon='FILE_FOLDER', text='')
+        col.operator('blive.videotexture_playlist_clear', icon='CANCEL', text='')
         col.operator('blive.videotexture_playlist_move_entry_up', icon='TRIA_UP', text='')
         col.operator('blive.videotexture_playlist_move_entry_down', icon='TRIA_DOWN', text='')
 

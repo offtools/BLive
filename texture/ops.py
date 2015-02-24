@@ -20,6 +20,7 @@
 # Script copyright (C) 2012 Thomas Achtner (offtools)
 
 # TODO: *add proper poll methods
+# FIX: Mixer Operator
 
 import os
 import bpy
@@ -228,6 +229,47 @@ class BLive_OT_videotexture_playlist_move_entry_up(bpy.types.Operator):
             return{'CANCELLED'}
 
 
+class BLive_OT_videotexture_playlist_add_dir(bpy.types.Operator):
+    '''Videotexture add all files from a directory (opened filebrowser) to playlist'''
+    bl_idname = "blive.videotexture_playlist_add_dir"
+    bl_label = "BLive add current directory in filebrowser to playlist"
+    uri = bpy.props.StringProperty()
+
+    @classmethod
+    def poll(self, context):
+        try:
+            return bool(context.active_object.active_material.active_texture.image)
+        except AttributeError:
+            return False
+
+    def execute(self, context):
+        ob = context.active_object
+        image = ob.active_material.active_texture.image
+        player = image.player
+
+        if player.sourcetype == 'Movie':
+            if 'FILE_BROWSER' in [i.type for i in context.screen.areas]:
+                narea = [i.type for i in context.screen.areas].index('FILE_BROWSER')
+                nspace = [i.type for i in context.screen.areas[narea].spaces].index('FILE_BROWSER')
+                space = context.screen.areas[narea].spaces[nspace]
+                directory = space.params.directory
+                files = sorted([i for i in os.listdir(directory)])
+                #TODO: use blender file filter
+                #TODO: select directory not go into it
+                for media in files:
+                    if media[-3:] in ['mov','jpg','png','mp4','avi','mpg']:
+                        entry = player.playlist.add()
+                        entry.name = media
+                        entry.filepath = "%s/%s" % (directory, media)
+                        entry.sourcetype = player.sourcetype
+        elif player.sourcetype == 'Camera' or player.sourcetype == 'Stream':
+                return{'CANCELLED'}
+
+        # select currently added entry
+        player.selected_playlist_entry = len(player.playlist) - 1
+
+        return {'FINISHED'}
+
 class BLive_OT_videotexture_playlist_move_entry_down(bpy.types.Operator):
     '''Videotexture move playlist entry down'''
     bl_idname = "blive.videotexture_playlist_move_entry_down"
@@ -271,6 +313,23 @@ class BLive_OT_videotexture_playlist_delete_entry(bpy.types.Operator):
             return{'FINISHED'}
         else:
             return{'CANCELLED'}
+
+class BLive_OT_videotexture_playlist_clear(bpy.types.Operator):
+    '''Videotexture clear playlist'''
+    bl_idname = "blive.videotexture_playlist_clear"
+    bl_label = "BLive empty playlist entry"
+
+    @classmethod
+    def poll(self, context):
+        try:
+            return bool(context.active_object.active_material.active_texture.image)
+        except AttributeError:
+            return False
+
+    def execute(self, context):
+        player = context.active_object.active_material.active_texture.image.player
+        player.playlist.clear()
+        return{'CANCELLED'}
 
 class BLive_OT_videotexture_playlist_next_entry(bpy.types.Operator):
     '''Videotexture goto next playlist entry'''
@@ -565,7 +624,9 @@ def register():
     bpy.utils.register_class(BLive_OT_videotexture_mixer_popup)
 
     bpy.utils.register_class(BLive_OT_videotexture_playlist_add_entry)
+    bpy.utils.register_class(BLive_OT_videotexture_playlist_add_dir)
     bpy.utils.register_class(BLive_OT_videotexture_playlist_delete_entry)
+    bpy.utils.register_class(BLive_OT_videotexture_playlist_clear)
     bpy.utils.register_class(BLive_OT_videotexture_playlist_next_entry)
     bpy.utils.register_class(BLive_OT_videotexture_playlist_prev_entry)
     bpy.utils.register_class(BLive_OT_videotexture_playlist_move_entry_up)
@@ -596,6 +657,8 @@ def unregister():
     bpy.utils.unregister_class(BLive_OT_videotexture_mixer_popup)
 
     bpy.utils.unregister_class(BLive_OT_videotexture_playlist_add_entry)
+    bpy.utils.unregister_class(BLive_OT_videotexture_playlist_add_dir)
+    bpy.utils.unregister_class(BLive_OT_videotexture_playlist_clear)
     bpy.utils.unregister_class(BLive_OT_videotexture_playlist_delete_entry)
     bpy.utils.unregister_class(BLive_OT_videotexture_playlist_next_entry)
     bpy.utils.unregister_class(BLive_OT_videotexture_playlist_prev_entry)
